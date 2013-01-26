@@ -132,12 +132,6 @@ int main()
 	init();
 
 	mpz_set_ui(foo, 23456789);
-	split_n_minus_1(foo, &i, tmp);
-	mpz_out_str(stdout, 10, foo);
-	printf("-1 = 2^%d * ", i);
-	mpz_out_str(stdout, 10, tmp);
-	puts("");
-
 	mpz_out_str(stdout, 10, foo);
 	if (miller_rabin(foo, k))
 		puts(" is probably prime");
