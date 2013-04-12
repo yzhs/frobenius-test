@@ -1,5 +1,5 @@
 import array
-from math import ceil, floor, sqrt
+from math import ceil, floor, log, sqrt
 import operator
 from random import randint
 
@@ -84,6 +84,21 @@ def debug(s):
 	if False:
 		print(s)
 
+def isqrt(n):
+	try:
+		r = floor(sqrt(n))
+	except OverflowError:
+		r = 2 * 10**floor(log(n)/log(100))
+	if r*r > n:
+		r = n // r
+	while r < n//r-1:
+		r = (r + n//r)//2
+	return r
+
+def is_square(n):
+	r = isqrt(n)
+	return r*r == n
+
 # {{{ QFT
 # The Quadratic Frobenius Test (QFT) with parameters (b,c) consists of the
 # following.
@@ -96,20 +111,20 @@ def QFT(n, b, c, B):
 	# (1) Test n for divisibility by primes less than or equal to min{B,
 	# sqrt(n)}.  If it is divisible by one of these primes, declare n to be
 	# composite and stop.
-	for p in primes(min(B, sqrt(n))):
-		if n % p == 0:
-			debug("found a prime divisor p={} of n={}".format(p, n))
-			return False # composite
-	
+#	for p in primes(min(B, isqrt(n))):
+#		if n % p == 0:
+#			#debug("found a prime divisor p={} of n={}".format(p, n))
+#			return False # composite
+
 	# (2) Test whether sqrt(n) in ℤ.  If it is, declare n to be composite and
 	# stop.
-	if floor(sqrt(n))^2 == n:
-		debug("n={}={}^2 is a perfect square and therefore composite".format(n, floor(sqrt(n))))
-		return False # composite
+#	if floor(sqrt(n))**2 == n:
+#		debug("n={}={}^2 is a perfect square and therefore composite".format(n, floor(sqrt(n))))
+#		return False # composite
 
 	x = get_x(n)
 	m = x**2-x*b-c
-	debug("doing computations modulo ({}, {})".format(n, m))
+	#debug("doing computations modulo ({}, {})".format(n, m))
 
 	# (3) Compute x^((n+1)/2) mod (n, x^2-bx-c).  If x^((n+1)/2) not in ℤ/nℤ,
 	# declare n to be composite and stop.
@@ -134,17 +149,17 @@ def QFT(n, b, c, B):
 	assert(2**r*s == n**2-1), "2^{}*{} == {}*{} != {} = {}^2-1}".format(r, s, 2**r, s, n**2-1, n)
 	foo = pow_mod(x, s, m)
 	if foo == poly(n, (1,)):
-		debug("as asserted by step (5a), n={} is probably prime".format(n))
+		#debug("as asserted by step (5a), n={} is probably prime".format(n))
 		return True # probably prime
 	else:
-		debug("x^{} == {}".format(s, foo))
+		pass#debug("x^{} == {}".format(s, foo))
 	for j in range(0, r-2 + 1):
 		bar = pow_mod(x, 2**j * s, m)
 		if bar == poly(n, (-1,)):
-			debug("as asserted by step (5b), n={} is probably prime".format(n))
+			#debug("as asserted by step (5b), n={} is probably prime".format(n))
 			return True # probably prime
 		else:
-			debug("x^(2^{}*{}) == {}".format(j, s, foo))
+			pass#debug("x^(2^{}*{}) == {}".format(j, s, foo))
 	return False # composite
 
 def RQFT(n, B):
@@ -157,7 +172,19 @@ def RQFT(n, B):
 	b = c = 0
 	j1 = j2 = 0
 
+	for p in primes(min(B, isqrt(n))):
+		if n % p == 0:
+			#debug("found a prime divisor p={} of n={}".format(p, n))
+			return False # composite
+
+	# (2) Test whether sqrt(n) in ℤ.  If it is, declare n to be composite and
+	# stop.
+	if is_square(n):
+		debug("n={}={}^2 is a perfect square and therefore composite".format(n, floor(sqrt(n))))
+		return False # composite
+
 	for _ in range(B):
+		fail = False
 		# (1) Choose pairs (b,c) at random with 1≤b,c≤n until one is found with
 		# (b^2+4c over n)=-1 and (-c over n)=1, or with gcd(b^2+4c,n), gcd(b,n) or
 		# gcd(c,n) a nontrivial divisor of n.  However, if the latter case occurs
@@ -168,21 +195,17 @@ def RQFT(n, B):
 		c = randint(1, n)
 		j1 = jacobi(b*b+4*c, n)
 		j2 = jacobi(-c, n)
-		if j1 != -1 or j2 != 1:
-			fail = True
-			continue
-		else:
-			fail = False
-		#print(jacobi(b**2+4*c, n), jacobi(-c, n))
-		if gcd(b**2+4*c, n) not in [1, n] \
-		or gcd(b, n) not in [1, n] \
-		or gcd(c, n) not in [1, n]:
-			return False
-		break
-	if fail:
-		# Could not find a valid pair (b,c) of parameters. n is probably prime.
-		print("n = {}, b = {}, c = {}, (b^2+4c/n) = {}, (-c/n) = {}".format(n, b, c, j1, j2))
+		if j1 == -1 and j2 == 1:
+			if gcd(b**2+4*c, n) not in [1, n] \
+			or gcd(b, n) not in [1, n] \
+			or gcd(c, n) not in [1, n]:
+				return False
+			break
+
+	if jacobi(b*b+4*c, n) != -1 or jacobi(-c, n) != 1:
+		print("n = {}, b = {}, c = {}, (b^2+4c/n) = {}, (-c/n) = {}".format(n, b, c, jacobi(b**2+4*c, n), jacobi(-c, n)))
 		return None
+
 
 	# (2) Perform the QFT with parameters (b,c).
 	return QFT(n, b, c, B)
@@ -194,17 +217,25 @@ class TestFrobenius(unittest.TestCase):
 	def setUp(self):
 		self.n = 1000
 		self.large_primes = []
+		self.composites = []
 		primes = self.large_primes
 		with open("primelist.txt") as f:
 			data = f.read().split("\n")[:-1]
 			for p in data:
 				primes.append(int(p))
+		with open("composites.txt") as f:
+			data = f.read().split("\n")[:-1]
+			for c in data:
+				self.composites.append(int(c))
 
 	def test_primes(self):
 		for i in range(self.n):
 			n = randint(0, len(self.large_primes))
 			self.assertTrue(RQFT(self.large_primes[n], B) != False)
-		print("RQFT found all {} primes to be possibly prime".format(self.n))
+
+	def test_squarefree_composites(self):
+		for n in self.composites:
+			self.assertFalse(RQFT(n, B))
 
 	def test_composites(self):
 		counter = errors = 0
@@ -212,21 +243,18 @@ class TestFrobenius(unittest.TestCase):
 			i = randint(0, len(self.large_primes)-1)
 			if self.large_primes[i] + 2 == self.large_primes[i+1]:
 				i+=1
-			n = 2 * randint(self.large_primes[i]//2, self.large_primes[i+1]//2) + 1
+			n = randint(self.large_primes[i]+1, self.large_primes[i+1]-1)
+			while n % 2 == 0:
+				n = randint(self.large_primes[i]+1, self.large_primes[i+1]-1)
 			# [n] is composite by construction
-			result = RQFT(n, B)
-			if result == True:
-				counter += 1
-			elif result == False:
-				self.assertTrue(True)
-			else:
-				errors += 1
-		print("RQFT found {} out of {} composites to be possibly prime".format(counter, self.n - errors))
+			self.assertFalse(RQFT(n, B))
+
+	def test_some_stuff(self):
+		self.assertTrue(RQFT(7, B))
+		self.assertFalse(RQFT(611879**2*611957**4, B))
+		self.assertFalse(RQFT(1235790412356789098765432827498274392743929834792843282734279348239482349**9, B))
 
 if __name__ == "__main__":
-	t = TestFrobenius()
-	t.setUp()
-	t.test_composites()
-	t.test_primes()
+	unittest.main()
 
 # vim: set ts=4 sw=4 noet :
