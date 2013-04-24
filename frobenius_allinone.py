@@ -6,11 +6,6 @@ import operator
 import unittest
 from small_primes import prime_list
 
-def even(x):
-	return x % 2 == 0
-def odd(x):
-	return x % 2 == 1
-
 def gcd(a, b):
 	while b != 0:
 		(a, b) = (b, a % b)
@@ -24,46 +19,36 @@ def split(n):
 		d //= 2
 	return (s, d)
 
-def Polynomial(n, coeff):
-	coeff = [0] * max(3-len(coeff), 0) + [x % n for x in coeff]
-	while len(coeff) > 1 and coeff[0] == 0:
-		coeff.pop(0)
-	return coeff
-
-def isInt(p):
-	return len(p) == 1 
-    #return p[0] == 0 and p[1] == 0
-
-def mult_mod(n, a, b, m):
-	if isInt(a) == 1:
-		x = a[0]
-		return Polynomial(n, [x*y for y in b])
+def mult_mod(n, f, g, b, c):
+	if f[0] == 0:
+		x = f[1]
+		return [(x*y) % n for y in g]
 	# (αx + β) (γx + δ) mod (x² - bx - c) = (αγb + αδ + βγ) x + αγc + βδ
-	return Polynomial(n, [-a[0]*b[0]*m[1] + a[0]*b[1] + a[1]*b[0], -a[0]*b[0]*m[2] + a[1]*b[1]])
+	return [(f[0]*g[0]*b + f[0]*g[1] + f[1]*g[0]) % n, (f[0]*g[0]*c + f[1]*g[1]) % n]
 
-def pow_mod(n, b, e, m):
+def pow_mod(n, base, exp, b, c):
 	"""efficiently compute b^e % m
-	b: Polynomial
-	e: int
-	m: Polynomial
+	base: [int]
+	exp: int
+	b, c: int
 	"""
-	res = Polynomial(n, [1])
-	while e != 0:
-		if odd(e):
-			res = mult_mod(n, res, b, m)
-		b = mult_mod(n, b, b, m)
-		e //= 2
+	res = [0, 1]
+	while exp != 0:
+		if exp % 2 == 1:
+			res = mult_mod(n, res, base, b, c)
+		base = mult_mod(n, base, base, b, c)
+		exp //= 2
 	return res
 
 def jacobi(x, y):
 	"""efficiently compute the jacobi symbol (x/y)"""
-	assert y > 3 and odd(y),("jacobi(x,y): y must be an odd integer >= 3, found {}".format(y))
+	#assert y > 3 and y % 2 == 1,("jacobi(x,y): y must be an odd integer >= 3, found {}".format(y))
 	res = 1
 	while True:
 		x = x % y
 		if x == 0:
 			return 0
-		while even(x):
+		while x % 2 == 0:
 			x //= 2
 			m8 = y % 8
 			if m8 == 3 or m8 == 5:
@@ -96,27 +81,24 @@ def QFT(n, b, c, B, use_rqft=False):
 		if is_square(n):
 			return False # composite
 
-	x = Polynomial(n, [1, 0])
-	m = Polynomial(n, [1, -b, -c])
+	x = [1, 0]
 
-	foo = pow_mod(n, x, (n + 1) // 2, m)
-	if not isInt(foo):
+	foo = pow_mod(n, x, (n + 1) // 2, b, c)
+	if not foo[0] == 0:
 		return False # composite
 
-	foo = mult_mod(n, foo, foo, m)
-	#foo = pow_mod(n, x, n + 1, m)
-	if foo != [-c % n]:
+	foo = mult_mod(n, foo, foo, b, c)
+	if not foo[0] == 0 or foo[-1] != n-c:
 		return False # composite
 
 	(r, s) = split(n**2)
-	foo = pow_mod(n, x, s, m)
-	if foo == [1]:
+	foo = pow_mod(n, x, s, b, c)
+	if foo[0] == 0 and foo[-1] == 1:
 		return True # probably prime
 	for j in range(0, r-2 + 1):
-		#foo = pow_mod(n, x, 2**j * s, m)
-		if foo == [n-1]:
+		if foo[0] == 0 and foo[-1] == n-1:
 			return True # probably prime
-		foo = mult_mod(n, foo, foo, m)
+		foo = mult_mod(n, foo, foo, b, c)
 	return False # composite
 
 def trial_division(n, B):
@@ -129,8 +111,8 @@ def trial_division(n, B):
 
 
 def RQFT(n, B):
-	assert(n > 1)
-	assert(odd(n))
+	#assert(n > 1)
+	#assert(n % 2 == 1)
 
 	if n in prime_list:
 		return True
@@ -182,7 +164,7 @@ class TestFrobenius(unittest.TestCase):
 	def test_primes(self):
 		for i in range(self.n):
 			n = randint(0, len(self.large_primes))
-			self.assertTrue(RQFT(self.large_primes[n], B) != False)
+			self.assertTrue(RQFT(self.large_primes[n], B))
 
 	def test_composites(self):
 		counter = 0
