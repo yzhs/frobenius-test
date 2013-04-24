@@ -1,13 +1,46 @@
 #include <assert.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <gmp.h>
+
+#include "helpers.h"
 
 #ifndef DEBUG
 #define assert(x)
 #endif
 
 gmp_randstate_t r_state;
+
+unsigned n = 1000;
+
+unsigned large_primes[3069262];
+
+mpz_t composites[1013];
+
+void read_primes(unsigned *primes)
+{
+	FILE *fp = fopen("primelist.txt", "r");
+	unsigned p, i = 0;
+
+	while (EOF != fscanf(fp, "%u\n", &p))
+		primes[i++] = p;
+
+	fclose(fp);
+}
+
+void read_composites(mpz_t *composites)
+{
+	FILE *fp = fopen("composites.txt", "r");
+	unsigned p, i = 0, len;
+
+	do
+		len = gmp_scanf("%Z\n", composites[i++]);
+	while (len > 0);
+
+	fclose(fp);
+}
+
 
 /**
  * This function has to be called before using any of the functions below.  It
@@ -22,6 +55,10 @@ void init()
 	gmp_randinit_default (r_state);
 	gmp_randseed_ui(r_state, seed);
 
+	read_primes(large_primes);
+	read_composites(composites);
+
+	srand(seed);
 //	gmp_randclear(r_state);
 }
 
@@ -39,22 +76,6 @@ void get_random(mpz_t n, mpz_t result)
 
 	mpz_add_ui(result, result, 2);
 	mpz_clear(tmp);
-}
-
-/** 
- * Find numbers s and d such that n-1 == 2^s*d.
- */
-void split_n_minus_1(mpz_t n, unsigned long *s, mpz_t d)
-{
-	mpz_t nm1;
-	mpz_init(nm1);
-
-	mpz_sub_ui(nm1, n, 1);
-
-	/* count the number of trailing zeros */
-	*s = mpz_scan1(nm1, 0);
-	/* divide n-1 by 2^s yealding d */
-	mpz_tdiv_q_2exp(d, nm1, *s);
 }
 
 /**
@@ -98,7 +119,7 @@ bool miller_rabin(mpz_t n, unsigned long k)
 	assert(mpz_cmp_ui(n, 3) > 0);
 
 	/* compute s and d s.t. n-1=2^s*d */
-	split_n_minus_1(n, &s, d);
+	s = split(n, d);
 
 	/* Repeat the test itself k times to increase the accuracy */
 	for (unsigned long i = 0; i < k; i++) {
@@ -120,9 +141,57 @@ bool miller_rabin(mpz_t n, unsigned long k)
 
 	}
 
+	mpz_clears(a, d, x, nm1, NULL);
+
 	return true;
 }
 
+void test_primes()
+{
+	mpz_t tmp;
+	mpz_init(tmp);
+	for (unsigned i = 0; i < n; i++) {
+		unsigned j = randint(0, 3069262-1);
+		mpz_set_ui(tmp, large_primes[j]);
+		assert(miller_rabin(tmp, 1));
+	}
+	mpz_clear(tmp);
+}
+
+void test_composites()
+{
+	unsigned counter = 0, i, c;
+	mpz_t tmp;
+	mpz_init(tmp);
+
+	for (i = 0; i < n; i++) {
+		c = randint(large_primes[1]+1, large_primes[2]-1) | 1;
+		mpz_set_ui(tmp, c);
+		if (miller_rabin(tmp, 1)) {
+			printf("%u\n", c);
+			counter++;
+		}
+	}
+	assert(counter < n/4);
+	mpz_clear(tmp);
+}
+
+void test_some_stuff()
+{
+	mpz_t tmp;
+	mpz_init(tmp);
+
+	mpz_set_ui(tmp, 7);
+	assert(miller_rabin(tmp, 1));
+
+	// 611879² * 611957⁴ = 52506700005424014690584902271185441
+	mpz_set_str(tmp, "52506700005424014690584902271185441", 10); 
+	assert(!miller_rabin(tmp, 1));
+
+	mpz_set_str(tmp, "1235790412356789098765432827498274392743929834792843282734279348239482349", 10);
+	mpz_pow_ui(tmp, tmp, 9);
+	assert(!miller_rabin(tmp, 1));
+}
 
 int main()
 {
@@ -131,17 +200,6 @@ int main()
 	mpz_inits(foo, tmp, NULL);
 	init();
 
-	mpz_set_ui(foo, 23456789);
-	mpz_out_str(stdout, 10, foo);
-	if (miller_rabin(foo, k))
-		puts(" is probably prime");
-	else
-		puts(" is composite");
-
-	mpz_set_ui(foo, 23456799);
-	mpz_out_str(stdout, 10, foo);
-	if (miller_rabin(foo, k))
-		puts(" is probably prime");
-	else
-		puts(" is composite");
+	test_primes();
+	test_composites();
 }
