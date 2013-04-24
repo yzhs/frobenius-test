@@ -58,37 +58,35 @@ def miller_rabin(n, k):
 			return False
 	return True
 
-def main():
-	k = 1000*1000
-	for foo in map(long, [23456789, 23456799]):
-		if miller_rabin(foo, k):
-			print("{} is probably prime".format(foo))
-		else:
-			print("{} is composite".format(foo))
-
 class TestMillerRabin(unittest.TestCase):
 	def setUp(self):
 		self.n = 1000
-		self.rounds = 100
 		self.large_primes = []
 		primes = self.large_primes
 		with open("primelist.txt") as f:
 			data = f.read().split("\n")[:-1]
 			for p in data:
 				primes.append(int(p))
+
 	def test_primes(self):
 		for i in range(self.n):
 			n = randint(0, len(self.large_primes))
 			self.assertTrue(miller_rabin(self.large_primes[n], 1))
+
 	def test_composites(self):
 		counter = 0
 		for i in range(self.n):
-			n = 2*randint(self.large_primes[0]//2, self.large_primes[-1]//2) + 1
-			if n in self.large_primes:
-				continue
+			n = 2*(randint(self.large_primes[1]+1, self.large_primes[2]-1)//2) + 1
 			if miller_rabin(n, 1):
 				counter += 1
-		print("Miller Rabin found {} out of {} composites to be possibly prime".format(counter, self.n))
 		self.assertLess(counter, self.n//4)
 
-# vim: set ts=4 sw=4 noet :
+	def test_some_stuff(self):
+		self.assertTrue(miller_rabin(7, 1))
+		self.assertFalse(miller_rabin(611879**2*611957**4, 1))
+		self.assertFalse(miller_rabin(1235790412356789098765432827498274392743929834792843282734279348239482349**9, 1))
+
+if __name__ == "__main__":
+	unittest.main()
+
+# vim: setlocal ts=4 sw=4 noet :

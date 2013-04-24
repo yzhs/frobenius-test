@@ -1,7 +1,7 @@
 import array
 from math import ceil, floor, log, sqrt
 import operator
-from random import randint
+from random import randint, seed
 
 from miller_rabin import split
 from polynomial import *
@@ -255,6 +255,7 @@ class TestFrobenius(unittest.TestCase):
 		self.assertFalse(RQFT(1235790412356789098765432827498274392743929834792843282734279348239482349**9, B))
 
 if __name__ == "__main__":
+	seed()
 	unittest.main()
 
 # vim: set ts=4 sw=4 noet :
