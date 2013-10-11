@@ -89,4 +89,4 @@ class TestMillerRabin(unittest.TestCase):
 if __name__ == "__main__":
 	unittest.main()
 
-# vim: setlocal ts=4 sw=4 noet :
+# vim: set ts=4 sw=4 noet :

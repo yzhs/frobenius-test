@@ -6,6 +6,8 @@ import operator
 import unittest
 from small_primes import prime_list
 
+from functools import reduce
+
 def gcd(a, b):
 	while b != 0:
 		(a, b) = (b, a % b)
@@ -74,9 +76,40 @@ def is_square(n):
 	r = isqrt(n)
 	return r*r == n
 
+# taken from http://facthacks.cr.yp.to/product.html
+def producttree(X):
+	result = [X]
+	while len(X) > 1:
+		X = [reduce(lambda a, b: a * b, X[i*2:(i+1)*2]) for i in range((len(X)+1)//2)]
+		result.append(X)
+	return result
+
+# dito
+def remaindersusingproducttree(n,T):
+	result = [n]
+	for t in reversed(T):
+		result = [result[i//2] % t[i] for i in range(len(t))]
+	return result
+
+def remainders(n,X):
+	return remaindersusingproducttree(n,producttree(X))
+
+foo = producttree(prime_list)[-1][0]
+
+def trial_division(n, B):
+	#return gcd(n, foo) not in [1, n]
+	i = 0
+	b = min(B, isqrt(n), len(prime_list))
+	while prime_list[i] <= b:
+		if n % prime_list[i] == 0:
+			return True # found a divisor
+		i+=1
+	return False
+
 def QFT(n, b, c, B, use_rqft=False):
 	if not use_rqft:
-		trial_division(n, B)
+		if trial_division(n, B):
+			return False # composite
 
 		if is_square(n):
 			return False # composite
@@ -84,49 +117,37 @@ def QFT(n, b, c, B, use_rqft=False):
 	x = [1, 0]
 
 	foo = pow_mod(n, x, (n + 1) // 2, b, c)
-	if not foo[0] == 0:
+	if foo[0] != 0:
 		return False # composite
 
-	foo = mult_mod(n, foo, foo, b, c)
-	if not foo[0] == 0 or foo[-1] != n-c:
+	if (foo[1]*foo[1]) % n != n-c:
 		return False # composite
 
 	(r, s) = split(n**2)
 	foo = pow_mod(n, x, s, b, c)
-	if foo[0] == 0 and foo[-1] == 1:
+	if foo[0] == 0 and foo[1] == 1:
 		return True # probably prime
 	for j in range(0, r-2 + 1):
-		if foo[0] == 0 and foo[-1] == n-1:
+		if foo[0] == 0 and foo[1] == n-1:
 			return True # probably prime
 		foo = mult_mod(n, foo, foo, b, c)
 	return False # composite
-
-def trial_division(n, B):
-	i = 0
-	b = min(B, isqrt(n), len(prime_list))
-	while prime_list[i] <= b:
-		if n % prime_list[i] == 0:
-			return False # composite
-		i+=1
 
 
 def RQFT(n, B):
 	#assert(n > 1)
 	#assert(n % 2 == 1)
 
-	if n in prime_list:
-		return True
-	fail = False
 	b = c = 0
 	j1 = j2 = 0
 
-	trial_division(n, B)
+	if trial_division(n, B):
+		return False # composite
 
 	if is_square(n):
 		return False # composite
 
 	for _ in range(B):
-		fail = False
 		b = randint(1, n)
 		c = randint(1, n)
 		j1 = jacobi(b*b+4*c, n)
@@ -191,4 +212,4 @@ if __name__ == "__main__":
 	seed()
 	unittest.main()
 
-# vim: setlocal ts=4 sw=4 noet :
+# vim: set ts=4 sw=4 noet :
