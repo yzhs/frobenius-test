@@ -123,7 +123,7 @@ def QFT(n, b, c, B, use_rqft=False):
 	if (foo[1]*foo[1]) % n != n-c:
 		return False # composite
 
-	(r, s) = split(n**2)
+	(r, s) = split(n**2) # 2^r * s == n**2 - 1
 	foo = pow_mod(n, x, s, b, c)
 	if foo[0] == 0 and foo[1] == 1:
 		return True # probably prime
