@@ -41,7 +41,7 @@ void read_primes(unsigned *primes)
 void read_composites(mpz_t *composites)
 {
 	FILE *fp = fopen("data/composites.txt", "r");
-	unsigned p, i = 0, len;
+	unsigned i = 0, len;
 
 	do
 		len = gmp_scanf("%Z\n", composites[i++]);
@@ -155,14 +155,10 @@ bool miller_rabin(mpz_t n, unsigned long k)
 #ifndef TEST
 int main(int argc, char *argv[])
 {
-	unsigned long i, k = 1;
 	mpz_t foo, tmp;
 	mpz_init(foo);
 	mpz_init(tmp);
 	miller_rabin_init();
-
-	if (argc >= 2)
-		k = atoi(argv[1]);
 
 	// <+do some more stuff+>
 }
