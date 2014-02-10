@@ -1,27 +1,36 @@
 #include <assert.h>
+#include <errno.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
 #include <gmp.h>
 
 #include "helpers.h"
+
+#define die(...) do { fprintf(stderr, __VA_ARGS__); exit(1); } while (0)
 
 #ifndef DEBUG
 #define assert(x)
 #endif
 
-gmp_randstate_t r_state;
-
 unsigned n = 1000;
 
 unsigned large_primes[3069262];
+
+gmp_randstate_t r_state;
 
 mpz_t composites[1013];
 
 void read_primes(unsigned *primes)
 {
-	FILE *fp = fopen("primelist.txt", "r");
+	FILE *fp = fopen("data/primelist.txt", "r");
 	unsigned p, i = 0;
+
+	if (NULL == fp) {
+		die("data/primelist.txt: %s\n", strerror(errno));
+	}
 
 	while (EOF != fscanf(fp, "%u\n", &p))
 		primes[i++] = p;
@@ -31,7 +40,7 @@ void read_primes(unsigned *primes)
 
 void read_composites(mpz_t *composites)
 {
-	FILE *fp = fopen("composites.txt", "r");
+	FILE *fp = fopen("data/composites.txt", "r");
 	unsigned p, i = 0, len;
 
 	do
@@ -46,20 +55,12 @@ void read_composites(mpz_t *composites)
  * This function has to be called before using any of the functions below.  It
  * initialises the random number generator using a (static) seed.
  */
-void init()
+void miller_rabin_init()
 {
-	unsigned long int seed;
-
-	seed = 123456;
-
-	gmp_randinit_default (r_state);
-	gmp_randseed_ui(r_state, seed);
+	init();
 
 	read_primes(large_primes);
 	read_composites(composites);
-
-	srand(seed);
-//	gmp_randclear(r_state);
 }
 
 /**
@@ -68,7 +69,8 @@ void init()
 void get_random(mpz_t n, mpz_t result)
 {
 	mpz_t tmp;
-	mpz_inits(tmp, result, NULL);
+	mpz_init(tmp);
+	mpz_init(result);
 	mpz_sub_ui(tmp, n, 3);
 
 	/* generate a random number between 0 and tmp-1 */
@@ -110,7 +112,11 @@ bool miller_rabin(mpz_t n, unsigned long k)
 {
 	unsigned long s;
 	mpz_t a, d, x, nm1;
-	mpz_inits(a, d, x, nm1, NULL);
+	//mpz_inits(a, d, x, nm1, NULL);
+	mpz_init(a);
+	mpz_init(d);
+	mpz_init(x);
+	mpz_init(nm1);
 	mpz_sub_ui(nm1, n, 1);
 
 	/* We need an odd integer */
@@ -119,7 +125,7 @@ bool miller_rabin(mpz_t n, unsigned long k)
 	assert(mpz_cmp_ui(n, 3) > 0);
 
 	/* compute s and d s.t. n-1=2^s*d */
-	s = split(n, d);
+	s = split(d, n);
 
 	/* Repeat the test itself k times to increase the accuracy */
 	for (unsigned long i = 0; i < k; i++) {
@@ -146,60 +152,18 @@ bool miller_rabin(mpz_t n, unsigned long k)
 	return true;
 }
 
-void test_primes()
+#ifndef TEST
+int main(int argc, char *argv[])
 {
-	mpz_t tmp;
-	mpz_init(tmp);
-	for (unsigned i = 0; i < n; i++) {
-		unsigned j = randint(0, 3069262-1);
-		mpz_set_ui(tmp, large_primes[j]);
-		assert(miller_rabin(tmp, 1));
-	}
-	mpz_clear(tmp);
-}
-
-void test_composites()
-{
-	unsigned counter = 0, i, c;
-	mpz_t tmp;
-	mpz_init(tmp);
-
-	for (i = 0; i < n; i++) {
-		c = randint(large_primes[1]+1, large_primes[2]-1) | 1;
-		mpz_set_ui(tmp, c);
-		if (miller_rabin(tmp, 1)) {
-			printf("%u\n", c);
-			counter++;
-		}
-	}
-	assert(counter < n/4);
-	mpz_clear(tmp);
-}
-
-void test_some_stuff()
-{
-	mpz_t tmp;
-	mpz_init(tmp);
-
-	mpz_set_ui(tmp, 7);
-	assert(miller_rabin(tmp, 1));
-
-	// 611879² * 611957⁴ = 52506700005424014690584902271185441
-	mpz_set_str(tmp, "52506700005424014690584902271185441", 10); 
-	assert(!miller_rabin(tmp, 1));
-
-	mpz_set_str(tmp, "1235790412356789098765432827498274392743929834792843282734279348239482349", 10);
-	mpz_pow_ui(tmp, tmp, 9);
-	assert(!miller_rabin(tmp, 1));
-}
-
-int main()
-{
-	unsigned long i, k = 1000000;
+	unsigned long i, k = 1;
 	mpz_t foo, tmp;
-	mpz_inits(foo, tmp, NULL);
-	init();
+	mpz_init(foo);
+	mpz_init(tmp);
+	miller_rabin_init();
 
-	test_primes();
-	test_composites();
+	if (argc >= 2)
+		k = atoi(argv[1]);
+
+	// <+do some more stuff+>
 }
+#endif
