@@ -1,5 +1,5 @@
 CC=gcc -std=gnu99
-DEBUG=-DDEBUG -g
+DEBUG=-DDEBUG -g -Wall -Werror
 #OPT=-O3 -mtune=native -march=native -ffast-math -funroll-all-loops
 OPT=-O3
 
@@ -23,15 +23,17 @@ miller_rabin_int: miller_rabin_int.c helpers_int.o
 %.o: %.c
 	$(CC) $(DEBUG) $(OPT) -c -o $@ $^
 
-.PHONY: all clean test
+test: test/frobenius_int_test
+	./test/frobenius_int_test
+
+test/%_int_test: test/%_int_test.c helpers_int.o
+	$(CC) $(DEBUG) $(OPT) -o $@ $^ -lm
+
+test/%_long_test: test/%_test.c helpers.o
+	$(CC) $(DEBUG) $(OPT) -o $@ $^ -lm
 
 clean:
 	-rm *.o miller_rabin frobenius miller_rabin_int frobenius_int
-	cd test && make clean
+	-rm test/*_test
 
-testpython:
-	python -m unittest miller_rabin.py
-	python -m unittest frobenius_allinone.py
-
-test:
-	cd test && make CC="$(CC)" DEBUG="$(DEBUG)" OPT="$(OPT)" run
+.PHONY: all clean test test_python
