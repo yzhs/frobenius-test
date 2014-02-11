@@ -21,41 +21,50 @@ unsigned B = 50000;
  */
 void mult_mod(unsigned long *res0, unsigned long *res1, unsigned long d, unsigned long e, unsigned long f, unsigned long g, unsigned long n, unsigned long b, unsigned long c)
 {
+	unsigned long df, ef = (e * f) % n;
+
 	/*
 	 * If deg f = 1, the whole thing amounts to multiplying the coefficients of g with a constant and reducing them
 	 * modulo n.
 	 */
 	if (d == 0) {
-		*res0 = (e * f) % n;
+		*res0 = ef;
 		return;
 	}
+	df = (d * f) % n;
 
-	*res0 = ((((d*f)%n)*b)%n + (d*g)%n + (e*f)%n)%n;
-	*res1 = ((((d*f)%n)*c)%n + (e*g)%n)%n;
+	*res0 = ((df*b)%n + (d*g)%n + ef)%n;
+	*res1 = ((df*c)%n + (e*g)%n)%n;
 }
 
-void square_mod(unsigned long *res0, unsigned long *res1, unsigned long d, unsigned long e, unsigned long n, unsigned long b, unsigned long c)
+void square_mod(unsigned long *res0, unsigned long *res1, /* The resulting linear polynomial. */
+                unsigned long d, unsigned long e,
+                unsigned long n, unsigned long b, unsigned long c)
 {
+	unsigned long ee = (e * e) % n;
+	unsigned long dd;
 	if (d == 0) {
 		*res0 = 0;
-		*res1 = (e * e) % n;
+		*res1 = ee;
 		return;
 	}
-
+	dd = (d*d) % n;
 	// compute res0 = d^2*b+2*d*e
-	*res0 = ((((d*d)%n)*b)%n + 2*(d*e)%n) % n;
+	*res0 = ((dd*b)%n + 2*(d*e)%n) % n;
 
 	// and res1 = d^2*c+e^2
-	*res1 = ((((d*d)%n)*c)%n + (e*e)%n)%n;
+	*res1 = ((dd*c)%n + ee)%n;
 }
 
-void pow_mod(unsigned long *res0, unsigned long *res1, unsigned long base0, unsigned long base1, unsigned long exp, unsigned long n, unsigned long b, unsigned long c)
+void pow_mod(unsigned long *res0, unsigned long *res1,
+             unsigned long base0, unsigned long base1, unsigned long exp,
+             unsigned long n, unsigned long b, unsigned long c)
 {
 	*res0 = 0;
 	*res1 = 1;
 
 	while (exp != 0) {
-		if ((exp & 1) == 1)
+		if (exp % 2 == 1)
 			mult_mod(res0, res1, base0, base1, *res0, *res1, n, b, c);
 		square_mod(&base0, &base1, base0, base1, n, b, c);
 		exp /= 2;
@@ -181,7 +190,7 @@ bool RQFT(unsigned long n, unsigned k)
 
 	if (n < 3)
 		die("Error: RQFT can only be used for numbers >= 3");
-	if ((n & 1) != 1)
+	if (even(n))
 		die("Error: RQFT can only be used for odd numbers");
 
 	foo = no_nontrivial_small_prime_divisor(n);
@@ -225,7 +234,7 @@ bool RQFT(unsigned long n, unsigned k)
 #ifndef TEST
 void *run(void *worker_id_cast_to_void_star)
 {
-	unsigned long upper_bound = (1lu << 27) - 1, dots_every = 1lu << 21;
+	unsigned long upper_bound = (1lu << 24) - 1, dots_every = 1lu << 21;
 	unsigned long counter = 0, i;
 	unsigned long worker_id = (unsigned long)worker_id_cast_to_void_star;
 
@@ -234,7 +243,7 @@ void *run(void *worker_id_cast_to_void_star)
 			printf(".");
 			(void)fflush(stdout);
 		}
-		if (RQFT(i, 50000))
+		if (RQFT(i, 1))
 			counter++;
 			//printf("%d\n", i);
 			//printf(".");
