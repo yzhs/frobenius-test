@@ -65,10 +65,8 @@ bool miller_rabin(unsigned long n, unsigned long k)
 	unsigned long a, d, x, nm1;
 	nm1 = n - 1;
 
-	/* We need an odd integer */
-	assert(n %2 == 1);
-        /* greater than 3 */
-	assert(n > 3);
+	/* We need an odd integer greater than 3 */
+	assert(odd(n) && n > 3);
 
 	/* compute s and d s.t. n-1=2^s*d */
 	s = split(&d, n);

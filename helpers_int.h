@@ -14,6 +14,9 @@
 
 #define len(a) (sizeof(a)/sizeof(a[0]))
 
+#define even(n) ((n) % 2 == 0)
+#define odd(n) ((n) % 2 == 1)
+
 /*
  * Given an integer 0 ≤ n < 2³², find the largest integer r such that r² ≤ n.
  */
