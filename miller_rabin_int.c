@@ -14,7 +14,7 @@
 #define assert(_)
 #endif
 
-#define N 2
+#define N 4
 
 /*
  * Raise b to the e'th power modulo m.
@@ -69,7 +69,7 @@ bool miller_rabin(unsigned long n, unsigned long k)
 	assert(odd(n) && n > 3);
 
 	/* compute s and d s.t. n-1=2^s*d */
-	s = split(&d, n);
+	split(&s, &d, n);
 
 	/* Repeat the test itself k times to increase the accuracy */
 	for (i = 0; i < k; i++) {
@@ -102,18 +102,22 @@ void *run(void *worker_id_cast_to_void_star)
 	unsigned long i;
 	unsigned long worker_id = (unsigned long)worker_id_cast_to_void_star;
 	unsigned long counter = 0;
+	//char str[32];
+	//(void)snprintf(str, 32, "primes_worker_%lu.txt", worker_id);
+	//FILE *primes = fopen(str, "w");
 
-	for (i = 5 + 2 * worker_id; i < (1lu<<23)-1; i+=2*N) {
+	for (i = 5 + 2 * worker_id; i < (1lu<<32)-1; i+=2*N) {
 		if (i % (1<<25) == 1) {
 			printf(".");
 			(void)fflush(stdout);
 		}
-		if (miller_rabin(i, 1))
+		if (miller_rabin(i, 1)) {
 			counter++;
-			//printf("%d\n", i);
-			//printf(".");
+			//fprintf(primes, "%lu\n", i);
+		}
 	}
 
+	//(void)fclose(primes);
 	return (void*)counter;
 }
 

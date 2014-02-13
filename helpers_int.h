@@ -1,6 +1,7 @@
 #ifndef HELPERS_INT_H
 #define HELPERS_INT_H
 #include <stdbool.h>
+#include <stdio.h>
 
 #define LIKELY(x) __builtin_expect(!!(x), 1)
 
@@ -14,8 +15,8 @@
 
 #define len(a) (sizeof(a)/sizeof(a[0]))
 
-#define even(n) ((n) % 2 == 0)
-#define odd(n) ((n) % 2 == 1)
+#define even(n) ((n) % 2lu == 0)
+#define odd(n) ((n) % 2lu == 1)
 
 /*
  * Given an integer 0 ≤ n < 2³², find the largest integer r such that r² ≤ n.
@@ -35,7 +36,7 @@ unsigned long gcd(unsigned long a, unsigned long b);
 bool is_square(unsigned long n);
 
 /* Calculate [s], [d] such that [n-1=2^s*d] where [d] is odd. */
-unsigned long split(unsigned long *d, unsigned long n);
+void split(unsigned long *s, unsigned long *d, unsigned long n);
 
 /*
  * This function generates a random integer between 2 and n-2.  This function

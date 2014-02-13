@@ -44,17 +44,15 @@ bool is_square(unsigned long n)
 /*
  * Calculate [s], [d] such that [n-1=2^s*d] where [d] is odd.
  */
-unsigned long split(unsigned long *d, unsigned long n)
+void split(unsigned long *s, unsigned long *d, unsigned long n)
 {
-	unsigned long s = 0;
+	*s = 0;
 	*d = n - 1;
 
-	while (odd(*d)) {
-		s++;
+	while (even(*d)) {
+		(*s)++;
 		*d /= 2;
 	}
-
-	return s;
 }
 
 /*

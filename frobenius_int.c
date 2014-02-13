@@ -7,7 +7,7 @@
 
 #include "helpers_int.h"
 
-#define N 2
+#define N 4
 
 
 #include "small_primes.c"
@@ -109,7 +109,8 @@ bool QFT(unsigned long n, unsigned long b, unsigned long c, bool use_rqft)
 {
 	unsigned long x0, x1, s, tmp, foo0, foo1;
 	unsigned long r, i;
-	x0 = x1 = s = tmp = foo0 = foo1 = 0;
+	x0 = 1;
+	x1 = s = tmp = foo0 = foo1 = 0;
 
 	// Suppose n>1 is odd, (b^2+4c over n)=-1 and (-c over n)=1.
 
@@ -133,9 +134,6 @@ bool QFT(unsigned long n, unsigned long b, unsigned long c, bool use_rqft)
 			return false; // composite
 		}
 	}
-
-	x0 = 1;
-	// x1 is 0 automatically
 
 	/*
 	 * (3) Compute x^((n+1)/2) mod (n, x^2-bx-c).  If x^((n+1)/2) not in ℤ/nℤ,
@@ -166,8 +164,8 @@ bool QFT(unsigned long n, unsigned long b, unsigned long c, bool use_rqft)
 	 * prime.
 	 */
 	tmp = n * n;
-	r = split(&s, tmp); // calculate r,s such that 2^r*s + 1 == n^2
-	if (tmp - 1 != (1<<r) * s)
+	split(&r, &s, tmp); // calculate r,s such that 2^r*s + 1 == n^2
+	if (tmp - 1 != (1lu<<r) * s)
 		die("split failed");
 	pow_mod(&foo0, &foo1, x0, x1, s, n, b, c);
 	tmp = n - 1;
@@ -234,20 +232,26 @@ bool RQFT(unsigned long n, unsigned k)
 #ifndef TEST
 void *run(void *worker_id_cast_to_void_star)
 {
-	unsigned long upper_bound = (1lu << 24) - 1, dots_every = 1lu << 21;
+	unsigned long upper_bound = (1lu << 20) - 1, dots_every = 1lu << 25;
 	unsigned long counter = 0, i;
 	unsigned long worker_id = (unsigned long)worker_id_cast_to_void_star;
+	char str[32];
+	FILE *primes;
+	(void)snprintf(str, 32, "primes_worker_%lu.txt", worker_id);
+	primes = fopen(str, "a");
 
 	for (i = 5 + 2 * worker_id; i < upper_bound; i+=2*N) {
 		if (i % dots_every == 1) {  /* we need to check for == 1 since i will always be odd */
 			printf(".");
 			(void)fflush(stdout);
 		}
-		if (RQFT(i, 1))
+		if (RQFT(i, 1)) {
 			counter++;
-			//printf("%d\n", i);
-			//printf(".");
+			fprintf(primes, "%lu\n", i);
+		}
 	}
+
+	(void)fclose(primes);
 	return (void*)counter;
 }
 
