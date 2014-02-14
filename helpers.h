@@ -1,18 +1,19 @@
 #ifndef HELPERS_H
 #define HELPERS_H
-
-#define error(...) fprintf(stderr, __VA_ARGS__)
-
+#include <stdlib.h>
 #include <gmp.h>
 
-unsigned long split(mpz_t d, mpz_t n);
+#define die(...) do { fprintf(stderr, __VA_ARGS__); exit(1); } while (0)
 
+#define len(a) (sizeof(a)/sizeof(a[0]))
+
+extern gmp_randstate_t r_state;
+
+void split_long(unsigned long *s, mpz_t d, mpz_t n);
+void get_random(mpz_t n, mpz_t result);
 unsigned randint(unsigned low, unsigned high);
 
-gmp_randstate_t r_state;
-
-void init();
-
-void cleanup();
+int init_long(void);
+int cleanup(void);
 
 #endif

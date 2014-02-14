@@ -3,21 +3,37 @@
 
 #include "helpers.h"
 
+gmp_randstate_t r_state;
+
 
 /* 
  * Calculate [s], [d] such that [n-1=2^s*d] where [d] is odd.
  */
-unsigned long split(mpz_t d, mpz_t n)
+void split_long(unsigned long *s, mpz_t d, mpz_t n)
 {
-	unsigned long s = 0;
+	*s = 0;
 	mpz_sub_ui(d, n, 1);
 
 	while (mpz_odd_p(d)) {
-		s++;
+		(*s)++;
 		mpz_fdiv_q_2exp(d, d, 1); // divide by 2^1
 	}
-	
-	return s;
+}
+
+/**
+ * This function generates a random integer between 2 and n-2.
+ */
+void get_random(mpz_t n, mpz_t result)
+{
+	mpz_t tmp;
+	mpz_init(tmp);
+	mpz_sub_ui(tmp, n, 3);
+
+	/* generate a random number between 0 and tmp-1 */
+	mpz_urandomm(result, r_state, tmp);
+
+	mpz_add_ui(result, result, 2);
+	mpz_clear(tmp);
 }
 
 /*
@@ -29,9 +45,7 @@ unsigned randint(unsigned low, unsigned high)
 	return low + (unsigned)rand() % (high - low);
 }
 
-gmp_randstate_t r_state;
-
-void init()
+int init_long(void)
 {
 	unsigned long int seed;
 	struct timeval tv;
@@ -44,9 +58,12 @@ void init()
 	gmp_randseed_ui(r_state, seed);
 
 	srand(seed);
+
+	return 0;
 }
 
-void cleanup()
+int cleanup(void)
 {
 	gmp_randclear(r_state);
+	return 0;
 }

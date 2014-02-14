@@ -69,11 +69,11 @@ bool miller_rabin(unsigned long n, unsigned long k)
 	assert(odd(n) && n > 3);
 
 	/* compute s and d s.t. n-1=2^s*d */
-	split(&s, &d, n);
+	split_int(&s, &d, n);
 
 	/* Repeat the test itself k times to increase the accuracy */
 	for (i = 0; i < k; i++) {
-		a = get_random(n);
+		a = get_random_int(n);
 
 		/* compute a^d mod n */
 		x = powm(a, d, n);
@@ -126,7 +126,7 @@ int main(int argc, char *argv[])
 	unsigned long i;
 	unsigned long counter = 0;
 	pthread_t threads[N];
-	init();
+	init_int();
 
 	for (i = 0; i < N; i++)
 		if (0 != pthread_create(&threads[i], NULL, run, (void*)i))

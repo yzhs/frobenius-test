@@ -44,7 +44,7 @@ bool is_square(unsigned long n)
 /*
  * Calculate [s], [d] such that [n-1=2^s*d] where [d] is odd.
  */
-void split(unsigned long *s, unsigned long *d, unsigned long n)
+void split_int(unsigned long *s, unsigned long *d, unsigned long n)
 {
 	*s = 0;
 	*d = n - 1;
@@ -59,7 +59,7 @@ void split(unsigned long *s, unsigned long *d, unsigned long n)
  * This function generates a random integer between 2 and n-2.  This function
  * will fail if n is equal to 3 and produce weird results for smaller ns.
  */
-unsigned long get_random(unsigned long n)
+unsigned long get_random_int(unsigned long n)
 {
 	return (unsigned long)rand() % (n - 3) + 2;
 }
@@ -145,7 +145,7 @@ int jacobi(unsigned long x, unsigned long y)
 /*
  * Initialises the random number generator using a (static) seed.
  */
-void init()
+void init_int(void)
 {
 	unsigned seed;
 	struct timeval tv;
