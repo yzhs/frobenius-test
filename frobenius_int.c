@@ -71,34 +71,22 @@ void powm_int(unsigned long *res0, unsigned long *res1,
 	}
 }
 
-int no_nontrivial_small_prime_divisor_int(unsigned long n)
+/*
+ * Like QFT, return true if n might be prime and false if a proof for n's
+ * compositeness was found.
+ */
+bool steps_one_and_two_int(unsigned long n)
 {
-	unsigned long sqrt;
-	int i;
-
-	//if (n < B) {
-	//	int m = (int)n, low = 0, high = (int)len(prime_list);
-        //
-	//	while (low + 1 < high) {
-	//		i = (low + high) / 2;
-	//		if (prime_list[i] == (unsigned short)m)
-	//			return -1;
-	//		else if (prime_list[i] > (unsigned short)m)
-	//			high = i;
-	//		else
-	//			low = i;
-	//	}
-	//}
-
-	sqrt = int_sqrt(n);
+	unsigned long sqrt = int_sqrt(n);
+	/*  (2) If n is a square, it can obviously not be prime. */
 	if (sqrt*sqrt == n)
-		return 0;
+		return false;
 
-	for (i = 0; i < (int)len(prime_list) && sqrt < (unsigned long)prime_list[i]; i++)
+	for (int i = 0; i < len(prime_list) && prime_list[i] <= sqrt; i++)
 		if (n % prime_list[i] == 0)
-			return 0;
+			return false;
 
-	return 1;
+	return true;
 }
 
 /*
@@ -115,24 +103,14 @@ bool QFT_int(unsigned long n, unsigned long b, unsigned long c, bool use_rqft)
 	// Suppose n>1 is odd, (b^2+4c over n)=-1 and (-c over n)=1.
 
 	if (!use_rqft) {
-		/*
-		 * (1) Test n for divisibility by primes less than or equal to
-		 * min{B, sqrt(n)}.  If it is divisible by one of these primes,
-		 * declare n to be composite and stop.
-		 */
-		int foo = no_nontrivial_small_prime_divisor_int(n);
-		if (!(bool)foo)
-			return false; // composite
-		else if (foo == -1)
-			return true; // n occurs in small_primes and is therefore certainly prime
-
-		/*
-		 * (2) Test whether sqrt(n) in ℤ.  If it is, declare n to be composite and
-		 * stop.
-		 */
-		if (is_square(n)) {
-			return false; // composite
-		}
+	       if (!steps_one_and_two_int(n))
+		       /* The first two steps found a non-trivial factor of n. */
+		       return false; // composite
+	       else if (n < B)
+		       /* n is to be too small to be a product of primes larger
+			* than B and is not divisible by any of the smaller
+			* ones, so n has to be prime. */
+		       return true;
 	}
 
 	/*
@@ -189,21 +167,17 @@ bool RQFT_int(unsigned long n, unsigned k)
 	bool result;
 	unsigned long b=0, c=0;
 	unsigned long bb4c, tmp;
-	int j1 = 0, j2 = 0, foo;
+	int j1 = 0, j2 = 0;
 
 	if (n < 3)
 		die("Error: RQFT_int can only be used for numbers >= 3");
 	if (even(n))
 		die("Error: RQFT_int can only be used for odd numbers");
 
-	foo = no_nontrivial_small_prime_divisor_int(n);
-	if (!(bool)foo)
+	if (!steps_one_and_two_int(n))
 		return false; // composite
-	else if (foo == -1)
+	else if (n < B)
 		return true; // n occurs in small_primes and is therefore certainly prime
-
-	if (is_square(n))
-		return false;
 
 	for (unsigned j = 0; j < k; j++) {
 		for (unsigned i = 0; i < B; i++) {
@@ -226,9 +200,9 @@ bool RQFT_int(unsigned long n, unsigned k)
 			}
 		}
 		if (j1 != -1 || j2 != 1) {
-			printf("Found no suitable pair (b,c) modulo n=3*%lu^2. "
+			printf("Found no suitable pair (b,c) modulo n=%lu. "
 			       "This is highly unlikely unless the programme is wrong. "
-			       "Assuming %lu is a prime...\n", int_sqrt(n/3), n);
+			       "Assuming %lu is a prime...\n", n, n);
 			return true;
 		}
 

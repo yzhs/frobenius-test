@@ -9,11 +9,11 @@
 
 extern gmp_randstate_t r_state;
 
-void split_long(unsigned long *s, mpz_t d, mpz_t n);
+void split(unsigned long *s, mpz_t d, mpz_t n);
 void get_random(mpz_t n, mpz_t result);
 unsigned randint(unsigned low, unsigned high);
 
-int init_long(void);
+int init(void);
 int cleanup(void);
 
 #endif

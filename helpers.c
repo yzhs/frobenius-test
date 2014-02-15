@@ -9,7 +9,7 @@ gmp_randstate_t r_state;
 /* 
  * Calculate [s], [d] such that [n-1=2^s*d] where [d] is odd.
  */
-void split_long(unsigned long *s, mpz_t d, mpz_t n)
+void split(unsigned long *s, mpz_t d, mpz_t n)
 {
 	*s = 0;
 	mpz_sub_ui(d, n, 1);
@@ -45,7 +45,7 @@ unsigned randint(unsigned low, unsigned high)
 	return low + (unsigned)rand() % (high - low);
 }
 
-int init_long(void)
+int init(void)
 {
 	unsigned long int seed;
 	struct timeval tv;

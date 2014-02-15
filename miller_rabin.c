@@ -59,7 +59,7 @@ bool miller_rabin(mpz_t n, unsigned long k)
 	assert(mpz_cmp_ui(n, 3) > 0);
 
 	/* compute s and d s.t. n-1=2^s*d */
-	split_long(&s, d, n);
+	split(&s, d, n);
 
 	/* Repeat the test itself k times to increase the accuracy */
 	for (unsigned long i = 0; i < k; i++) {
@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
 	//FILE *primes = fopen("primes_worker.txt", "a");
 
 	mpz_inits(foo, tmp, NULL);
-	init_long();
+	init();
 
 	for (i = 5; i < upper_bound; i+=2) {
 		if (i % dots_every == 1) {  /* we need to check for == 1 since i will always be odd */

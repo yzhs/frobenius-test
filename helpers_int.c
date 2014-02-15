@@ -8,11 +8,13 @@
  */
 unsigned long int_sqrt(unsigned long n)
 {
-	unsigned long root = (unsigned long)sqrt((double)n), new_root;
-	return root;
-	do {
-		new_root = (root + n / root) / 2;
-	} while (labs((long)new_root - root) < 1);
+	unsigned long root = (unsigned long)sqrt((double)n);
+	if (n == 0)
+		return 0;
+	if (root * root > n)
+		root = n / root;
+	while ((root + 1) * (root + 1) <= n)
+		root++;
 	return root;
 }
 
