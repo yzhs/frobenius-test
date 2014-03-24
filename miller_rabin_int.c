@@ -16,10 +16,12 @@
 
 #define N 4
 
+Primality miller_rabin(unsigned long n, unsigned long k);
+
 /*
  * Raise b to the e'th power modulo m.
  */
-unsigned long powm(unsigned long b, unsigned long e, unsigned long m)
+static unsigned long powm(unsigned long b, unsigned long e, unsigned long m)
 {
 	unsigned long result = 1;
 	while (LIKELY(e != 0)) {
@@ -59,7 +61,7 @@ unsigned long powm(unsigned long b, unsigned long e, unsigned long m)
  * The function returns true if it found no evidence, that n might be composite
  * and false if it found a counter example.
  */
-bool miller_rabin(unsigned long n, unsigned long k)
+Primality miller_rabin(unsigned long n, unsigned long k)
 {
 	unsigned long i, r, s;
 	unsigned long a, d, x, nm1;
@@ -84,20 +86,20 @@ bool miller_rabin(unsigned long n, unsigned long k)
 		for (r = 1; r <= s; r++) {
 			x = powm(x, 2, n);
 			if (x == 1)
-				return false;
+				return composite;
 			if (x == nm1)
 			       	break;
 		}
 
 		if (x != nm1)
-			return false;
+			return composite;
 	}
 
-	return true;
+	return probably_prime;
 }
 
 #ifndef TEST
-void *run(void *worker_id_cast_to_void_star)
+static void *run(void *worker_id_cast_to_void_star)
 {
 	unsigned long i;
 	unsigned long worker_id = (unsigned long)worker_id_cast_to_void_star;
@@ -121,7 +123,7 @@ void *run(void *worker_id_cast_to_void_star)
 	return (void*)counter;
 }
 
-int main(int argc, char *argv[])
+int main()
 {
 	unsigned long i;
 	unsigned long counter = 0;
@@ -133,7 +135,7 @@ int main(int argc, char *argv[])
 			die("failed to create thread %lu, exiting\n", i);
 
 	for (i = 0; i < N; i++) {
-		int tmp;
+		unsigned long tmp;
 		(void)pthread_join(threads[i], (void**)&tmp);
 		counter += tmp;
 	}

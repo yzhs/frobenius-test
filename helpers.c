@@ -47,17 +47,17 @@ unsigned randint(unsigned low, unsigned high)
 
 int init(void)
 {
-	unsigned long int seed;
+	long int seed;
 	struct timeval tv;
 
-	seed = 123457;
+	//seed = 123457;
 	gettimeofday(&tv, NULL);
 	seed = tv.tv_usec;
 
 	gmp_randinit_default (r_state);
 	gmp_randseed_ui(r_state, seed);
 
-	srand(seed);
+	srand((unsigned int)seed);
 
 	return 0;
 }

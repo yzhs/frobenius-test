@@ -8,7 +8,7 @@
  */
 unsigned long int_sqrt(unsigned long n)
 {
-	unsigned long root = (unsigned long)sqrt((double)n);
+	unsigned long root = (unsigned long) (sqrt((double)n));
 	if (n == 0)
 		return 0;
 	if (root * root > n)
@@ -150,10 +150,10 @@ int jacobi(unsigned long x, unsigned long y)
 void init_int(void)
 {
 	unsigned seed;
-	struct timeval tv;
+	//struct timeval tv;
 
-	gettimeofday(&tv, NULL);
-	seed = tv.tv_usec;
+	//gettimeofday(&tv, NULL);
+	//seed = tv.tv_usec;
 	seed = 123456;
 
 	srand(seed);

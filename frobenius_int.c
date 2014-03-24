@@ -11,15 +11,20 @@
 #define N 4
 
 
+Primality QFT_int(unsigned long n, unsigned long b, unsigned long c);
+Primality RQFT_int(unsigned long n, unsigned k);
 
-unsigned B = 50000;
+static unsigned B = 50000;
 
 
 /*
  * Return f(x)*g(x) mod (n, x^2 - b*x - c) where f(x) = d*x + e and g(x) = f*x + g in the return arguments res0 and
  * res1, representing the polynomial res0*x + res1.
  */
-void mult_mod_int(unsigned long *res0, unsigned long *res1, unsigned long d, unsigned long e, unsigned long f, unsigned long g, unsigned long n, unsigned long b, unsigned long c)
+static void mult_mod_int(unsigned long *res0, unsigned long *res1,
+		         unsigned long d, unsigned long e,
+			 unsigned long f, unsigned long g,
+			 unsigned long n, unsigned long b, unsigned long c)
 {
 	unsigned long df, ef = (e * f) % n;
 
@@ -33,13 +38,14 @@ void mult_mod_int(unsigned long *res0, unsigned long *res1, unsigned long d, uns
 	}
 	df = (d * f) % n;
 
+	// All these modulo operations are pretty expensive...
 	*res0 = ((df*b)%n + (d*g)%n + ef)%n;
 	*res1 = ((df*c)%n + (e*g)%n)%n;
 }
 
-void square_mod_int(unsigned long *res0, unsigned long *res1, /* The resulting linear polynomial. */
-                unsigned long d, unsigned long e,
-                unsigned long n, unsigned long b, unsigned long c)
+static void square_mod_int(unsigned long *res0, unsigned long *res1, /* The resulting linear polynomial. */
+                           unsigned long d, unsigned long e,
+                           unsigned long n, unsigned long b, unsigned long c)
 {
 	unsigned long ee = (e * e) % n;
 	unsigned long dd;
@@ -56,9 +62,9 @@ void square_mod_int(unsigned long *res0, unsigned long *res1, /* The resulting l
 	*res1 = ((dd*c)%n + ee)%n;
 }
 
-void powm_int(unsigned long *res0, unsigned long *res1,
-             unsigned long base0, unsigned long base1, unsigned long exp,
-             unsigned long n, unsigned long b, unsigned long c)
+static void powm_int(unsigned long *res0, unsigned long *res1,
+                     unsigned long base0, unsigned long base1, unsigned long exp,
+                     unsigned long n, unsigned long b, unsigned long c)
 {
 	*res0 = 0;
 	*res1 = 1;
@@ -75,25 +81,23 @@ void powm_int(unsigned long *res0, unsigned long *res1,
  * Like QFT, return true if n might be prime and false if a proof for n's
  * compositeness was found.
  */
-bool steps_one_and_two_int(unsigned long n)
+static Primality steps_one_and_two_int(unsigned long n)
 {
 	unsigned long sqrt = int_sqrt(n);
 	/*  (2) If n is a square, it can obviously not be prime. */
 	if (sqrt*sqrt == n)
-		return false;
+		return composite;
 
-	for (int i = 0; i < len(prime_list) && prime_list[i] <= sqrt; i++)
+	for (unsigned long i = 0; i < len(prime_list) && prime_list[i] <= sqrt; i++)
 		if (n % prime_list[i] == 0)
-			return false;
+			return composite;
 
-	return true;
+	/* If the given number is small enough, there cannot be a non-trivial
+	 * divisor of n, whence n is prime. */
+	return (sqrt < B) ? prime : probably_prime;
 }
 
-/*
- * The Quadratic Frobenius Test (QFT_int) with parameters (b,c) consists of the
- * following.
- */
-bool QFT_int(unsigned long n, unsigned long b, unsigned long c, bool use_rqft)
+static Primality QFT_helper_int(unsigned long n, unsigned long b, unsigned long c)
 {
 	unsigned long x0, x1, s, tmp, foo0, foo1;
 	unsigned long r, i;
@@ -101,17 +105,6 @@ bool QFT_int(unsigned long n, unsigned long b, unsigned long c, bool use_rqft)
 	x1 = s = tmp = foo0 = foo1 = 0;
 
 	// Suppose n>1 is odd, (b^2+4c over n)=-1 and (-c over n)=1.
-
-	if (!use_rqft) {
-	       if (!steps_one_and_two_int(n))
-		       /* The first two steps found a non-trivial factor of n. */
-		       return false; // composite
-	       else if (n < B)
-		       /* n is to be too small to be a product of primes larger
-			* than B and is not divisible by any of the smaller
-			* ones, so n has to be prime. */
-		       return true;
-	}
 
 	/*
 	 * (3) Compute x^((n+1)/2) mod (n, x^2-bx-c).  If x^((n+1)/2) not in ℤ/nℤ,
@@ -121,7 +114,7 @@ bool QFT_int(unsigned long n, unsigned long b, unsigned long c, bool use_rqft)
 	tmp = tmp / 2; // tmp = (n+1)/2
 	powm_int(&foo0, &foo1, x0, x1, tmp, n, b, c);
 	if (foo0 != 0) { // check whether x^((n+1)/2) has degree 1
-		return false; // composite
+		return composite;
 	}
 
 	/*
@@ -131,7 +124,7 @@ bool QFT_int(unsigned long n, unsigned long b, unsigned long c, bool use_rqft)
 	foo1 = foo1 * foo1;
 	tmp = n - c;
 	if (foo1 % n != tmp % n)
-		return false; // composite
+		return composite;
 
 	/*
 	 * (5) Let n^2-1=2^r*s, where s is odd.  If x^s not congruent 1 mod (n,
@@ -147,14 +140,27 @@ bool QFT_int(unsigned long n, unsigned long b, unsigned long c, bool use_rqft)
 	powm_int(&foo0, &foo1, x0, x1, s, n, b, c);
 	tmp = n - 1;
 	if (foo0 == 0 && foo1 == 1)
-		return true; // probably prime
+		return probably_prime;
 	for (i = 0; i < r-1; i++) {
 		if (foo0 == 0 && foo1 % n == tmp % n)
-			return true; // probably prime
+			return probably_prime;
 		square_mod_int(&foo0, &foo1, foo0, foo1, n, b, c);
 	}
 
-	return false; // composite
+	return composite;
+}
+
+/*
+ * The Quadratic Frobenius Test (QFT_int) with parameters (b,c) consists of the
+ * following.
+ */
+Primality QFT_int(unsigned long n, unsigned long b, unsigned long c)
+{
+	Primality result = steps_one_and_two_int(n);
+	if (result != probably_prime)
+		return result;
+
+	return QFT_helper_int(n, b, c);
 }
 
 /*
@@ -162,9 +168,9 @@ bool QFT_int(unsigned long n, unsigned long b, unsigned long c, bool use_rqft)
  * prime.  The Parameter [k] determines how many times the test will be run at
  * most.  If the test returns "composite", it will not be run again.
  */
-bool RQFT_int(unsigned long n, unsigned k)
+Primality RQFT_int(unsigned long n, unsigned k)
 {
-	bool result;
+	Primality result;
 	unsigned long b=0, c=0;
 	unsigned long bb4c, tmp;
 	int j1 = 0, j2 = 0;
@@ -174,10 +180,11 @@ bool RQFT_int(unsigned long n, unsigned k)
 	if (even(n))
 		die("Error: RQFT_int can only be used for odd numbers");
 
-	if (!steps_one_and_two_int(n))
-		return false; // composite
-	else if (n < B)
-		return true; // n occurs in small_primes and is therefore certainly prime
+	result = steps_one_and_two_int(n);
+	/* If the number is found to be either composite or certainly prime, we can
+	 * return that result immediately. */
+	if (result != probably_prime)
+		return result;
 
 	for (unsigned j = 0; j < k; j++) {
 		for (unsigned i = 0; i < B; i++) {
@@ -189,13 +196,13 @@ bool RQFT_int(unsigned long n, unsigned k)
 			if (j1 == -1 && j2 == 1) {
 				tmp = gcd(bb4c, n);
 				if (tmp != 1 && tmp != n)
-					return false;;
+					return composite;;
 				tmp = gcd(b, n);
 				if (tmp != 1 && tmp != n)
-					return false;;
+					return composite;;
 				tmp = gcd(c, n);
 				if (tmp != 1 && tmp != n)
-					return false;;
+					return composite;;
 				break;
 			}
 		}
@@ -203,26 +210,26 @@ bool RQFT_int(unsigned long n, unsigned k)
 			printf("Found no suitable pair (b,c) modulo n=%lu. "
 			       "This is highly unlikely unless the programme is wrong. "
 			       "Assuming %lu is a prime...\n", n, n);
-			return true;
+			return probably_prime;
 		}
 
-		result = QFT_int(n, b, c, true);
-		if (!result)
-			return false;
+		result = QFT_helper_int(n, b, c);
+		if (result == composite)
+			return composite;
 	}
-	return true;
+	return composite;
 }
 
 #ifndef TEST
-void *run(void *worker_id_cast_to_void_star)
+static void *run(void *worker_id_cast_to_void_star)
 {
-	unsigned long upper_bound = (1lu << 20) - 1, dots_every = 1lu << 25;
+	unsigned long upper_bound = (1lu << 32) - 1, dots_every = 1lu << 25;
 	unsigned long counter = 0, i;
 	unsigned long worker_id = (unsigned long)worker_id_cast_to_void_star;
-	char str[32];
-	FILE *primes;
-	(void)snprintf(str, 32, "primes_worker_%lu.txt", worker_id);
-	primes = fopen(str, "a");
+	//char str[32];
+	//FILE *primes;
+	//(void)snprintf(str, 32, "primes_worker_%lu.txt", worker_id);
+	//primes = fopen(str, "a");
 
 	for (i = 5 + 2 * worker_id; i < upper_bound; i+=2*N) {
 		if (i % dots_every == 1) {  /* we need to check for == 1 since i will always be odd */
@@ -231,15 +238,15 @@ void *run(void *worker_id_cast_to_void_star)
 		}
 		if (RQFT_int(i, 1)) {
 			counter++;
-			fprintf(primes, "%lu\n", i);
+			//fprintf(primes, "%lu\n", i);
 		}
 	}
 
-	(void)fclose(primes);
+	//(void)fclose(primes);
 	return (void*)counter;
 }
 
-int main(int argc, char *argv[])
+int main()
 {
 	unsigned i;
 	unsigned counter = 0;
@@ -252,7 +259,7 @@ int main(int argc, char *argv[])
 			die("failed to create thread %u, exiting\n", i);
 
 	for (i = 0; i < N; i++) {
-		int tmp;
+		unsigned long tmp;
 		(void)pthread_join(threads[i], (void**)&tmp);
 		counter += tmp;
 	}

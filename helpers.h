@@ -3,9 +3,7 @@
 #include <stdlib.h>
 #include <gmp.h>
 
-#define die(...) do { fprintf(stderr, __VA_ARGS__); exit(1); } while (0)
-
-#define len(a) (sizeof(a)/sizeof(a[0]))
+#include "common.h"
 
 extern gmp_randstate_t r_state;
 

@@ -3,17 +3,9 @@
 #include <stdbool.h>
 #include <stdio.h>
 
+#include "common.h"
+
 #define LIKELY(x) __builtin_expect(!!(x), 1)
-
-#define die(...) do { fprintf(stderr, __VA_ARGS__); exit(1); } while (0)
-
-#ifdef DEBUG
-#define debug(...) printf(__VA_ARGS__)
-#else
-#define debug(...)
-#endif
-
-#define len(a) (sizeof(a)/sizeof(a[0]))
 
 #define even(n) ((n) % 2lu == 0)
 #define odd(n) ((n) % 2lu == 1)

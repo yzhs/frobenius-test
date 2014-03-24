@@ -9,13 +9,12 @@
 
 #include "helpers.h"
 
-#define die(...) do { fprintf(stderr, __VA_ARGS__); exit(1); } while (0)
-
 #ifndef DEBUG
+#undef assert
 #define assert(x)
 #endif
 
-unsigned n = 1000;
+Primality miller_rabin(mpz_t n, unsigned long k);
 
 /**
  * This function checks whether a given number n is a prime or not, using the
@@ -45,9 +44,9 @@ unsigned n = 1000;
  * The function returns true if it found no evidence, that n might be composite
  * and false if it found a counter example.
  */
-bool miller_rabin(mpz_t n, unsigned long k)
+Primality miller_rabin(mpz_t n, unsigned long k)
 {
-	bool result = true;
+	Primality result = probably_prime;
 	unsigned long s;
 	mpz_t a, d, x, nm1;
 	mpz_inits(a, d, x, nm1, NULL);
@@ -74,14 +73,14 @@ bool miller_rabin(mpz_t n, unsigned long k)
 		for (unsigned long r = 1; r <= s; r++) {
 			mpz_powm_ui(x, x, 2, n);
 			if (mpz_cmp_ui(x, 1) == 0) {
-				result = false;
+				result = composite;
 				goto exit;
 			}
 			if (mpz_cmp(x, nm1) == 0)
 				break;
 		}
 		if (mpz_cmp(x, nm1) != 0) {
-			result = false;
+			result = composite;
 			goto exit;
 		}
 
@@ -93,7 +92,7 @@ exit:
 }
 
 #ifndef TEST
-int main(int argc, char *argv[])
+int main()
 {
 	mpz_t foo, tmp;
 	unsigned long upper_bound = (1lu << 32) - 1, dots_every = 1lu << 25;
