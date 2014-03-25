@@ -1,5 +1,4 @@
 #include <assert.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/time.h>
@@ -8,7 +7,7 @@
 #include "helpers_int.h"
 #include "small_primes.h"
 
-#define N 4
+#define N 1
 
 
 Primality QFT_int(unsigned long n, unsigned long b, unsigned long c);
@@ -22,7 +21,7 @@ static unsigned B = 50000;
  * res1, representing the polynomial res0*x + res1.
  */
 static void mult_mod_int(unsigned long *res0, unsigned long *res1,
-		         unsigned long d, unsigned long e,
+			 unsigned long d, unsigned long e,
 			 unsigned long f, unsigned long g,
 			 unsigned long n, unsigned long b, unsigned long c)
 {
@@ -39,32 +38,33 @@ static void mult_mod_int(unsigned long *res0, unsigned long *res1,
 	df = (d * f) % n;
 
 	// All these modulo operations are pretty expensive...
-	*res0 = ((df*b)%n + (d*g)%n + ef)%n;
-	*res1 = ((df*c)%n + (e*g)%n)%n;
+	*res0 = ((df * b) % n + (d * g) % n + ef) % n;
+	*res1 = ((df * c) % n + (e * g) % n) % n;
 }
 
 static void square_mod_int(unsigned long *res0, unsigned long *res1, /* The resulting linear polynomial. */
-                           unsigned long d, unsigned long e,
-                           unsigned long n, unsigned long b, unsigned long c)
+			   unsigned long d, unsigned long e,
+			   unsigned long n, unsigned long b, unsigned long c)
 {
 	unsigned long ee = (e * e) % n;
 	unsigned long dd;
+
 	if (d == 0) {
 		*res0 = 0;
 		*res1 = ee;
 		return;
 	}
-	dd = (d*d) % n;
+	dd = (d * d) % n;
 	// compute res0 = d^2*b+2*d*e
-	*res0 = ((dd*b)%n + 2*(d*e)%n) % n;
+	*res0 = ((dd * b) % n + 2 * (d * e) % n) % n;
 
 	// and res1 = d^2*c+e^2
-	*res1 = ((dd*c)%n + ee)%n;
+	*res1 = ((dd * c) % n + ee) % n;
 }
 
 static void powm_int(unsigned long *res0, unsigned long *res1,
-                     unsigned long base0, unsigned long base1, unsigned long exp,
-                     unsigned long n, unsigned long b, unsigned long c)
+		     unsigned long base0, unsigned long base1, unsigned long exp,
+		     unsigned long n, unsigned long b, unsigned long c)
 {
 	*res0 = 0;
 	*res1 = 1;
@@ -78,14 +78,15 @@ static void powm_int(unsigned long *res0, unsigned long *res1,
 }
 
 /*
- * Like QFT, return true if n might be prime and false if a proof for n's
- * compositeness was found.
+ * Like QFT, return 'probably_prime' if n might be prime, 'prime' if n is
+ * certainly prime and 'composite' if a proof for n's compositeness was found.
  */
-static Primality steps_one_and_two_int(unsigned long n)
+static Primality steps_1_2_int(unsigned long n)
 {
 	unsigned long sqrt = int_sqrt(n);
+
 	/*  (2) If n is a square, it can obviously not be prime. */
-	if (sqrt*sqrt == n)
+	if (sqrt * sqrt == n)
 		return composite;
 
 	for (unsigned long i = 0; i < len(prime_list) && prime_list[i] <= sqrt; i++)
@@ -97,10 +98,14 @@ static Primality steps_one_and_two_int(unsigned long n)
 	return (sqrt < B) ? prime : probably_prime;
 }
 
-static Primality QFT_helper_int(unsigned long n, unsigned long b, unsigned long c)
+/*
+ * Execute steps (3) through (5) of the Quadratic Frobenius Test.
+ */
+static Primality steps_3_4_5_int(unsigned long n, unsigned long b, unsigned long c)
 {
 	unsigned long x0, x1, s, tmp, foo0, foo1;
 	unsigned long r, i;
+
 	x0 = 1;
 	x1 = s = tmp = foo0 = foo1 = 0;
 
@@ -110,12 +115,11 @@ static Primality QFT_helper_int(unsigned long n, unsigned long b, unsigned long 
 	 * (3) Compute x^((n+1)/2) mod (n, x^2-bx-c).  If x^((n+1)/2) not in ℤ/nℤ,
 	 * declare n to be composite and stop.
 	 */
-	tmp = n + 1; // tmp = n+1
-	tmp = tmp / 2; // tmp = (n+1)/2
+	tmp = n + 1;    // tmp = n+1
+	tmp = tmp / 2;  // tmp = (n+1)/2
 	powm_int(&foo0, &foo1, x0, x1, tmp, n, b, c);
-	if (foo0 != 0) { // check whether x^((n+1)/2) has degree 1
+	if (foo0 != 0)  // check whether x^((n+1)/2) has degree 1
 		return composite;
-	}
 
 	/*
 	 * (4) Compute x^(n+1) mod (n, x^2-bx-c).  If x^(n+1) not congruent -c,
@@ -135,13 +139,13 @@ static Primality QFT_helper_int(unsigned long n, unsigned long b, unsigned long 
 	 */
 	tmp = n * n;
 	split_int(&r, &s, tmp); // calculate r,s such that 2^r*s + 1 == n^2
-	if (tmp - 1 != (1lu<<r) * s)
+	if (tmp - 1 != (1lu << r) * s)
 		die("split failed");
 	powm_int(&foo0, &foo1, x0, x1, s, n, b, c);
 	tmp = n - 1;
 	if (foo0 == 0 && foo1 == 1)
 		return probably_prime;
-	for (i = 0; i < r-1; i++) {
+	for (i = 0; i < r - 1; i++) {
 		if (foo0 == 0 && foo1 % n == tmp % n)
 			return probably_prime;
 		square_mod_int(&foo0, &foo1, foo0, foo1, n, b, c);
@@ -151,16 +155,19 @@ static Primality QFT_helper_int(unsigned long n, unsigned long b, unsigned long 
 }
 
 /*
- * The Quadratic Frobenius Test (QFT_int) with parameters (b,c) consists of the
- * following.
+ * Execute the Quadratic Frobenius Test with parameters (b,c).
+ *
+ * Returns 'prime' if n is certainly prime, 'probably_prime' if no evidence
+ * could be found that n might be composite and 'composite' otherwise.
  */
 Primality QFT_int(unsigned long n, unsigned long b, unsigned long c)
 {
-	Primality result = steps_one_and_two_int(n);
+	Primality result = steps_1_2_int(n);
+
 	if (result != probably_prime)
 		return result;
 
-	return QFT_helper_int(n, b, c);
+	return steps_3_4_5_int(n, b, c);
 }
 
 /*
@@ -171,16 +178,16 @@ Primality QFT_int(unsigned long n, unsigned long b, unsigned long c)
 Primality RQFT_int(unsigned long n, unsigned k)
 {
 	Primality result;
-	unsigned long b=0, c=0;
+	unsigned long b = 0, c = 0;
 	unsigned long bb4c, tmp;
 	int j1 = 0, j2 = 0;
 
 	if (n < 3)
-		die("Error: RQFT_int can only be used for numbers >= 3");
+		return n == 2 ? prime : composite;
 	if (even(n))
-		die("Error: RQFT_int can only be used for odd numbers");
+		return composite;
 
-	result = steps_one_and_two_int(n);
+	result = steps_1_2_int(n);
 	/* If the number is found to be either composite or certainly prime, we can
 	 * return that result immediately. */
 	if (result != probably_prime)
@@ -192,17 +199,17 @@ Primality RQFT_int(unsigned long n, unsigned k)
 			c = get_random_int(n);
 			bb4c = ((b * b) % n + c * 4) % n;
 			j1 = jacobi(bb4c, n);
-			j2 = jacobi(n-c, n); /* Warning: n-c is not congruent to -c, since -c is interpreted as 2⁶⁴-c !!! */
+			j2 = jacobi(n - c, n); /* Warning: n-c is not congruent to -c, since -c is interpreted as 2⁶⁴-c !!! */
 			if (j1 == -1 && j2 == 1) {
 				tmp = gcd(bb4c, n);
 				if (tmp != 1 && tmp != n)
-					return composite;;
+					return composite;
 				tmp = gcd(b, n);
 				if (tmp != 1 && tmp != n)
-					return composite;;
+					return composite;
 				tmp = gcd(c, n);
 				if (tmp != 1 && tmp != n)
-					return composite;;
+					return composite;
 				break;
 			}
 		}
@@ -213,7 +220,7 @@ Primality RQFT_int(unsigned long n, unsigned k)
 			return probably_prime;
 		}
 
-		result = QFT_helper_int(n, b, c);
+		result = steps_3_4_5_int(n, b, c);
 		if (result == composite)
 			return composite;
 	}
@@ -226,24 +233,32 @@ static void *run(void *worker_id_cast_to_void_star)
 	unsigned long upper_bound = (1lu << 32) - 1, dots_every = 1lu << 25;
 	unsigned long counter = 0, i;
 	unsigned long worker_id = (unsigned long)worker_id_cast_to_void_star;
-	//char str[32];
-	//FILE *primes;
-	//(void)snprintf(str, 32, "primes_worker_%lu.txt", worker_id);
-	//primes = fopen(str, "a");
 
-	for (i = 5 + 2 * worker_id; i < upper_bound; i+=2*N) {
+#ifdef WRITE_PRIMES
+	char str[32];
+	FILE *primes;
+	(void)snprintf(str, 32, "primes_worker_%lu.txt", worker_id);
+	primes = fopen(str, "a");
+#endif
+
+	for (i = B * B + 1 + 2 * worker_id; i < upper_bound; i += 2 * N) {
 		if (i % dots_every == 1) {  /* we need to check for == 1 since i will always be odd */
 			printf(".");
 			(void)fflush(stdout);
 		}
+
 		if (RQFT_int(i, 1)) {
 			counter++;
-			//fprintf(primes, "%lu\n", i);
+#ifdef WRITE_PRIMES
+			fprintf(primes, "%lu\n", i);
+#endif
 		}
 	}
 
-	//(void)fclose(primes);
-	return (void*)counter;
+#ifdef WRITE_PRIMES
+	(void)fclose(primes);
+#endif
+	return (void *)counter;
 }
 
 int main()
@@ -255,12 +270,12 @@ int main()
 	init_int();
 
 	for (i = 0; i < N; i++)
-		if (0 != pthread_create(&threads[i], NULL, run, (void*)(unsigned long)i))
+		if (0 != pthread_create(&threads[i], NULL, run, (void *)(unsigned long)i))
 			die("failed to create thread %u, exiting\n", i);
 
 	for (i = 0; i < N; i++) {
 		unsigned long tmp;
-		(void)pthread_join(threads[i], (void**)&tmp);
+		(void)pthread_join(threads[i], (void **)&tmp);
 		counter += tmp;
 	}
 

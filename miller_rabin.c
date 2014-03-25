@@ -49,12 +49,13 @@ Primality miller_rabin(mpz_t n, unsigned long k)
 	Primality result = probably_prime;
 	unsigned long s;
 	mpz_t a, d, x, nm1;
+
 	mpz_inits(a, d, x, nm1, NULL);
 	mpz_sub_ui(nm1, n, 1);
 
 	/* We need an odd integer */
 	assert(mpz_odd_p(n));
-        /* greater than 3 */
+	/* greater than 3 */
 	assert(mpz_cmp_ui(n, 3) > 0);
 
 	/* compute s and d s.t. n-1=2^s*d */
@@ -83,7 +84,6 @@ Primality miller_rabin(mpz_t n, unsigned long k)
 			result = composite;
 			goto exit;
 		}
-
 	}
 
 exit:
@@ -97,21 +97,21 @@ int main()
 	mpz_t foo, tmp;
 	unsigned long upper_bound = (1lu << 32) - 1, dots_every = 1lu << 25;
 	unsigned long counter = 0, i;
+
 	//FILE *primes = fopen("primes_worker.txt", "a");
 
 	mpz_inits(foo, tmp, NULL);
 	init();
 
-	for (i = 5; i < upper_bound; i+=2) {
+	for (i = 5; i < upper_bound; i += 2) {
 		if (i % dots_every == 1) {  /* we need to check for == 1 since i will always be odd */
 			printf(".");
 			(void)fflush(stdout);
 		}
 		mpz_set_ui(foo, i);
-		if (miller_rabin(foo, 1)) {
+		if (miller_rabin(foo, 1))
 			counter++;
-		//	fprintf(primes, "%lu\n", i);
-		}
+			//	fprintf(primes, "%lu\n", i);
 	}
 
 	//(void)fclose(primes);

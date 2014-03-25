@@ -24,6 +24,7 @@ Primality miller_rabin(unsigned long n, unsigned long k);
 static unsigned long powm(unsigned long b, unsigned long e, unsigned long m)
 {
 	unsigned long result = 1;
+
 	while (LIKELY(e != 0)) {
 		if (e % 2 == 1)
 			result = (result * b) % m;
@@ -65,6 +66,7 @@ Primality miller_rabin(unsigned long n, unsigned long k)
 {
 	unsigned long i, r, s;
 	unsigned long a, d, x, nm1;
+
 	nm1 = n - 1;
 
 	/* We need an odd integer greater than 3 */
@@ -88,7 +90,7 @@ Primality miller_rabin(unsigned long n, unsigned long k)
 			if (x == 1)
 				return composite;
 			if (x == nm1)
-			       	break;
+				break;
 		}
 
 		if (x != nm1)
@@ -104,23 +106,30 @@ static void *run(void *worker_id_cast_to_void_star)
 	unsigned long i;
 	unsigned long worker_id = (unsigned long)worker_id_cast_to_void_star;
 	unsigned long counter = 0;
-	//char str[32];
-	//(void)snprintf(str, 32, "primes_worker_%lu.txt", worker_id);
-	//FILE *primes = fopen(str, "w");
 
-	for (i = 5 + 2 * worker_id; i < (1lu<<32)-1; i+=2*N) {
-		if (i % (1<<25) == 1) {
+#ifdef WRITE_PRIMES
+	char str[32];
+	(void)snprintf(str, 32, "primes_worker_%lu.txt", worker_id);
+	FILE *primes = fopen(str, "w");
+#endif
+
+	for (i = 5 + 2 * worker_id; i < (1lu << 32) - 1; i += 2 * N) {
+		if (i % (1 << 25) == 1) {
 			printf(".");
 			(void)fflush(stdout);
 		}
 		if (miller_rabin(i, 1)) {
 			counter++;
-			//fprintf(primes, "%lu\n", i);
+#ifdef WRITE_PRIMES
+			fprintf(primes, "%lu\n", i);
+#endif
 		}
 	}
 
-	//(void)fclose(primes);
-	return (void*)counter;
+#ifdef WRITE_PRIMES
+	(void)fclose(primes);
+#endif
+	return (void *)counter;
 }
 
 int main()
@@ -128,15 +137,16 @@ int main()
 	unsigned long i;
 	unsigned long counter = 0;
 	pthread_t threads[N];
+
 	init_int();
 
 	for (i = 0; i < N; i++)
-		if (0 != pthread_create(&threads[i], NULL, run, (void*)i))
+		if (0 != pthread_create(&threads[i], NULL, run, (void *)i))
 			die("failed to create thread %lu, exiting\n", i);
 
 	for (i = 0; i < N; i++) {
 		unsigned long tmp;
-		(void)pthread_join(threads[i], (void**)&tmp);
+		(void)pthread_join(threads[i], (void **)&tmp);
 		counter += tmp;
 	}
 

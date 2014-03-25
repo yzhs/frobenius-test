@@ -9,8 +9,8 @@
 #include "helpers.h"
 #include "small_primes.h"
 
-Primality QFT_helper(mpz_t n, mpz_t b, mpz_t c);
-Primality QFT(mpz_t n, mpz_t b, mpz_t c, unsigned B);
+Primality steps_3_4_5(mpz_t n, mpz_t b, mpz_t c);
+Primality QFT(mpz_t n, mpz_t b, mpz_t c);
 Primality RQFT(mpz_t n, unsigned B);
 
 static mpz_t tmp0, tmp1, tmp2;
@@ -81,7 +81,7 @@ static void pomw(mpz_t res0, mpz_t res1, mpz_t base0, mpz_t base1, mpz_t exp, mp
 	}
 }
 
-static Primality steps_one_and_two(mpz_t n)
+static Primality steps_1_2(mpz_t n)
 {
 #define tmp tmp0
 	/*  (2) If n is a square, it can obviously not be prime. */
@@ -114,11 +114,12 @@ static Primality steps_one_and_two(mpz_t n)
 }
 
 #define ret(x) do { result = (x); goto exit; } while (0)
-Primality QFT_helper(mpz_t n, mpz_t b, mpz_t c)
+Primality steps_3_4_5(mpz_t n, mpz_t b, mpz_t c)
 {
 	mpz_t x0, x1, s, tmp, foo0, foo1;
 	unsigned long r;
-	Primality result = probably_prime;
+	Primality result = composite;
+
 	mpz_inits(x0, x1, s, tmp, foo0, foo1, NULL);
 
 	mpz_set_ui(x0, 1);
@@ -128,8 +129,8 @@ Primality QFT_helper(mpz_t n, mpz_t b, mpz_t c)
 	 * (3) Compute x^((n+1)/2) mod (n, x^2-bx-c).  If x^((n+1)/2) not in ℤ/nℤ,
 	 * declare n to be composite and stop.
 	 */
-	mpz_add_ui(tmp, n, 1); // tmp = n+1
-	mpz_fdiv_q_2exp(tmp, tmp, 1); // tmp = (n+1)/2
+	mpz_add_ui(tmp, n, 1);          // tmp = n+1
+	mpz_fdiv_q_2exp(tmp, tmp, 1);   // tmp = (n+1)/2
 	pomw(foo0, foo1, x0, x1, tmp, n, b, c);
 
 	/* check whether x^((n+1)/2) has degree 1 */
@@ -142,9 +143,8 @@ Primality QFT_helper(mpz_t n, mpz_t b, mpz_t c)
 	 */
 	mpz_mul(foo1, foo1, foo1);
 	mpz_sub(tmp, n, c);
-	if (!mpz_congruent_p(foo1, tmp, n)) {
-		ret(composite); // composite
-	}
+	if (!mpz_congruent_p(foo1, tmp, n))
+		ret(composite);
 
 	/*
 	 * (5) Let n^2-1=2^r*s, where s is odd.  If x^s not congruent 1 mod (n,
@@ -162,7 +162,7 @@ Primality QFT_helper(mpz_t n, mpz_t b, mpz_t c)
 	if (mpz_sgn(foo0) == 0 && mpz_cmp_ui(foo1, 1) == 0)
 		ret(probably_prime);
 
-	for (unsigned long i = 0; i < r-1; i++) {
+	for (unsigned long i = 0; i < r - 1; i++) {
 		if (mpz_sgn(foo0) == 0 && mpz_congruent_p(foo1, tmp, n))
 			ret(probably_prime);
 		square_mod(foo0, foo1, foo0, foo1, n, b, c);
@@ -178,15 +178,14 @@ exit:
  * The Quadratic Frobenius Test (QFT) with parameters (b,c) consists of the
  * following.
  */
-Primality QFT(mpz_t n, mpz_t b, mpz_t c, unsigned B)
+Primality QFT(mpz_t n, mpz_t b, mpz_t c)
 {
-	// Suppose n>1 is odd, (b^2+4c over n)=-1 and (-c over n)=1.
-	if (!steps_one_and_two(n))
-		return composite; // composite
-	else if (mpz_cmp_ui(n, B) < 0)
-		return prime; // n occurs in small_primes and is therefore certainly prime
+	Primality result = steps_1_2(n);
 
-	return QFT_helper(n, b, c);
+	if (result != probably_prime)
+		return result;
+
+	return steps_3_4_5(n, b, c);
 }
 
 Primality RQFT(mpz_t n, unsigned B)
@@ -194,8 +193,7 @@ Primality RQFT(mpz_t n, unsigned B)
 	mpz_t b, c, nm1;
 	mpz_t bb4c, neg_c, tmp;
 	int j1 = 0, j2 = 0;
-	bool result;
-	Primality first_two_steps;
+	Primality result;
 
 	if (mpz_even_p(n)) {
 		/*  2 is the only odd prime... */
@@ -210,11 +208,17 @@ Primality RQFT(mpz_t n, unsigned B)
 	mpz_inits(b, c, nm1, bb4c, neg_c, tmp, NULL);
 	mpz_sub_ui(nm1, n, 1);
 
-	first_two_steps = steps_one_and_two(n);
+	result = steps_1_2(n);
 	/* If the number is found to be either composite or certainly prime, we can
 	 * return that result immediately. */
-	if (first_two_steps != probably_prime)
-		ret(first_two_steps);
+	if (result != probably_prime)
+		ret(result);
+
+#define check_non_trivial_divisor(num) do { \
+		mpz_gcd(tmp, num, n); \
+		if (mpz_cmp_ui(tmp, 1) != 0 && mpz_cmp(tmp, n) != 0) \
+			ret(composite); \
+} while (0)
 
 	for (unsigned i = 0; i < B; i++) {
 		mpz_urandomm(b, r_state, nm1);
@@ -225,15 +229,9 @@ Primality RQFT(mpz_t n, unsigned B)
 		mpz_neg(neg_c, c);
 		j2 = mpz_jacobi(neg_c, n);
 		if (j1 == -1 && j2 == 1) {
-			mpz_gcd(tmp, bb4c, n);
-			if (mpz_cmp_ui(tmp, 1) != 0 && mpz_cmp(tmp, n) != 0)
-				ret(composite);
-			mpz_gcd(tmp, b, n);
-			if (mpz_cmp_ui(tmp, 1) != 0 && mpz_cmp(tmp, n) != 0)
-				ret(composite);
-			mpz_gcd(tmp, c, n);
-			if (mpz_cmp_ui(tmp, 1) != 0 && mpz_cmp(tmp, n) != 0)
-				ret(composite);
+			check_non_trivial_divisor(bb4c);
+			check_non_trivial_divisor(b);
+			check_non_trivial_divisor(c);
 			break;
 		}
 	}
@@ -241,8 +239,8 @@ Primality RQFT(mpz_t n, unsigned B)
 		gmp_printf("Found no suitable pair (b,c) modulo n=%Zd.  This is highly unlikely unless the programme is wrong.  Assuming n is a prime...\n", n);
 		ret(probably_prime);
 	}
-	
-	result = QFT_helper(n, b, c);
+
+	result = steps_3_4_5(n, b, c);
 exit:
 	mpz_clears(b, c, nm1, bb4c, neg_c, tmp, NULL);
 	return result;
@@ -252,13 +250,14 @@ exit:
 int main()
 {
 	mpz_t tmp;
+
 	mpz_inits(tmp, tmp0, tmp1, tmp2, NULL);
 	init();
 
 	mpz_set_ui(tmp, 1215239);
-	assert(RQFT(tmp, 1));
+	assert(RQFT(tmp, 1) != composite);
 	mpz_set_ui(tmp, 1215237);
-	assert(!RQFT(tmp, 10));
+	assert(RQFT(tmp, 1) == composite);
 
 	cleanup();
 	mpz_clears(tmp, tmp0, tmp1, tmp2, NULL);
