@@ -33,6 +33,6 @@ test/%.o: %.c
 
 clean:
 	-rm *.o miller_rabin frobenius miller_rabin_int frobenius_int
-	-rm test/*.o test/main_int test/main_long run_tests
+	-rm test/*.o run_tests
 
 .PHONY: all clean test test_python
