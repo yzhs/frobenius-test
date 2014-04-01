@@ -16,12 +16,13 @@
 
 #define N 4
 
-Primality miller_rabin(unsigned long n, unsigned long k);
+Primality miller_rabin_int(unsigned n, int k);
 
 /*
- * Raise b to the e'th power modulo m.
+ * Raise b to the e'th power modulo m.  This uses 64-bit registers to hold the
+ * results of the multipliations.  Therefore, the results will be wrong if m is greater than 2^32-1
  */
-static unsigned long powm(unsigned long b, unsigned long e, unsigned long m)
+static unsigned long powm(unsigned long b, unsigned long e, unsigned m)
 {
 	unsigned long result = 1;
 
@@ -62,22 +63,27 @@ static unsigned long powm(unsigned long b, unsigned long e, unsigned long m)
  * The function returns true if it found no evidence, that n might be composite
  * and false if it found a counter example.
  */
-Primality miller_rabin(unsigned long n, unsigned long k)
+Primality miller_rabin_int(unsigned n, int k)
 {
-	unsigned long i, r, s;
+	unsigned long s;
 	unsigned long a, d, x, nm1;
 
-	nm1 = n - 1;
-
 	/* We need an odd integer greater than 3 */
-	assert(odd(n) && n > 3);
+	if (even(n))
+		return n == 2 ? prime : composite;
+	if (n == 3)
+		return prime;
+	else if (n < 3)
+		return composite;
+
+	nm1 = n - 1;
 
 	/* compute s and d s.t. n-1=2^s*d */
 	split_int(&s, &d, n);
 
 	/* Repeat the test itself k times to increase the accuracy */
-	for (i = 0; i < k; i++) {
-		a = get_random_int(n);
+	for (int i = 0; i < k; i++) {
+		a = get_random_int(2, n-2);
 
 		/* compute a^d mod n */
 		x = powm(a, d, n);
@@ -85,8 +91,9 @@ Primality miller_rabin(unsigned long n, unsigned long k)
 		if (x == 1 || x == nm1)
 			continue;
 
-		for (r = 1; r <= s; r++) {
-			x = powm(x, 2, n);
+		for (unsigned long r = 1; r <= s; r++) {
+			//x = powm(x, 2, n);
+			x = (x * x) % n;
 			if (x == 1)
 				return composite;
 			if (x == nm1)
@@ -118,7 +125,7 @@ static void *run(void *worker_id_cast_to_void_star)
 			printf(".");
 			(void)fflush(stdout);
 		}
-		if (miller_rabin(i, 1)) {
+		if (miller_rabin_int((unsigned)i, 1)) {
 			counter++;
 #ifdef WRITE_PRIMES
 			fprintf(primes, "%lu\n", i);

@@ -23,7 +23,7 @@ void split(unsigned long *s, mpz_t d, mpz_t n)
 /**
  * This function generates a random integer between 2 and n-2.
  */
-void get_random(mpz_t n, mpz_t result)
+void get_random(mpz_t result, mpz_t n)
 {
 	mpz_t tmp;
 	mpz_init(tmp);
@@ -37,12 +37,12 @@ void get_random(mpz_t n, mpz_t result)
 }
 
 /*
- * Generate a random integer between [low] and [high].
+ * Generate a random integer between [low] and [high]+1, both included.
  */
 unsigned randint(unsigned low, unsigned high)
 {
 	// TODO make sure the distribution is uniform
-	return low + (unsigned)rand() % (high - low);
+	return low + (unsigned)rand() % (high - low + 1);
 }
 
 int init(void)

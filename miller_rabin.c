@@ -1,6 +1,5 @@
 #include <assert.h>
 #include <errno.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -14,7 +13,7 @@
 #define assert(x)
 #endif
 
-Primality miller_rabin(mpz_t n, unsigned long k);
+Primality miller_rabin(mpz_t n, int k);
 
 /**
  * This function checks whether a given number n is a prime or not, using the
@@ -44,26 +43,33 @@ Primality miller_rabin(mpz_t n, unsigned long k);
  * The function returns true if it found no evidence, that n might be composite
  * and false if it found a counter example.
  */
-Primality miller_rabin(mpz_t n, unsigned long k)
+Primality miller_rabin(mpz_t n, int k)
 {
 	Primality result = probably_prime;
 	unsigned long s;
+	int foo;
 	mpz_t a, d, x, nm1;
+
+	/* We need an odd integer */
+	if (mpz_even_p(n))
+		return mpz_cmp_ui(n, 2) == 0 ? prime : composite;
+
+	/* greater than 3 */
+	foo = mpz_cmp_ui(n, 3);
+	if (foo == 0)
+		return prime;
+	else if (foo < 0)
+		return composite;
 
 	mpz_inits(a, d, x, nm1, NULL);
 	mpz_sub_ui(nm1, n, 1);
-
-	/* We need an odd integer */
-	assert(mpz_odd_p(n));
-	/* greater than 3 */
-	assert(mpz_cmp_ui(n, 3) > 0);
 
 	/* compute s and d s.t. n-1=2^s*d */
 	split(&s, d, n);
 
 	/* Repeat the test itself k times to increase the accuracy */
-	for (unsigned long i = 0; i < k; i++) {
-		get_random(n, a);
+	for (int i = 0; i < k; i++) {
+		get_random(a, n);
 
 		/* compute a^d mod n */
 		mpz_powm(x, a, d, n);

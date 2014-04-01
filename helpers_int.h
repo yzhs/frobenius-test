@@ -30,17 +30,12 @@ bool is_square(unsigned long n);
 /* Calculate [s], [d] such that [n-1=2^s*d] where [d] is odd. */
 void split_int(unsigned long *s, unsigned long *d, unsigned long n);
 
-/*
- * This function generates a random integer between 2 and n-2.  This function
- * will fail if n is equal to 3 and produce weird results for smaller ns.
- */
-unsigned long get_random_int(unsigned long n);
-
 /* Compute the jacobi symbol (x/y) of x over y. */
 int jacobi(unsigned long x, unsigned long y);
 
-/* This function generates a random integer between 2 and n-2. */
-unsigned long get_random_int(unsigned long n);
+/* This function generates a random integer between low and high. Both low and
+ * high are included. */
+unsigned long get_random_int(unsigned long low, unsigned long high);
 
 /* Initialises the random number generator using a (static) seed. */
 void init_int(void);

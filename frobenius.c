@@ -9,7 +9,6 @@
 #include "helpers.h"
 #include "small_primes.h"
 
-Primality steps_3_4_5(mpz_t n, mpz_t b, mpz_t c);
 Primality QFT(mpz_t n, mpz_t b, mpz_t c);
 Primality RQFT(mpz_t n, unsigned B);
 
@@ -114,7 +113,7 @@ static Primality steps_1_2(mpz_t n)
 }
 
 #define ret(x) do { result = (x); goto exit; } while (0)
-Primality steps_3_4_5(mpz_t n, mpz_t b, mpz_t c)
+static Primality steps_3_4_5(mpz_t n, mpz_t b, mpz_t c)
 {
 	mpz_t x0, x1, s, tmp, foo0, foo1;
 	unsigned long r;
@@ -221,8 +220,9 @@ Primality RQFT(mpz_t n, unsigned B)
 } while (0)
 
 	for (unsigned i = 0; i < B; i++) {
-		mpz_urandomm(b, r_state, nm1);
-		mpz_urandomm(c, r_state, nm1);
+		get_random(b, n);
+		get_random(c, n);
+
 		mpz_mul(bb4c, b, b);
 		mpz_addmul_ui(bb4c, c, 4);
 		j1 = mpz_jacobi(bb4c, n);
@@ -236,7 +236,8 @@ Primality RQFT(mpz_t n, unsigned B)
 		}
 	}
 	if (j1 != -1 || j2 != 1) {
-		gmp_printf("Found no suitable pair (b,c) modulo n=%Zd.  This is highly unlikely unless the programme is wrong.  Assuming n is a prime...\n", n);
+		gmp_printf("Found no suitable pair (b,c) modulo n=%Zd.  This is highly "\
+			   "unlikely unless the programme is wrong.  Assuming n is a prime...\n", n);
 		ret(probably_prime);
 	}
 
@@ -258,6 +259,10 @@ int main()
 	assert(RQFT(tmp, 1) != composite);
 	mpz_set_ui(tmp, 1215237);
 	assert(RQFT(tmp, 1) == composite);
+	mpz_set_str(tmp, "2147483659", 10);
+	assert(RQFT(tmp, 1) == probably_prime);
+	mpz_set_str(tmp, "32317006071311007300714876688669951960444102669715484032130345427524655138867890893197201411522913463688717960921898019494119559150490921095088152386448283120630877367300996091750197750389652106796057638384067568276792218642619756161838094338476170470581645852036305042887575891541065808607552399123930385521914333389668342420684974786564569494856176035326322058077805659331026192708460314150258592864177116725943603718461857357598351152301645904403697613233287231227125684710820209725157101726931323469678542580656697935045997268352998638215525166389437335543602135433229604645318478604952148193555853611059596231637", 10);
+	assert(RQFT(tmp, 1) == probably_prime);
 
 	cleanup();
 	mpz_clears(tmp, tmp0, tmp1, tmp2, NULL);

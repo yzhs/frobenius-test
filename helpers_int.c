@@ -61,9 +61,9 @@ void split_int(unsigned long *s, unsigned long *d, unsigned long n)
  * This function generates a random integer between 2 and n-2.  This function
  * will fail if n is equal to 3 and produce weird results for smaller ns.
  */
-unsigned long get_random_int(unsigned long n)
+unsigned long get_random_int(unsigned long low, unsigned long high)
 {
-	return (unsigned long)rand() % (n - 3) + 2;
+	return (unsigned long)rand() % (high - low + 1) + low;
 }
 
 #if 1

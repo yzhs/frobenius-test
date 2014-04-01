@@ -13,7 +13,7 @@
 Primality QFT_int(unsigned long n, unsigned long b, unsigned long c);
 Primality RQFT_int(unsigned long n, unsigned k);
 
-static unsigned B = 50000;
+static const unsigned B = 50000;
 
 
 /*
@@ -193,23 +193,23 @@ Primality RQFT_int(unsigned long n, unsigned k)
 	if (result != probably_prime)
 		return result;
 
+#define check_non_trivial_divisor(num) do { \
+		tmp = gcd(num, n); \
+		if (tmp != 1 && tmp != n) \
+			return composite; \
+} while (0)
+
 	for (unsigned j = 0; j < k; j++) {
 		for (unsigned i = 0; i < B; i++) {
-			b = get_random_int(n);
-			c = get_random_int(n);
+			b = get_random_int(2, n-2);
+			c = get_random_int(2, n-2);
 			bb4c = ((b * b) % n + c * 4) % n;
 			j1 = jacobi(bb4c, n);
 			j2 = jacobi(n - c, n); /* Warning: n-c is not congruent to -c, since -c is interpreted as 2⁶⁴-c !!! */
 			if (j1 == -1 && j2 == 1) {
-				tmp = gcd(bb4c, n);
-				if (tmp != 1 && tmp != n)
-					return composite;
-				tmp = gcd(b, n);
-				if (tmp != 1 && tmp != n)
-					return composite;
-				tmp = gcd(c, n);
-				if (tmp != 1 && tmp != n)
-					return composite;
+				check_non_trivial_divisor(bb4c);
+				check_non_trivial_divisor(b);
+				check_non_trivial_divisor(c);
 				break;
 			}
 		}
