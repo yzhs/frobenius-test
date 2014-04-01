@@ -1,0 +1,4 @@
+#ifndef TEST_FROBENIUS_LONG_H
+#define TEST_FROBENIUS_LONG_H
+
+#endif
