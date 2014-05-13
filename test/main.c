@@ -19,7 +19,7 @@ int main()
 
 	suite = CU_add_suite("Miller-Rabin (int)", NULL, NULL);
 	CU_ADD_TEST(suite, test_miller_rabin_powm_int);
-	CU_ADD_TEST(suite, test_miller_rabin_primes_int);
+	//CU_ADD_TEST(suite, test_miller_rabin_primes_int);
 
 	suite = CU_add_suite("Miller-Rabin (GMP)", init, cleanup);
 	CU_ADD_TEST(suite, test_miller_rabin_some_numbers);
@@ -39,7 +39,7 @@ int main()
 	CU_ADD_TEST(suite, test_frobenius_trial_division_int);
 	CU_ADD_TEST(suite, test_frobenius_int_rqft_small_primes);
 	CU_ADD_TEST(suite, test_frobenius_int_rqft_small_composites);
-	CU_ADD_TEST(suite, test_frobenius_primelist_int);
+	//CU_ADD_TEST(suite, test_frobenius_primelist_int);
 	CU_ADD_TEST(suite, test_frobenius_problematic_primes_int);
 	CU_ADD_TEST(suite, test_frobenius_larger_primes_int);
 

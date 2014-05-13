@@ -104,8 +104,6 @@ int main()
 	unsigned long upper_bound = (1lu << 32) - 1, dots_every = 1lu << 25;
 	unsigned long counter = 0, i;
 
-	//FILE *primes = fopen("primes_worker.txt", "a");
-
 	mpz_inits(foo, tmp, NULL);
 	init();
 
@@ -117,10 +115,7 @@ int main()
 		mpz_set_ui(foo, i);
 		if (miller_rabin(foo, 1))
 			counter++;
-			//	fprintf(primes, "%lu\n", i);
 	}
-
-	//(void)fclose(primes);
 
 	printf("\n%lu\n", counter);
 	cleanup();

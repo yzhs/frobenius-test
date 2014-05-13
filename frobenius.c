@@ -53,13 +53,13 @@ static void square_mod(mpz_t res0, mpz_t res1, mpz_t d, mpz_t e, mpz_t n, mpz_t 
 		return;
 	}
 
-	// compute res0 = d^2*b+2*d*e
+	// compute res0 = d^2*b + 2*d*e
 	mpz_mul(tmp2, d, d);
 	mpz_mul(tmp0, tmp2, b);
 	mpz_mul(tmp1, d, e);
 	mpz_addmul_ui(tmp0, tmp1, 2);
 
-	// and res1 = d^2*c+e^2
+	// and res1 = d^2*c + e^2
 	mpz_mul(tmp1, tmp2, c);
 	mpz_addmul(tmp1, e, e);
 

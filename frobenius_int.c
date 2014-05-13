@@ -38,10 +38,13 @@ static void mult_mod_int(unsigned long *res0, unsigned long *res1,
 	df = (d * f) % n;
 
 	// All these modulo operations are pretty expensive...
-	*res0 = ((df * b) % n + (d * g) % n + ef) % n;
+	*res0 = (((df * b) % n + (d * g) % n) % n + ef) % n;
 	*res1 = ((df * c) % n + (e * g) % n) % n;
 }
 
+/*
+ * Calculate (dx + e)^2 mod (n, x^2-bx-c) returning the result as (*res0) * x + (*res1).
+ */
 static void square_mod_int(unsigned long *res0, unsigned long *res1, /* The resulting linear polynomial. */
 			   unsigned long d, unsigned long e,
 			   unsigned long n, unsigned long b, unsigned long c)
@@ -56,12 +59,15 @@ static void square_mod_int(unsigned long *res0, unsigned long *res1, /* The resu
 	}
 	dd = (d * d) % n;
 	// compute res0 = d^2*b+2*d*e
-	*res0 = ((dd * b) % n + 2 * (d * e) % n) % n;
+	*res0 = ((dd * b) % n + (2 * (d * e) % n) % n) % n;
 
 	// and res1 = d^2*c+e^2
 	*res1 = ((dd * c) % n + ee) % n;
 }
 
+/*
+ * Calculate (base0 * x + base1)^exp mod (n, x^2-bx-c) returning the result as (*res0) * x + (*res1).
+ */
 static void powm_int(unsigned long *res0, unsigned long *res1,
 		     unsigned long base0, unsigned long base1, unsigned long exp,
 		     unsigned long n, unsigned long b, unsigned long c)
