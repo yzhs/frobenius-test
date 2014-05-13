@@ -12,15 +12,15 @@ void test_miller_rabin_powm_int(void)
 	mpz_t base, mod, result;
 
 	for (unsigned i = 0; i < 30; i++)
-		CU_ASSERT_EQUAL(powm(2, i, 1u<<31), 1lu << i);
+		CU_ASSERT_EQUAL(powm(2, i, 1u << 31), 1lu << i);
 
-	CU_ASSERT_EQUAL(powm(2, 16, 1<<30), 0x10000);
+	CU_ASSERT_EQUAL(powm(2, 16, 1 << 30), 0x10000);
 	CU_ASSERT_EQUAL(powm(2, 16, 0xffff), 1);
 
 	mpz_inits(base, mod, result, NULL);
 	for (unsigned i = 0; i < 100; i++) {
-		unsigned b = (unsigned)get_random_int(0, (1lu<<32)-1);
-		unsigned m = (unsigned)get_random_int(0, (1lu<<32)-1);
+		unsigned b = (unsigned)get_random_int(0, (1lu << 32) - 1);
+		unsigned m = (unsigned)get_random_int(0, (1lu << 32) - 1);
 		mpz_set_ui(base, b);
 		mpz_set_ui(mod, m);
 		for (unsigned e = 0; e < 10000; e++) {

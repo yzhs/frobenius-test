@@ -54,7 +54,7 @@ void test_miller_rabin_primes(void)
 		mpz_set_ui(prime, large_primes[i]);
 		CU_ASSERT_NOT_EQUAL_FATAL(miller_rabin(prime, 1), composite);
 		if (i % 1000 == 999)
-			fprintf(stderr,  ".");
+			fprintf(stderr, ".");
 	}
 	mpz_clear(prime);
 }
@@ -81,10 +81,10 @@ void test_miller_rabin_composites2(void)
 	mpz_init(tmp);
 
 	for (i = 0; i < n; i++) {
-		for (k = 0; k < ((large_primes[i+1] - large_primes[i]) / 10 | 1); k++) {
+		for (k = 0; k < ((large_primes[i + 1] - large_primes[i]) / 10 | 1); k++) {
 			Primality res;
-			c = randint(large_primes[i] + 1, large_primes[i+1] - 1) | 1;
-			if (c == large_primes[i+1])
+			c = randint(large_primes[i] + 1, large_primes[i + 1] - 1) | 1;
+			if (c == large_primes[i + 1])
 				continue;
 			mpz_set_ui(tmp, c);
 			res = miller_rabin(tmp, 10);
@@ -101,6 +101,7 @@ extern Primality miller_rabin_int(unsigned n, int k);
 void test_miller_rabin_both(void)
 {
 	mpz_t tmp;
+
 	mpz_init(tmp);
 
 	for (unsigned k = 5; k < 10000; k++) {

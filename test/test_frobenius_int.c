@@ -8,7 +8,6 @@
 /*
  * Helper functions
  */
-
 void test_frobenius_int_int_sqrt(void)
 {
 	CU_ASSERT_EQUAL(int_sqrt(0), 0);
@@ -20,7 +19,7 @@ void test_frobenius_int_int_sqrt(void)
 	CU_ASSERT_EQUAL(int_sqrt(1lu << 62), 1lu << 31);
 
 	for (int i = 0; i < 1000000; i++) {
-		unsigned long n = get_random_int(2, (1lu<<32)-2);
+		unsigned long n = get_random_int(2, (1lu << 32) - 2);
 		unsigned long sqrt = int_sqrt(n);
 		CU_ASSERT_TRUE(sqrt * sqrt <= n);
 		CU_ASSERT_TRUE((sqrt + 1) * (sqrt + 1) > n);
@@ -76,12 +75,12 @@ void test_frobenius_int_split(void)
 void test_frobenius_int_get_random_int(void)
 {
 	for (int i = 0; i < 10000; i++) {
-		unsigned long rand = get_random_int(2, 1234-2);
+		unsigned long rand = get_random_int(2, 1234 - 2);
 		CU_ASSERT_TRUE(2 <= rand);
 		CU_ASSERT_TRUE(rand <= 1234 - 2);
 	}
 	for (int i = 0; i < 10000; i++) {
-		unsigned long rand = get_random_int(2, 7-2);
+		unsigned long rand = get_random_int(2, 7 - 2);
 		CU_ASSERT_TRUE(2 <= rand);
 		CU_ASSERT_TRUE(rand <= 7 - 2);
 	}
@@ -90,7 +89,6 @@ void test_frobenius_int_get_random_int(void)
 /*
  * The main arithmetic functions
  */
-
 void test_frobenius_mult_mod_int(void)
 {
 	unsigned long b, c, n;
@@ -124,7 +122,6 @@ void test_frobenius_squares_int(void)
 /*
  * The various parts of the frobenius test
  */
-
 void test_frobenius_trial_division_int(void)
 {
 	for (int i = 1; i < 1000; i++)
@@ -135,7 +132,6 @@ void test_frobenius_trial_division_int(void)
 /*
  * Full RQFT tests
  */
-
 void test_frobenius_int_rqft_small_primes(void)
 {
 	for (unsigned long i = 2; i < len(prime_list); i++)
@@ -199,7 +195,7 @@ void test_frobenius_primelist_int(void)
 }
 
 // Test the first few primes larger than B^2.
-// These are the smallest primes that 
+// These are the smallest primes that
 void test_frobenius_larger_primes_int(void)
 {
 	CU_ASSERT_EQUAL(RQFT_int(2500000001, 1), probably_prime);

@@ -6,5 +6,3 @@
 
 #define TEST
 #include "../frobenius.c"
-
-

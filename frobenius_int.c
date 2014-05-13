@@ -207,8 +207,8 @@ Primality RQFT_int(unsigned long n, unsigned k)
 
 	for (unsigned j = 0; j < k; j++) {
 		for (unsigned i = 0; i < B; i++) {
-			b = get_random_int(2, n-2);
-			c = get_random_int(2, n-2);
+			b = get_random_int(2, n - 2);
+			c = get_random_int(2, n - 2);
 			bb4c = ((b * b) % n + c * 4) % n;
 			j1 = jacobi(bb4c, n);
 			j2 = jacobi(n - c, n); /* Warning: n-c is not congruent to -c, since -c is interpreted as 2⁶⁴-c !!! */

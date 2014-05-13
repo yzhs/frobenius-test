@@ -6,7 +6,7 @@
 gmp_randstate_t r_state;
 
 
-/* 
+/*
  * Calculate [s], [d] such that [n-1=2^s*d] where [d] is odd.
  */
 void split(unsigned long *s, mpz_t d, mpz_t n)
@@ -26,6 +26,7 @@ void split(unsigned long *s, mpz_t d, mpz_t n)
 void get_random(mpz_t result, mpz_t n)
 {
 	mpz_t tmp;
+
 	mpz_init(tmp);
 	mpz_sub_ui(tmp, n, 3);
 
@@ -54,7 +55,7 @@ int init(void)
 	gettimeofday(&tv, NULL);
 	seed = tv.tv_usec;
 
-	gmp_randinit_default (r_state);
+	gmp_randinit_default(r_state);
 	gmp_randseed_ui(r_state, seed);
 
 	srand((unsigned int)seed);

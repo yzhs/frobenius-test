@@ -83,7 +83,7 @@ Primality miller_rabin_int(unsigned n, int k)
 
 	/* Repeat the test itself k times to increase the accuracy */
 	for (int i = 0; i < k; i++) {
-		a = get_random_int(2, n-2);
+		a = get_random_int(2, n - 2);
 
 		/* compute a^d mod n */
 		x = powm(a, d, n);

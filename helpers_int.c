@@ -8,7 +8,8 @@
  */
 unsigned long int_sqrt(unsigned long n)
 {
-	unsigned long root = (unsigned long) (sqrt((double)n));
+	unsigned long root = (unsigned long)(sqrt((double)n));
+
 	if (n == 0)
 		return 0;
 	if (root * root > n)
@@ -25,6 +26,7 @@ unsigned long int_sqrt(unsigned long n)
 unsigned long gcd(unsigned long a, unsigned long b)
 {
 	unsigned long t;
+
 	while (b != 0) {
 		t = b;
 		b = a % b;
@@ -40,7 +42,8 @@ unsigned long gcd(unsigned long a, unsigned long b)
 bool is_square(unsigned long n)
 {
 	unsigned long sqrt = int_sqrt(n);
-	return sqrt*sqrt == n;
+
+	return sqrt * sqrt == n;
 }
 
 /*
@@ -76,7 +79,7 @@ int jacobi(unsigned long x, unsigned long y)
 	unsigned long t;
 	int res = 1, m8;
 
-	for (;;) {
+	for (;; ) {
 		x %= y;
 		if (x == 0)
 			return 0;
@@ -106,20 +109,22 @@ int jacobi(unsigned long x, unsigned long y)
 /*  Compute the 2-adic valuation of z. */
 long vals(unsigned long z)
 {
-  static char tab[64]={-1,0,1,12,2,6,-1,13,3,-1,7,-1,-1,-1,-1,14,10,4,-1,-1,8,-1,-1,25,-1,-1,-1,-1,-1,21,27,15,31,11,5,-1,-1,-1,-1,-1,9,-1,-1,24,-1,-1,20,26,30,-1,-1,-1,-1,23,-1,19,29,-1,22,18,28,17,16,-1};
-  long s;
+	static char tab[64] = { -1, 0, 1, 12, 2, 6, -1, 13, 3, -1, 7, -1, -1, -1, -1, 14, 10, 4, -1, -1, 8, -1, -1, 25, -1, -1, -1, -1, -1, 21, 27, 15, 31, 11, 5, -1, -1, -1, -1, -1, 9, -1, -1, 24, -1, -1, 20, 26, 30, -1, -1, -1, -1, 23, -1, 19, 29, -1, 22, 18, 28, 17, 16, -1 };
+	long s;
 
-  if (!z) return -1;
-  if (! (z&0xffffffff)) { s = 32; z >>=32; } else s = 0;
-  z |= ~z + 1;
-  z += z << 4;
-  z += z << 6;
-  z ^= z << 16; /* or  z -= z<<16 */
-  return s + tab[(z&0xffffffff)>>26];
+	if (!z) return -1;
+	if (!(z & 0xffffffff)) {
+		s = 32; z >>= 32;
+	} else { s = 0; }
+	z |= ~z + 1;
+	z += z << 4;
+	z += z << 6;
+	z ^= z << 16; /* or  z -= z<<16 */
+	return s + tab[(z & 0xffffffff) >> 26];
 }
 
 /* Figure out whether t is 3 or 5 modulo 8 */
-#define  ome(t) (labs(((t)&7)-4) == 1)
+#define  ome(t) (labs(((t) & 7) - 4) == 1)
 
 int jacobi(unsigned long x, unsigned long y)
 {
@@ -150,6 +155,7 @@ int jacobi(unsigned long x, unsigned long y)
 void init_int(void)
 {
 	unsigned seed;
+
 	//struct timeval tv;
 
 	//gettimeofday(&tv, NULL);
