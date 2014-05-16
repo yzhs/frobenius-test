@@ -9,6 +9,11 @@
 
 #define N 1
 
+int enable_logging = 0;
+
+#undef debug
+#define debug(...) do {} while (0)
+
 
 Primality QFT_int(unsigned long n, unsigned long b, unsigned long c);
 Primality RQFT_int(unsigned long n, unsigned k);
@@ -93,12 +98,16 @@ static Primality steps_1_2_int(unsigned long n)
 	unsigned long sqrt = int_sqrt(n);
 
 	/*  (2) If n is a square, it can obviously not be prime. */
-	if (sqrt * sqrt == n)
+	if (sqrt * sqrt == n) {
+		debug("found a square: %lu\n", n);
 		return composite;
+	}
 
 	for (unsigned long i = 0; i < len(prime_list) && prime_list[i] <= sqrt; i++)
-		if (n % prime_list[i] == 0)
+		if (n % prime_list[i] == 0) {
+			debug("found a prime factor: %u divides %lu\n", prime_list[i], n);
 			return composite;
+		}
 
 	/* If the given number is small enough, there cannot be a non-trivial
 	 * divisor of n, whence n is prime. */
@@ -125,8 +134,10 @@ static Primality steps_3_4_5_int(unsigned long n, unsigned long b, unsigned long
 	tmp = n + 1;    // tmp = n+1
 	tmp = tmp / 2;  // tmp = (n+1)/2
 	powm_int(&foo0, &foo1, x0, x1, tmp, n, b, c);
-	if (foo0 != 0)  // check whether x^((n+1)/2) has degree 1
+	if (foo0 != 0) {// check whether x^((n+1)/2) has degree 1
+		debug("sqrt(-c) is not an integer: sqrt(-c) == %lu*x+%lu, n=%lu, b=%lu, c=%lu\n", foo0, foo1, n, b, c);
 		return composite;
+	}
 
 	/*
 	 * (4) Compute x^(n+1) mod (n, x^2-bx-c).  If x^(n+1) not congruent -c,
@@ -134,8 +145,12 @@ static Primality steps_3_4_5_int(unsigned long n, unsigned long b, unsigned long
 	 */
 	foo1 = foo1 * foo1;
 	tmp = n - c;
-	if (foo1 % n != tmp % n)
+	if (foo1 % n != tmp % n) {
+		debug("x^(n+1) != c: x^(n+1) == %lu*x+%lu, n=%lu, b=%lu, c=%lu\n", foo0, foo1, n, b, c);
 		return composite;
+	}
+
+	debug("composite = %i, probably_prime = %i, prime = %i\n", composite, probably_prime, prime);
 
 	/*
 	 * (5) Let n^2-1=2^r*s, where s is odd.  If x^s not congruent 1 mod (n,
@@ -150,14 +165,20 @@ static Primality steps_3_4_5_int(unsigned long n, unsigned long b, unsigned long
 		die("split failed");
 	powm_int(&foo0, &foo1, x0, x1, s, n, b, c);
 	tmp = n - 1;
-	if (foo0 == 0 && foo1 == 1)
+	if (foo0 == 0 && foo1 == 1) {
+		debug("x^s == 1 mod (n, x^2-bx-c) where (b,c)=(%lu,%lu), so n=%lu is probably prime\n", b, c, n);
 		return probably_prime;
+	}
+
 	for (i = 0; i < r - 1; i++) {
-		if (foo0 == 0 && foo1 % n == tmp % n)
+		if (foo0 == 0 && foo1 % n == tmp % n) {
+			debug("x^(2^%lu*s) == n-1 mod (n, x^2-%lux-%lu), so n=%lu is probably prime\n", i, b, c, n);
 			return probably_prime;
+		}
 		square_mod_int(&foo0, &foo1, foo0, foo1, n, b, c);
 	}
 
+	debug("n is certainly composite\n");
 	return composite;
 }
 
@@ -231,7 +252,8 @@ Primality RQFT_int(unsigned long n, unsigned k)
 		if (result == composite)
 			return composite;
 	}
-	return composite;
+
+	return probably_prime;
 }
 
 #ifndef TEST
