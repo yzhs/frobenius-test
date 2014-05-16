@@ -9,6 +9,7 @@ void test_frobenius_int_jacobi(void);
 void test_frobenius_int_split(void);
 void test_frobenius_int_get_random_int(void);
 void test_frobenius_mult_mod_int(void);
+void test_frobenius_powm_mod_int(void);
 void test_frobenius_squares_int(void);
 void test_frobenius_trial_division_int(void);
 void test_frobenius_int_rqft_small_primes(void);

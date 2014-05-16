@@ -34,6 +34,8 @@ int main()
 	CU_ADD_TEST(suite, test_frobenius_int_is_square);
 	CU_ADD_TEST(suite, test_frobenius_int_jacobi);
 	CU_ADD_TEST(suite, test_frobenius_int_split);
+	CU_ADD_TEST(suite, test_frobenius_mult_mod_int);
+	CU_ADD_TEST(suite, test_frobenius_powm_mod_int);
 	CU_ADD_TEST(suite, test_frobenius_int_get_random_int);
 	CU_ADD_TEST(suite, test_frobenius_squares_int);
 	CU_ADD_TEST(suite, test_frobenius_trial_division_int);

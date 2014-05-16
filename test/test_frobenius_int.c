@@ -92,19 +92,99 @@ void test_frobenius_int_get_random_int(void)
 void test_frobenius_mult_mod_int(void)
 {
 	unsigned long b, c, n;
-	//unsigned long d, e, f, g;
+	unsigned long d, e, f, g;
 	unsigned long res0, res1;
+	unsigned long tmp0, tmp1;
 
 	b = 55516;
 	c = 108625;
 	n = 131071;
 
-	//mult_mod_int(&res0, &res1, d, e, f, g, n, b, c);
-	powm_int(&res0, &res1, 1, 0, (n + 1) / 2, n, b, c);
+	for (d = 1; d < 100; d++) {
+		for (e = 1; e < 100; e++) {
+			mult_mod_int(&res0, &res1, d, e, d, e, n, b, c);
+			square_mod_int(&tmp0, &tmp1, d, e, n, b, c);
+			CU_ASSERT_EQUAL_FATAL(tmp0, res0);
+			CU_ASSERT_EQUAL_FATAL(tmp1, res1);
+		}
+	}
+	d = 1;
+	e = 2;
+	f = 3;
+	g = 123;
 
-	CU_ASSERT_EQUAL(res0, 1);
-	CU_ASSERT_EQUAL(res1, 1);
+	mult_mod_int(&res0, &res1, d, e, f, g, n, b, c);
+
+	CU_ASSERT_EQUAL(res0, (e*f + d*g + d*f*b) % n);
+	CU_ASSERT_EQUAL(res1, (e*g + c*d*f) % n);
 }
+
+static unsigned long powm_const(unsigned long base, unsigned long exponent, unsigned long modulus)
+{
+	unsigned long result = 1;
+	base = base % modulus;
+
+	while (exponent > 0) {
+		if (exponent % 2 == 1)
+			result = (result * base) % modulus;
+		exponent /= 2;
+		base = (base * base) % modulus;
+	}
+
+	return result;
+}
+
+void test_frobenius_powm_mod_int(void)
+{
+	unsigned long b, c, n;
+	unsigned long res0, res1;
+	unsigned long d, e;
+	unsigned long tmp0, tmp1;
+	unsigned long foo;
+
+	// Example taken from https://en.wikipedia.org/wiki/Modular_exponentiation
+	CU_ASSERT_EQUAL_FATAL(powm_const(4, 13, 497), 445);
+
+	n = 131071;
+
+	for (int i = 0; i < 100; i++) {
+		do
+			c = 1 + rand() % 1000;
+		while (jacobi(n - c, n) != 1);
+
+		do
+			b = 1 + rand() % 1000;
+		while (jacobi(b*b+4*c, n) != -1);
+
+		if (i == 0) {
+			for (e = 1; e < n/10; e++) {
+				for (unsigned long k = 0; k < 1000; k++) {
+					powm_int(&res0, &res1, 0, e, k, n, b, c);
+					CU_ASSERT_EQUAL_FATAL(res0, 0);
+					foo = powm_const(e, k, n);
+					if (foo != res1)
+						printf("powm_const(%lu, %lu, %lu) = %lu does not match powm_int(0, %lu, %lu, %lu, %lu, %lu) = %lu",
+								e, k, n, foo, e, k, n, b, c, res1);
+					CU_ASSERT_EQUAL_FATAL(res1, powm_const(e, k, n));
+				}
+			}
+		}
+
+		d = 1000 + rand() % 500;
+		d = 53431;
+		e = 53431;
+		powm_int(&tmp0, &tmp1, d, e, 2, n, b, c);
+		square_mod_int(&res0, &res1, d, e, n, b, c);
+		if (tmp1 != res1) {
+			printf("\nd=%lu, e=%lu, n=%lu, b=%lu, c=%lu\n", d, e, n, b, c);
+			printf("powm(d, e, 2, n, b, c) = %lu * x + %lu\n", tmp0, tmp1);
+			printf("square(d, e, n, b, c) = %lu * x + %lu\n", res0, res1);
+		}
+		CU_ASSERT_EQUAL(tmp0, res0);
+		CU_ASSERT_EQUAL_FATAL(tmp1, res1);
+	}
+}
+
 
 
 void test_frobenius_squares_int(void)
