@@ -25,7 +25,7 @@ static void mult_mod_int(unsigned long *res0, unsigned long *res1,
 			 unsigned long f, unsigned long g,
 			 unsigned long n, unsigned long b, unsigned long c)
 {
-	unsigned long df, ef = (e * f) % n;
+	unsigned long df, ef = (e * f) % n, eg = (e * g) % n;
 
 	/*
 	 * If deg f = 1, the whole thing amounts to multiplying the coefficients of g with a constant and reducing them
@@ -33,13 +33,14 @@ static void mult_mod_int(unsigned long *res0, unsigned long *res1,
 	 */
 	if (d == 0) {
 		*res0 = ef;
+		*res1 = eg;
 		return;
 	}
 	df = (d * f) % n;
 
 	// All these modulo operations are pretty expensive...
 	*res0 = (((df * b) % n + (d * g) % n) % n + ef) % n;
-	*res1 = ((df * c) % n + (e * g) % n) % n;
+	*res1 = ((df * c) % n + eg) % n;
 }
 
 /*
