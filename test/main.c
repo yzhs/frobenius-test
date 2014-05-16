@@ -41,7 +41,7 @@ int main()
 	CU_ADD_TEST(suite, test_frobenius_trial_division_int);
 	CU_ADD_TEST(suite, test_frobenius_int_rqft_small_primes);
 	CU_ADD_TEST(suite, test_frobenius_int_rqft_small_composites);
-	//CU_ADD_TEST(suite, test_frobenius_primelist_int);
+	CU_ADD_TEST(suite, test_frobenius_primelist_int);
 	CU_ADD_TEST(suite, test_frobenius_problematic_primes_int);
 	CU_ADD_TEST(suite, test_frobenius_larger_primes_int);
 
