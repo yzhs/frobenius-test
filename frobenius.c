@@ -213,6 +213,9 @@ Primality RQFT(mpz_t n, unsigned B)
 	if (result != probably_prime)
 		ret(result);
 
+#ifdef check_non_trivial_divisor
+#undef check_non_trivial_divisor
+#endif
 #define check_non_trivial_divisor(num) do { \
 		mpz_gcd(tmp, num, n); \
 		if (mpz_cmp_ui(tmp, 1) != 0 && mpz_cmp(tmp, n) != 0) \

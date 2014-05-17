@@ -171,7 +171,6 @@ void test_frobenius_powm_mod_int(void)
 		}
 
 		d = 1000 + rand() % 500;
-		d = 53431;
 		e = 53431;
 		powm_int(&tmp0, &tmp1, d, e, 2, n, b, c);
 		square_mod_int(&res0, &res1, d, e, n, b, c);

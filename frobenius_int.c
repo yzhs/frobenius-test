@@ -221,6 +221,9 @@ Primality RQFT_int(unsigned long n, unsigned k)
 	if (result != probably_prime)
 		return result;
 
+#ifdef check_non_trivial_divisor
+#undef check_non_trivial_divisor
+#endif
 #define check_non_trivial_divisor(num) do { \
 		tmp = gcd(num, n); \
 		if (tmp != 1 && tmp != n) \

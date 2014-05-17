@@ -14,7 +14,7 @@ void split(unsigned long *s, mpz_t d, mpz_t n)
 	*s = 0;
 	mpz_sub_ui(d, n, 1);
 
-	while (mpz_odd_p(d)) {
+	while (mpz_even_p(d)) {
 		(*s)++;
 		mpz_fdiv_q_2exp(d, d, 1); // divide by 2^1
 	}
