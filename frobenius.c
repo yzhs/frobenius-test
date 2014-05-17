@@ -67,7 +67,7 @@ static void square_mod(mpz_t res0, mpz_t res1, mpz_t d, mpz_t e, mpz_t n, mpz_t 
 	mpz_mod(res1, tmp1, n);
 }
 
-static void pomw(mpz_t res0, mpz_t res1, mpz_t base0, mpz_t base1, mpz_t exp, mpz_t n, mpz_t b, mpz_t c)
+static void powm(mpz_t res0, mpz_t res1, mpz_t base0, mpz_t base1, mpz_t exp, mpz_t n, mpz_t b, mpz_t c)
 {
 	mpz_set_ui(res0, 0);
 	mpz_set_ui(res1, 1);
@@ -130,7 +130,7 @@ static Primality steps_3_4_5(mpz_t n, mpz_t b, mpz_t c)
 	 */
 	mpz_add_ui(tmp, n, 1);          // tmp = n+1
 	mpz_fdiv_q_2exp(tmp, tmp, 1);   // tmp = (n+1)/2
-	pomw(foo0, foo1, x0, x1, tmp, n, b, c);
+	powm(foo0, foo1, x0, x1, tmp, n, b, c);
 
 	/* check whether x^((n+1)/2) has degree 1 */
 	if (mpz_sgn(foo0) != 0)
@@ -155,7 +155,7 @@ static Primality steps_3_4_5(mpz_t n, mpz_t b, mpz_t c)
 	mpz_mul(tmp, n, n);
 	/* calculate r,s such that 2^r*s + 1 == n^2 */
 	split(&r, s, tmp);
-	pomw(foo0, foo1, x0, x1, s, n, b, c);
+	powm(foo0, foo1, x0, x1, s, n, b, c);
 	mpz_sub_ui(tmp, n, 1);
 
 	if (mpz_sgn(foo0) == 0 && mpz_cmp_ui(foo1, 1) == 0)
