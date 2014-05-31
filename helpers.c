@@ -9,7 +9,7 @@ gmp_randstate_t r_state;
 /*
  * Calculate [s], [d] such that [n-1=2^s*d] where [d] is odd.
  */
-void split(unsigned long *s, mpz_t d, mpz_t n)
+void split(unsigned long *s, mpz_t d, const mpz_t n)
 {
 	*s = 0;
 	mpz_sub_ui(d, n, 1);
@@ -23,7 +23,7 @@ void split(unsigned long *s, mpz_t d, mpz_t n)
 /**
  * This function generates a random integer between 2 and n-2.
  */
-void get_random(mpz_t result, mpz_t n)
+void get_random(mpz_t result, const mpz_t n)
 {
 	mpz_t tmp;
 
@@ -40,7 +40,7 @@ void get_random(mpz_t result, mpz_t n)
 /*
  * Generate a random integer between [low] and [high]+1, both included.
  */
-unsigned randint(unsigned low, unsigned high)
+unsigned randint(const unsigned low, const unsigned high)
 {
 	// TODO make sure the distribution is uniform
 	return low + (unsigned)rand() % (high - low + 1);

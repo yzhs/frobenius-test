@@ -6,7 +6,7 @@
 /*
  * Given an integer 0 ≤ n < 2³², find the largest integer r such that r² ≤ n.
  */
-unsigned long int_sqrt(unsigned long n)
+unsigned long int_sqrt(const unsigned long n)
 {
 	unsigned long root = (unsigned long)(sqrt((double)n));
 
@@ -39,7 +39,7 @@ unsigned long gcd(unsigned long a, unsigned long b)
  * Use the integer square root function to figure out whether a number is a
  * perfect square.
  */
-bool is_square(unsigned long n)
+bool is_square(const unsigned long n)
 {
 	unsigned long sqrt = int_sqrt(n);
 
@@ -49,7 +49,7 @@ bool is_square(unsigned long n)
 /*
  * Calculate [s], [d] such that [n-1=2^s*d] where [d] is odd.
  */
-void split_int(unsigned long *s, unsigned long *d, unsigned long n)
+void split_int(unsigned long *s, unsigned long *d, const unsigned long n)
 {
 	*s = 0;
 	*d = n - 1;
@@ -64,7 +64,7 @@ void split_int(unsigned long *s, unsigned long *d, unsigned long n)
  * This function generates a random integer between 2 and n-2.  This function
  * will fail if n is equal to 3 and produce weird results for smaller ns.
  */
-unsigned long get_random_int(unsigned long low, unsigned long high)
+unsigned long get_random_int(const unsigned long low, const unsigned long high)
 {
 	return (unsigned long)rand() % (high - low + 1) + low;
 }

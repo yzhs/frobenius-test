@@ -9,8 +9,8 @@
 #include "helpers.h"
 #include "small_primes.h"
 
-Primality QFT(mpz_t n, mpz_t b, mpz_t c);
-Primality RQFT(mpz_t n, unsigned B);
+Primality QFT(const mpz_t n, const mpz_t b, const mpz_t c);
+Primality RQFT(const mpz_t n, unsigned const B);
 
 static mpz_t tmp0, tmp1, tmp2;
 
@@ -18,7 +18,9 @@ static mpz_t tmp0, tmp1, tmp2;
  * Return f(x)*g(x) mod (n, x^2 - b*x - c) where f(x) = d*x + e and g(x) = f*x + g in the return arguments res0 and
  * res1, representing the polynomial res0*x + res1.
  */
-static void mult_mod(mpz_t res0, mpz_t res1, mpz_t d, mpz_t e, mpz_t f, mpz_t g, mpz_t n, mpz_t b, mpz_t c)
+static void mult_mod(mpz_t res0, mpz_t res1,
+                     const mpz_t d, const mpz_t e, const mpz_t f, const mpz_t g,
+                     const mpz_t n, const mpz_t b, const mpz_t c)
 {
 	/*
 	 * If deg f = 1, the whole thing amounts to multiplying the coefficients of g with a constant and reducing them
@@ -46,7 +48,9 @@ static void mult_mod(mpz_t res0, mpz_t res1, mpz_t d, mpz_t e, mpz_t f, mpz_t g,
 	mpz_mod(res1, tmp1, n);
 }
 
-static void square_mod(mpz_t res0, mpz_t res1, mpz_t d, mpz_t e, mpz_t n, mpz_t b, mpz_t c)
+static void square_mod(mpz_t res0, mpz_t res1,
+                       const mpz_t d, const mpz_t e,
+                       const mpz_t n, const mpz_t b, const mpz_t c)
 {
 	if (mpz_sgn(d) == 0) {
 		mpz_set_ui(res0, 0);
@@ -69,7 +73,9 @@ static void square_mod(mpz_t res0, mpz_t res1, mpz_t d, mpz_t e, mpz_t n, mpz_t 
 	mpz_mod(res1, tmp1, n);
 }
 
-static void powm(mpz_t res0, mpz_t res1, mpz_t base0, mpz_t base1, mpz_t exp, mpz_t n, mpz_t b, mpz_t c)
+static void powm(mpz_t res0, mpz_t res1,
+                 const mpz_t b0, const mpz_t b1, const mpz_t e,
+                 const mpz_t n, const mpz_t b, const mpz_t c)
 {
 	mpz_t base0, base1, exp;
 	mpz_inits(base0, base1, exp, NULL);
@@ -91,7 +97,7 @@ static void powm(mpz_t res0, mpz_t res1, mpz_t base0, mpz_t base1, mpz_t exp, mp
 	}
 }
 
-static Primality steps_1_2(mpz_t n)
+static Primality steps_1_2(const mpz_t n)
 {
 #define tmp tmp0
 	/*  (2) If n is a square, it can obviously not be prime. */
@@ -124,7 +130,8 @@ static Primality steps_1_2(mpz_t n)
 }
 
 #define ret(x) do { result = (x); goto exit; } while (0)
-static Primality steps_3_4_5(mpz_t n, mpz_t b, mpz_t c)
+
+static Primality steps_3_4_5(const mpz_t n, const mpz_t b, const mpz_t c)
 {
 	mpz_t x0, x1, s, tmp, foo0, foo1;
 	unsigned long r;
@@ -188,7 +195,7 @@ exit:
  * The Quadratic Frobenius Test (QFT) with parameters (b,c) consists of the
  * following.
  */
-Primality QFT(mpz_t n, mpz_t b, mpz_t c)
+Primality QFT(const mpz_t n, const mpz_t b, const mpz_t c)
 {
 	Primality result = steps_1_2(n);
 
@@ -198,7 +205,7 @@ Primality QFT(mpz_t n, mpz_t b, mpz_t c)
 	return steps_3_4_5(n, b, c);
 }
 
-Primality RQFT(mpz_t n, unsigned B)
+Primality RQFT(const mpz_t n, const unsigned B)
 {
 	mpz_t b, c, nm1;
 	mpz_t bb4c, neg_c, tmp;

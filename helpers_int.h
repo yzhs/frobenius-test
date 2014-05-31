@@ -13,7 +13,7 @@
 /*
  * Given an integer 0 ≤ n < 2³², find the largest integer r such that r² ≤ n.
  */
-unsigned long int_sqrt(unsigned long n);
+unsigned long int_sqrt(const unsigned long n);
 
 /*
  * Calculate the greatest common divisor of a and b using the Euclidean
@@ -25,10 +25,10 @@ unsigned long gcd(unsigned long a, unsigned long b);
  * Use the integer square root function to figure out whether a number is a
  * perfect square.
  */
-bool is_square(unsigned long n);
+bool is_square(const unsigned long n);
 
 /* Calculate [s], [d] such that [n-1=2^s*d] where [d] is odd. */
-void split_int(unsigned long *s, unsigned long *d, unsigned long n);
+void split_int(unsigned long *s, unsigned long *d, const unsigned long n);
 
 /* Compute the jacobi symbol (x/y) of x over y. */
 int jacobi(unsigned long x, unsigned long y);

@@ -26,9 +26,9 @@ static const unsigned B = 50000;
  * res1, representing the polynomial res0*x + res1.
  */
 static void mult_mod_int(unsigned long *res0, unsigned long *res1,
-			 unsigned long d, unsigned long e,
-			 unsigned long f, unsigned long g,
-			 unsigned long n, unsigned long b, unsigned long c)
+                         const unsigned long d, const unsigned long e,
+                         const unsigned long f, const unsigned long g,
+                         const unsigned long n, const unsigned long b, unsigned long c)
 {
 	unsigned long df, ef = (e * f) % n, eg = (e * g) % n;
 
@@ -52,8 +52,8 @@ static void mult_mod_int(unsigned long *res0, unsigned long *res1,
  * Calculate (dx + e)^2 mod (n, x^2-bx-c) returning the result as (*res0) * x + (*res1).
  */
 static void square_mod_int(unsigned long *res0, unsigned long *res1, /* The resulting linear polynomial. */
-			   unsigned long d, unsigned long e,
-			   unsigned long n, unsigned long b, unsigned long c)
+                           const unsigned long d, const unsigned long e,
+                           const unsigned long n, const unsigned long b, unsigned long c)
 {
 	unsigned long ee = (e * e) % n;
 	unsigned long dd;
@@ -75,8 +75,8 @@ static void square_mod_int(unsigned long *res0, unsigned long *res1, /* The resu
  * Calculate (base0 * x + base1)^exp mod (n, x^2-bx-c) returning the result as (*res0) * x + (*res1).
  */
 static void powm_int(unsigned long *res0, unsigned long *res1,
-		     unsigned long base0, unsigned long base1, unsigned long exp,
-		     unsigned long n, unsigned long b, unsigned long c)
+                     unsigned long base0, unsigned long base1, unsigned long exp,
+                     const unsigned long n, const unsigned long b, const unsigned long c)
 {
 	*res0 = 0;
 	*res1 = 1;
@@ -93,7 +93,7 @@ static void powm_int(unsigned long *res0, unsigned long *res1,
  * Like QFT, return 'probably_prime' if n might be prime, 'prime' if n is
  * certainly prime and 'composite' if a proof for n's compositeness was found.
  */
-static Primality steps_1_2_int(unsigned long n)
+static Primality steps_1_2_int(const unsigned long n)
 {
 	unsigned long sqrt = int_sqrt(n);
 
@@ -117,7 +117,7 @@ static Primality steps_1_2_int(unsigned long n)
 /*
  * Execute steps (3) through (5) of the Quadratic Frobenius Test.
  */
-static Primality steps_3_4_5_int(unsigned long n, unsigned long b, unsigned long c)
+static Primality steps_3_4_5_int(const unsigned long n, const unsigned long b, const unsigned long c)
 {
 	unsigned long x0, x1, s, tmp, foo0, foo1;
 	unsigned long r, i;
@@ -188,7 +188,7 @@ static Primality steps_3_4_5_int(unsigned long n, unsigned long b, unsigned long
  * Returns 'prime' if n is certainly prime, 'probably_prime' if no evidence
  * could be found that n might be composite and 'composite' otherwise.
  */
-Primality QFT_int(unsigned long n, unsigned long b, unsigned long c)
+Primality QFT_int(const unsigned long n, const unsigned long b, const unsigned long c)
 {
 	Primality result = steps_1_2_int(n);
 
@@ -203,7 +203,7 @@ Primality QFT_int(unsigned long n, unsigned long b, unsigned long c)
  * prime.  The Parameter [k] determines how many times the test will be run at
  * most.  If the test returns "composite", it will not be run again.
  */
-Primality RQFT_int(unsigned long n, unsigned k)
+Primality RQFT_int(const unsigned long n, const unsigned k)
 {
 	Primality result;
 	unsigned long b = 0, c = 0;
