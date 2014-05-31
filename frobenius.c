@@ -71,6 +71,15 @@ static void square_mod(mpz_t res0, mpz_t res1, mpz_t d, mpz_t e, mpz_t n, mpz_t 
 
 static void powm(mpz_t res0, mpz_t res1, mpz_t base0, mpz_t base1, mpz_t exp, mpz_t n, mpz_t b, mpz_t c)
 {
+	mpz_t base0, base1, exp;
+	mpz_inits(base0, base1, exp, NULL);
+
+	// Copy all input parameters that will be changed in this function.
+	mpz_set(base0, b0);
+	mpz_set(base1, b1);
+	mpz_set(exp, e);
+
+	// Initialize the return value.
 	mpz_set_ui(res0, 0);
 	mpz_set_ui(res1, 1);
 
