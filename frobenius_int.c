@@ -145,7 +145,7 @@ static Primality steps_3_4_5_int(unsigned long n, unsigned long b, unsigned long
 	 */
 	foo1 = foo1 * foo1;
 	tmp = n - c;
-	if (foo1 % n != tmp % n) {
+	if (foo1 % n != tmp) {
 		debug("x^(n+1) != c: x^(n+1) == %lu*x+%lu, n=%lu, b=%lu, c=%lu\n", foo0, foo1, n, b, c);
 		return composite;
 	}
@@ -171,7 +171,7 @@ static Primality steps_3_4_5_int(unsigned long n, unsigned long b, unsigned long
 	}
 
 	for (i = 0; i < r - 1; i++) {
-		if (foo0 == 0 && foo1 % n == tmp % n) {
+		if (foo0 == 0 && foo1 % n == tmp) {
 			debug("x^(2^%lu*s) == n-1 mod (n, x^2-%lux-%lu), so n=%lu is probably prime\n", i, b, c, n);
 			return probably_prime;
 		}
