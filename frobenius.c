@@ -26,7 +26,9 @@ static void mult_mod(mpz_t res0, mpz_t res1, mpz_t d, mpz_t e, mpz_t f, mpz_t g,
 	 */
 	if (mpz_sgn(d) == 0) {
 		mpz_mul(res0, e, f);
+		mpz_mul(res1, e, g);
 		mpz_mod(res0, res0, n);
+		mpz_mod(res1, res1, n);
 		return;
 	}
 
