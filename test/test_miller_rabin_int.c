@@ -2,7 +2,6 @@
 #include <gmp.h>
 #include "test_miller_rabin_int.h"
 
-#define TEST
 #include "../miller_rabin_int.c"
 
 static unsigned large_primes[3069262];

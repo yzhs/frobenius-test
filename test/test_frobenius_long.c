@@ -94,7 +94,6 @@ void test_frobenius_powm_mod(void)
 
 	mpz_set_ui(n_, n);
 
-	b = c = 0;
 	for (int i = 0; i < num_iterations; i++) {
 		do
 			c = (unsigned long)rand() % n;
@@ -124,12 +123,10 @@ void test_frobenius_powm_mod(void)
 void test_frobenius_squares(void)
 {
 	for (int i = 0; i < num_iterations; i++) {
-		unsigned long n = 1 + (unsigned long)rand() % ((1<<15) - 1);
+		unsigned long n = 2 + (unsigned long)rand() % ((1<<15) - 2);
 		mpz_t n_;
-		mpz_init(n_);
-
 		n = n * n;
-		mpz_set_ui(n_, n);
+		mpz_init_set_ui(n_, n);
 
 		CU_ASSERT_FALSE(steps_1_2(n_));
 		CU_ASSERT_FALSE(RQFT(n_, 1));
@@ -140,6 +137,11 @@ void test_frobenius_squares(void)
 void test_frobenius_trial_division(void)
 {
 	for (int i = 0; i < num_iterations; i++) {
+		unsigned long n = 2 + (unsigned long)rand() % ((1lu<<32) - 2);
+		mpz_t n_;
+		mpz_init_set_ui(n_, n);
+
+		CU_ASSERT_EQUAL_FATAL(steps_1_2(n_), steps_1_2_int(n));
 	}
 }
 
@@ -147,35 +149,61 @@ void test_frobenius_trial_division(void)
 void test_frobenius_rqft_small_primes(void)
 {
 	for (int i = 0; i < num_iterations; i++) {
+		unsigned long n = 2 + (unsigned long)rand() % ((1lu<<32) - 2);
+		mpz_t n_;
+		mpz_init_set_ui(n_, n);
+
+		CU_ASSERT_EQUAL_FATAL(RQFT(n_, 1), RQFT_int(n, 1));
 	}
 }
 
-
-void test_frobenius_rqft_small_composites(void)
-{
-	for (int i = 0; i < num_iterations; i++) {
-	}
-}
-
-
-void test_frobenius_problematic_primes(void)
-{
-	for (int i = 0; i < num_iterations; i++) {
-	}
-}
 
 
 void test_frobenius_primelist(void)
 {
-	for (int i = 0; i < num_iterations; i++) {
+	FILE *fp = fopen("data/primelist.txt", "r");
+	unsigned p;
+	unsigned long i = 0;
+	static unsigned large_primes[3069262];
+	mpz_t n;
+
+	if (NULL == fp)
+		die("data/primelist.txt: %s\n", strerror(errno));
+
+	while (EOF != fscanf(fp, "%u\n", &p))
+		large_primes[i++] = p;
+
+	fclose(fp);
+
+	mpz_init(n);
+	for (i = 0; i < len(large_primes); i++) {
+		Primality foo;
+		mpz_set_ui(n, large_primes[i]);
+		foo = RQFT(n, 1);
+		if (foo == composite && large_primes[i] % 16 != 15)
+			printf("%x\n", large_primes[i]);
+		CU_ASSERT_NOT_EQUAL(foo, composite);
 	}
 }
 
 
 void test_frobenius_larger_primes(void)
 {
-	for (int i = 0; i < num_iterations; i++) {
-	}
+	mpz_t n;
+	mpz_init_set_ui(n, 2500000001);
+	CU_ASSERT_EQUAL(RQFT(n, 1), probably_prime);
+
+	mpz_set_ui(n, 2500000033);
+	CU_ASSERT_EQUAL(RQFT(n, 1), probably_prime);
+
+	mpz_set_ui(n, 2500000039);
+	CU_ASSERT_EQUAL(RQFT(n, 1), probably_prime);
+
+	mpz_set_ui(n, 2500000043);
+	CU_ASSERT_EQUAL(RQFT(n, 1), probably_prime);
+
+	mpz_set_ui(n, 2500000057);
+	CU_ASSERT_EQUAL(RQFT(n, 1), probably_prime);
 }
 
 

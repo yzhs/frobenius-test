@@ -1,7 +1,6 @@
 #include <CUnit/CUnit.h>
 #include "test_miller_rabin_long.h"
 
-#define TEST
 #include "../miller_rabin.c"
 
 static unsigned large_primes[3069262];
