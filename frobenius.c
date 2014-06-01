@@ -235,29 +235,33 @@ Primality RQFT(const mpz_t n, const unsigned k)
 	if (result != probably_prime)
 		ret(result);
 
-	for (unsigned i = 0; i < B; i++) {
-		get_random(b, n);
-		get_random(c, n);
+	for (unsigned j = 0; j < k; j++) {
+		for (unsigned i = 0; i < B; i++) {
+			get_random(b, n);
+			get_random(c, n);
 
-		mpz_mul(bb4c, b, b);
-		mpz_addmul_ui(bb4c, c, 4);
-		j1 = mpz_jacobi(bb4c, n);
-		mpz_neg(neg_c, c);
-		j2 = mpz_jacobi(neg_c, n);
-		if (j1 == -1 && j2 == 1) {
-			check_non_trivial_divisor(bb4c);
-			check_non_trivial_divisor(b);
-			check_non_trivial_divisor(c);
-			break;
+			mpz_mul(bb4c, b, b);
+			mpz_addmul_ui(bb4c, c, 4);
+			j1 = mpz_jacobi(bb4c, n);
+			mpz_neg(neg_c, c);
+			j2 = mpz_jacobi(neg_c, n);
+			if (j1 == -1 && j2 == 1) {
+				check_non_trivial_divisor(bb4c);
+				check_non_trivial_divisor(b);
+				check_non_trivial_divisor(c);
+				break;
+			}
+		}
+		if (j1 != -1 || j2 != 1) {
+			gmp_printf("Found no suitable pair (b,c) modulo n=%Zd.  This is highly " \
+					"unlikely unless the programme is wrong.  Assuming n is a prime...\n", n);
+		} else {
+			result = steps_3_4_5(n, b, c);
+			if (result != probably_prime)
+				ret(result);
 		}
 	}
-	if (j1 != -1 || j2 != 1) {
-		gmp_printf("Found no suitable pair (b,c) modulo n=%Zd.  This is highly " \
-			   "unlikely unless the programme is wrong.  Assuming n is a prime...\n", n);
-		ret(probably_prime);
-	}
 
-	result = steps_3_4_5(n, b, c);
 exit:
 	mpz_clears(b, c, nm1, bb4c, neg_c, tmp, NULL);
 	return result;
