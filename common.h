@@ -1,6 +1,8 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+#define B 50000lu
+
 extern int enable_logging;
 
 #define die(...) do { fprintf(stderr, __VA_ARGS__); exit(1); } while (0)
