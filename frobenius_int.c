@@ -6,19 +6,9 @@
 
 #include "helpers_int.h"
 #include "small_primes.h"
-
-#define N 1
+#include "frobenius_int.h"
 
 int enable_logging = 0;
-
-#undef debug
-#define debug(...) do {} while (0)
-
-
-Primality QFT_int(unsigned long n, unsigned long b, unsigned long c);
-Primality RQFT_int(unsigned long n, unsigned k);
-
-static const unsigned B = 50000;
 
 
 /*
@@ -259,60 +249,4 @@ Primality RQFT_int(const unsigned long n, const unsigned k)
 	return probably_prime;
 }
 
-#ifndef TEST
-static void *run(void *worker_id_cast_to_void_star)
-{
-	unsigned long upper_bound = (1lu << 32) - 1, dots_every = 1lu << 25;
-	unsigned long counter = 0, i;
-	unsigned long worker_id = (unsigned long)worker_id_cast_to_void_star;
-
-#ifdef WRITE_PRIMES
-	char str[32];
-	FILE *primes;
-	(void)snprintf(str, 32, "primes_worker_%lu.txt", worker_id);
-	primes = fopen(str, "a");
-#endif
-
-	for (i = B * B + 1 + 2 * worker_id; i < upper_bound; i += 2 * N) {
-		if (i % dots_every == 1) {  /* we need to check for == 1 since i will always be odd */
-			printf(".");
-			(void)fflush(stdout);
-		}
-
-		if (RQFT_int(i, 1)) {
-			counter++;
-#ifdef WRITE_PRIMES
-			fprintf(primes, "%lu\n", i);
-#endif
-		}
-	}
-
-#ifdef WRITE_PRIMES
-	(void)fclose(primes);
-#endif
-	return (void *)counter;
-}
-
-int main()
-{
-	unsigned i;
-	unsigned counter = 0;
-	pthread_t threads[N];
-
-	init_int();
-
-	for (i = 0; i < N; i++)
-		if (0 != pthread_create(&threads[i], NULL, run, (void *)(unsigned long)i))
-			die("failed to create thread %u, exiting\n", i);
-
-	for (i = 0; i < N; i++) {
-		unsigned long tmp;
-		(void)pthread_join(threads[i], (void **)&tmp);
-		counter += tmp;
-	}
-
-	printf("\n%u\n", counter);
-
-	return 0;
-}
-#endif
+#undef check_non_trivial_divisor

@@ -13,10 +13,7 @@
 #endif
 #define assert(_)
 #endif
-
-#define N 4
-
-Primality miller_rabin_int(unsigned n, int k);
+#include "miller_rabin_int.h"
 
 /*
  * Raise b to the e'th power modulo m.  This uses 64-bit registers to hold the
@@ -63,7 +60,7 @@ static unsigned long powm(unsigned long b, unsigned long e, unsigned m)
  * The function returns true if it found no evidence, that n might be composite
  * and false if it found a counter example.
  */
-Primality miller_rabin_int(unsigned n, int k)
+Primality miller_rabin_int(const unsigned n, const unsigned k)
 {
 	unsigned long s;
 	unsigned long a, d, x, nm1;
@@ -82,7 +79,7 @@ Primality miller_rabin_int(unsigned n, int k)
 	split_int(&s, &d, n);
 
 	/* Repeat the test itself k times to increase the accuracy */
-	for (int i = 0; i < k; i++) {
+	for (unsigned i = 0; i < k; i++) {
 		a = get_random_int(2, n - 2);
 
 		/* compute a^d mod n */
@@ -106,59 +103,3 @@ Primality miller_rabin_int(unsigned n, int k)
 
 	return probably_prime;
 }
-
-#ifndef TEST
-static void *run(void *worker_id_cast_to_void_star)
-{
-	unsigned long i;
-	unsigned long worker_id = (unsigned long)worker_id_cast_to_void_star;
-	unsigned long counter = 0;
-
-#ifdef WRITE_PRIMES
-	char str[32];
-	(void)snprintf(str, 32, "primes_worker_%lu.txt", worker_id);
-	FILE *primes = fopen(str, "w");
-#endif
-
-	for (i = 5 + 2 * worker_id; i < (1lu << 32) - 1; i += 2 * N) {
-		if (i % (1 << 25) == 1) {
-			printf(".");
-			(void)fflush(stdout);
-		}
-		if (miller_rabin_int((unsigned)i, 1)) {
-			counter++;
-#ifdef WRITE_PRIMES
-			fprintf(primes, "%lu\n", i);
-#endif
-		}
-	}
-
-#ifdef WRITE_PRIMES
-	(void)fclose(primes);
-#endif
-	return (void *)counter;
-}
-
-int main()
-{
-	unsigned long i;
-	unsigned long counter = 0;
-	pthread_t threads[N];
-
-	init_int();
-
-	for (i = 0; i < N; i++)
-		if (0 != pthread_create(&threads[i], NULL, run, (void *)i))
-			die("failed to create thread %lu, exiting\n", i);
-
-	for (i = 0; i < N; i++) {
-		unsigned long tmp;
-		(void)pthread_join(threads[i], (void **)&tmp);
-		counter += tmp;
-	}
-
-	printf("\n%lu\n", counter);
-
-	return 0;
-}
-#endif

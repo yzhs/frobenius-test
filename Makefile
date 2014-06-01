@@ -14,16 +14,16 @@ test: run_tests
 	./run_tests
 
 
-frobenius: frobenius.o helpers.o small_primes.o
+frobenius: run_frobenius.o frobenius.o helpers.o small_primes.o
 	$(CC) $(CFLAGS) -o $@ $^ -lgmp
 
-frobenius_int: frobenius_int.o helpers_int.o small_primes.o
+frobenius_int: run_frobenius_int.o frobenius_int.o helpers_int.o small_primes.o
 	$(CC) $(CFLAGS) -o $@ $^ -lm -pthread
 
-miller_rabin: miller_rabin.o helpers.o
+miller_rabin: run_miller_rabin.o miller_rabin.o helpers.o
 	$(CC) $(CFLAGS) -o $@ $^ -lgmp
 
-miller_rabin_int: miller_rabin_int.o helpers_int.o
+miller_rabin_int: run_miller_rabin_int.o miller_rabin_int.o helpers_int.o
 	$(CC) $(CFLAGS) -o $@ $^ -lm -pthread
 
 

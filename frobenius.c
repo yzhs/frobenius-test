@@ -8,9 +8,7 @@
 
 #include "helpers.h"
 #include "small_primes.h"
-
-Primality QFT(const mpz_t n, const mpz_t b, const mpz_t c);
-Primality RQFT(const mpz_t n, unsigned const B);
+#include "frobenius.h"
 
 static mpz_t tmp0, tmp1, tmp2;
 
@@ -205,7 +203,7 @@ Primality QFT(const mpz_t n, const mpz_t b, const mpz_t c)
 	return steps_3_4_5(n, b, c);
 }
 
-Primality RQFT(const mpz_t n, const unsigned B)
+Primality RQFT(const mpz_t n, const unsigned k)
 {
 	mpz_t b, c, nm1;
 	mpz_t bb4c, neg_c, tmp;
@@ -268,33 +266,4 @@ exit:
 	return result;
 }
 
-#ifndef TEST
-int main()
-{
-	mpz_t tmp;
-
-	mpz_inits(tmp, tmp0, tmp1, tmp2, NULL);
-	init();
-
-	mpz_set_ui(tmp, 1215239);
-	assert(RQFT(tmp, 1) != composite);
-	mpz_set_ui(tmp, 1215237);
-	assert(RQFT(tmp, 1) == composite);
-	mpz_set_str(tmp, "2147483659", 10);
-	assert(RQFT(tmp, 1) == probably_prime);
-	mpz_set_str(tmp, "32317006071311007300714876688669951960444102669715484032130"\
-			"34542752465513886789089319720141152291346368871796092189801949411955"\
-			"91504909210950881523864482831206308773673009960917501977503896521067"\
-			"96057638384067568276792218642619756161838094338476170470581645852036"\
-			"30504288757589154106580860755239912393038552191433338966834242068497"\
-			"47865645694948561760353263220580778056593310261927084603141502585928"\
-			"64177116725943603718461857357598351152301645904403697613233287231227"\
-			"12568471082020972515710172693132346967854258065669793504599726835299"\
-			"86382155251663894373355436021354332296046453184786049521481935558536"\
-			"11059596231637", 10);
-	assert(RQFT(tmp, 1) == probably_prime);
-
-	cleanup();
-	mpz_clears(tmp, tmp0, tmp1, tmp2, NULL);
-}
-#endif
+#undef check_non_trivial_divisor

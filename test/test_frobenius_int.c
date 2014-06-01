@@ -2,7 +2,6 @@
 
 #include "test_frobenius_int.h"
 
-#define TEST
 #include "../frobenius_int.c"
 
 /*
