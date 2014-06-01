@@ -6,13 +6,6 @@
 #include <pthread.h>
 
 #include "helpers_int.h"
-
-#ifndef DEBUG
-#ifdef assert
-#undef assert
-#endif
-#define assert(_)
-#endif
 #include "miller_rabin_int.h"
 
 /*
