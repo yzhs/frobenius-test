@@ -188,6 +188,12 @@ Primality QFT_int(const unsigned long n, const unsigned long b, const unsigned l
 	return steps_3_4_5_int(n, b, c);
 }
 
+#define check_non_trivial_divisor(num) do { \
+		tmp = gcd(num, n); \
+		if (tmp != 1 && tmp != n) \
+			return composite; \
+} while (0)
+
 /*
  * Run the randomized quadratic frobenius test to check whether [n] is a a
  * prime.  The Parameter [k] determines how many times the test will be run at
@@ -210,15 +216,6 @@ Primality RQFT_int(const unsigned long n, const unsigned k)
 	 * return that result immediately. */
 	if (result != probably_prime)
 		return result;
-
-#ifdef check_non_trivial_divisor
-#undef check_non_trivial_divisor
-#endif
-#define check_non_trivial_divisor(num) do { \
-		tmp = gcd(num, n); \
-		if (tmp != 1 && tmp != n) \
-			return composite; \
-} while (0)
 
 	for (unsigned j = 0; j < k; j++) {
 		for (unsigned i = 0; i < B; i++) {

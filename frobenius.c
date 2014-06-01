@@ -203,6 +203,12 @@ Primality QFT(const mpz_t n, const mpz_t b, const mpz_t c)
 	return steps_3_4_5(n, b, c);
 }
 
+#define check_non_trivial_divisor(num) do { \
+		mpz_gcd(tmp, num, n); \
+		if (mpz_cmp_ui(tmp, 1) != 0 && mpz_cmp(tmp, n) != 0) \
+			ret(composite); \
+} while (0)
+
 Primality RQFT(const mpz_t n, const unsigned k)
 {
 	mpz_t b, c, nm1;
@@ -228,15 +234,6 @@ Primality RQFT(const mpz_t n, const unsigned k)
 	 * return that result immediately. */
 	if (result != probably_prime)
 		ret(result);
-
-#ifdef check_non_trivial_divisor
-#undef check_non_trivial_divisor
-#endif
-#define check_non_trivial_divisor(num) do { \
-		mpz_gcd(tmp, num, n); \
-		if (mpz_cmp_ui(tmp, 1) != 0 && mpz_cmp(tmp, n) != 0) \
-			ret(composite); \
-} while (0)
 
 	for (unsigned i = 0; i < B; i++) {
 		get_random(b, n);
