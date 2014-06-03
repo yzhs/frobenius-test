@@ -1,16 +1,25 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-#define B 50000lu
+#define LIKELY(x) __builtin_expect(!!(x), 1)
 
 extern int enable_logging;
 
+// Print an error message and terminate the programm.
 #define die(...) do { fprintf(stderr, __VA_ARGS__); exit(1); } while (0)
 
+// Print a debugging message if debugging output is enabled.
 #define debug(...) do { if (enable_logging) fprintf(stderr, __VA_ARGS__); } while (0)
 
-#define len(a) (sizeof(a) / sizeof(a[0]))
 
+// Upper bound for the prime numbers to be use for trial division.
+#define B 50000lu
+
+// Possible result of primality tests that prove compositeness.
 typedef enum { composite = 0, probably_prime, prime } Primality;
+
+
+// Get the number of elements a (statically sized) array has.
+#define len(a) (sizeof(a) / sizeof(a[0]))
 
 #endif

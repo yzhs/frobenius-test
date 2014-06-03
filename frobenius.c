@@ -109,7 +109,8 @@ static Primality steps_1_2(const mpz_t n)
 		mpz_sqrt(tmp, n);
 		sqrt = mpz_get_ui(tmp);
 
-		for (unsigned long i = 0; i < len(prime_list) && prime_list[i] <= sqrt; i++)
+		// Start from prime_list[1] == 3 stead of prime_list[0] == 2.
+		for (unsigned long i = 1; i < len(prime_list) && prime_list[i] <= sqrt; i++)
 			if (mpz_divisible_ui_p(n, prime_list[i]))
 				return composite;
 
@@ -118,7 +119,8 @@ static Primality steps_1_2(const mpz_t n)
 		if (sqrt < 50000)
 			return prime;
 	} else {
-		for (unsigned long i = 0; i < len(prime_list); i++)
+		// Start from prime_list[1] == 3 stead of prime_list[0] == 2.
+		for (unsigned long i = 1; i < len(prime_list); i++)
 			if (mpz_divisible_ui_p(n, prime_list[i]))
 				return composite;
 	}

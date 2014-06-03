@@ -13,37 +13,19 @@
 #define assert(x)
 #endif
 
-Primality miller_rabin(mpz_t n, int k);
-
-/**
+/*
  * This function checks whether a given number n is a prime or not, using the
  * Miller-Rabin primality test.  This is a probabilistic test which randomly
  * chooses an integer a as a base and checks whether n satisfies a certain
  * property (which depends on b).  If it does, n is a prime for at least three
  * out of four of the possible values of a, if it does not, it is certainly not
  * prime.
- * The implementation is taken from the following pseudo code found on
- * http://en.wikipedia.org/wiki/Miller-Rabin_primality_test:
- *
- *   Input: n > 3, an odd integer to be tested for primality;
- *   Input: k, a parameter that determines the accuracy of the test
- *   Output: composite if n is composite, otherwise probably prime
- *   write n − 1 as 2^s·d with d odd by factoring powers of 2 from n − 1
- *   LOOP: repeat k times:
- *      pick a random integer a in the range 2, n − 2
- *      x ← a^d mod n
- *      if x = 1 or x = n − 1 then do next LOOP
- *      for r = 1 .. s
- *         x ← x^2 mod n
- *         if x = 1 then return composite
- *         if x = n − 1 then do next LOOP
- *      return composite
- *   return probably prime
- *
- * The function returns true if it found no evidence, that n might be composite
- * and false if it found a counter example.
+ * The implementation is taken from the pseudo code found on
+ * http://en.wikipedia.org/wiki/Miller-Rabin_primality_test.
+ * The function returns `probably_prime` if it found no evidence, that n might
+ * be composite and `composite` if it did find a counter example.
  */
-Primality miller_rabin(mpz_t n, int k)
+Primality miller_rabin(const mpz_t n, const unsigned k)
 {
 	Primality result = probably_prime;
 	unsigned long s;
@@ -68,7 +50,7 @@ Primality miller_rabin(mpz_t n, int k)
 	split(&s, d, n);
 
 	/* Repeat the test itself k times to increase the accuracy */
-	for (int i = 0; i < k; i++) {
+	for (unsigned i = 0; i < k; i++) {
 		get_random(a, n);
 
 		/* compute a^d mod n */

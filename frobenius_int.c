@@ -54,6 +54,7 @@ static void square_mod_int(unsigned long *res0, unsigned long *res1, /* The resu
 		return;
 	}
 	dd = (d * d) % n;
+
 	// compute res0 = d^2*b+2*d*e
 	*res0 = ((dd * b) % n + (2 * (d * e) % n) % n) % n;
 
@@ -62,7 +63,9 @@ static void square_mod_int(unsigned long *res0, unsigned long *res1, /* The resu
 }
 
 /*
- * Calculate (base0 * x + base1)^exp mod (n, x^2-bx-c) returning the result as (*res0) * x + (*res1).
+ * Calculate (base0 * x + base1)^exp mod (n, x^2-bx-c) returning the result as
+ * (*res0) * x + (*res1).  The computation is done using exponentiation by
+ * squaring.
  */
 static void powm_int(unsigned long *res0, unsigned long *res1,
                      unsigned long base0, unsigned long base1, unsigned long exp,
@@ -72,7 +75,7 @@ static void powm_int(unsigned long *res0, unsigned long *res1,
 	*res1 = 1;
 
 	while (exp != 0) {
-		if (exp % 2 == 1)
+		if (odd(exp))
 			mult_mod_int(res0, res1, base0, base1, *res0, *res1, n, b, c);
 		square_mod_int(&base0, &base1, base0, base1, n, b, c);
 		exp /= 2;
@@ -88,16 +91,13 @@ static Primality steps_1_2_int(const unsigned long n)
 	unsigned long sqrt = int_sqrt(n);
 
 	/*  (2) If n is a square, it can obviously not be prime. */
-	if (sqrt * sqrt == n) {
-		debug("found a square: %lu\n", n);
+	if (sqrt * sqrt == n)
 		return composite;
-	}
 
-	for (unsigned long i = 0; i < len(prime_list) && prime_list[i] <= sqrt; i++)
-		if (n % prime_list[i] == 0) {
-			debug("found a prime factor: %u divides %lu\n", prime_list[i], n);
+	// Start from prime_list[1] == 3 stead of prime_list[0] == 2.
+	for (unsigned long i = 1; i < len(prime_list) && prime_list[i] <= sqrt; i++)
+		if (n % prime_list[i] == 0)
 			return composite;
-		}
 
 	/* If the given number is small enough, there cannot be a non-trivial
 	 * divisor of n, whence n is prime. */
@@ -115,19 +115,15 @@ static Primality steps_3_4_5_int(const unsigned long n, const unsigned long b, c
 	x0 = 1;
 	x1 = s = tmp = foo0 = foo1 = 0;
 
-	// Suppose n>1 is odd, (b^2+4c over n)=-1 and (-c over n)=1.
-
 	/*
 	 * (3) Compute x^((n+1)/2) mod (n, x^2-bx-c).  If x^((n+1)/2) not in ℤ/nℤ,
 	 * declare n to be composite and stop.
 	 */
-	tmp = n + 1;    // tmp = n+1
-	tmp = tmp / 2;  // tmp = (n+1)/2
+	tmp = n + 1;
+	tmp = tmp / 2;
 	powm_int(&foo0, &foo1, x0, x1, tmp, n, b, c);
-	if (foo0 != 0) {// check whether x^((n+1)/2) has degree 1
-		debug("sqrt(-c) is not an integer: sqrt(-c) == %lu*x+%lu, n=%lu, b=%lu, c=%lu\n", foo0, foo1, n, b, c);
+	if (foo0 != 0)  // check whether x^((n+1)/2) has degree 1
 		return composite;
-	}
 
 	/*
 	 * (4) Compute x^(n+1) mod (n, x^2-bx-c).  If x^(n+1) not congruent -c,
@@ -135,12 +131,8 @@ static Primality steps_3_4_5_int(const unsigned long n, const unsigned long b, c
 	 */
 	foo1 = foo1 * foo1;
 	tmp = n - c;
-	if (foo1 % n != tmp) {
-		debug("x^(n+1) != c: x^(n+1) == %lu*x+%lu, n=%lu, b=%lu, c=%lu\n", foo0, foo1, n, b, c);
+	if (foo1 % n != tmp)
 		return composite;
-	}
-
-	debug("composite = %i, probably_prime = %i, prime = %i\n", composite, probably_prime, prime);
 
 	/*
 	 * (5) Let n^2-1=2^r*s, where s is odd.  If x^s not congruent 1 mod (n,
@@ -151,24 +143,18 @@ static Primality steps_3_4_5_int(const unsigned long n, const unsigned long b, c
 	 */
 	tmp = n * n;
 	split_int(&r, &s, tmp); // calculate r,s such that 2^r*s + 1 == n^2
-	if (tmp - 1 != (1lu << r) * s)
-		die("split failed");
 	powm_int(&foo0, &foo1, x0, x1, s, n, b, c);
 	tmp = n - 1;
-	if (foo0 == 0 && foo1 == 1) {
-		debug("x^s == 1 mod (n, x^2-bx-c) where (b,c)=(%lu,%lu), so n=%lu is probably prime\n", b, c, n);
+	if (foo0 == 0 && foo1 == 1)
 		return probably_prime;
-	}
 
 	for (i = 0; i < r - 1; i++) {
-		if (foo0 == 0 && foo1 % n == tmp) {
-			debug("x^(2^%lu*s) == n-1 mod (n, x^2-%lux-%lu), so n=%lu is probably prime\n", i, b, c, n);
+		if (foo0 == 0 && foo1 % n == tmp)
 			return probably_prime;
-		}
+
 		square_mod_int(&foo0, &foo1, foo0, foo1, n, b, c);
 	}
 
-	debug("n is certainly composite\n");
 	return composite;
 }
 
@@ -221,9 +207,12 @@ Primality RQFT_int(const unsigned long n, const unsigned k)
 		for (unsigned i = 0; i < B; i++) {
 			b = get_random_int(2, n - 2);
 			c = get_random_int(2, n - 2);
+
 			bb4c = ((b * b) % n + c * 4) % n;
+
 			j1 = jacobi(bb4c, n);
 			j2 = jacobi(n - c, n); /* Warning: n-c is not congruent to -c, since -c is interpreted as 2⁶⁴-c !!! */
+
 			if (j1 == -1 && j2 == 1) {
 				check_non_trivial_divisor(bb4c);
 				check_non_trivial_divisor(b);
@@ -231,6 +220,7 @@ Primality RQFT_int(const unsigned long n, const unsigned k)
 				break;
 			}
 		}
+
 		if (j1 != -1 || j2 != 1) {
 			printf("Found no suitable pair (b,c) modulo n=%lu. "
 			       "This is highly unlikely unless the programme is wrong. "

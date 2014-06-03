@@ -6,6 +6,37 @@
 gmp_randstate_t r_state;
 
 
+
+/*
+ * Seed random number generators.
+ */
+int init(void)
+{
+	long int seed;
+	struct timeval tv;
+
+	//seed = 123457;
+	gettimeofday(&tv, NULL);
+	seed = tv.tv_usec;
+
+	gmp_randinit_default(r_state);
+	gmp_randseed_ui(r_state, seed);
+
+	srand((unsigned int)seed);
+
+	return 0;
+}
+
+/*
+ * Whatever is to be done before program shutdown.
+ */
+int cleanup(void)
+{
+	gmp_randclear(r_state);
+	return 0;
+}
+
+
 /*
  * Calculate [s], [d] such that [n-1=2^s*d] where [d] is odd.
  */
@@ -44,27 +75,4 @@ unsigned randint(const unsigned low, const unsigned high)
 {
 	// TODO make sure the distribution is uniform
 	return low + (unsigned)rand() % (high - low + 1);
-}
-
-int init(void)
-{
-	long int seed;
-	struct timeval tv;
-
-	//seed = 123457;
-	gettimeofday(&tv, NULL);
-	seed = tv.tv_usec;
-
-	gmp_randinit_default(r_state);
-	gmp_randseed_ui(r_state, seed);
-
-	srand((unsigned int)seed);
-
-	return 0;
-}
-
-int cleanup(void)
-{
-	gmp_randclear(r_state);
-	return 0;
 }

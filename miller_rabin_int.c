@@ -10,14 +10,15 @@
 
 /*
  * Raise b to the e'th power modulo m.  This uses 64-bit registers to hold the
- * results of the multipliations.  Therefore, the results will be wrong if m is greater than 2^32-1
+ * results of the multipliations.  Therefore, the results will be wrong if m is
+ * greater than 2^32-1
  */
 static unsigned long powm(unsigned long b, unsigned long e, unsigned m)
 {
 	unsigned long result = 1;
 
 	while (LIKELY(e != 0)) {
-		if (e % 2 == 1)
+		if (odd(e))
 			result = (result * b) % m;
 		b = (b * b) % m;
 		e /= 2;
@@ -32,26 +33,12 @@ static unsigned long powm(unsigned long b, unsigned long e, unsigned m)
  * property (which depends on b).  If it does, n is a prime for at least three
  * out of four of the possible values of a, if it does not, it is certainly not
  * prime.
- * The implementation is taken from the following pseudo code found on
- * http://en.wikipedia.org/wiki/Miller-Rabin_primality_test:
  *
- *   Input: n > 3, an odd integer to be tested for primality;
- *   Input: k, a parameter that determines the accuracy of the test
- *   Output: composite if n is composite, otherwise probably prime
- *   write n − 1 as 2^s·d with d odd by factoring powers of 2 from n − 1
- *   LOOP: repeat k times:
- *      pick a random integer a in the range 2, n − 2
- *      x ← a^d mod n
- *      if x = 1 or x = n − 1 then do next LOOP
- *      for r = 1 .. s
- *         x ← x^2 mod n
- *         if x = 1 then return composite
- *         if x = n − 1 then do next LOOP
- *      return composite
- *   return probably prime
+ * The implementation is taken from the pseudo code found on
+ * http://en.wikipedia.org/wiki/Miller-Rabin_primality_test.
  *
- * The function returns true if it found no evidence, that n might be composite
- * and false if it found a counter example.
+ * The function returns `probably_prime` if it found no evidence, that n might
+ * be composite and `composite` if it did find a counter example.
  */
 Primality miller_rabin_int(const unsigned n, const unsigned k)
 {
