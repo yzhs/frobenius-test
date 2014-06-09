@@ -1,12 +1,16 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+#include <stdarg.h>
+
 #define LIKELY(x) __builtin_expect(!!(x), 1)
 
 extern int enable_logging;
 
+//#define die(...) do { fprintf(stderr, __VA_ARGS__); exit(1); } while (0)
+
 // Print an error message and terminate the programm.
-#define die(...) do { fprintf(stderr, __VA_ARGS__); exit(1); } while (0)
+int die(const char *format, ...);
 
 // Print a debugging message if debugging output is enabled.
 #define debug(...) do { if (enable_logging) fprintf(stderr, __VA_ARGS__); } while (0)
