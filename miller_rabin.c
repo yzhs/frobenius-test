@@ -1,5 +1,3 @@
-#include <assert.h>
-#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -7,11 +5,7 @@
 #include <gmp.h>
 
 #include "helpers.h"
-
-#ifndef DEBUG
-#undef assert
-#define assert(x)
-#endif
+#include "miller_rabin.h"
 
 /*
  * This function checks whether a given number n is a prime or not, using the
