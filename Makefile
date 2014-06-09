@@ -34,6 +34,9 @@ run_tests: helpers.o helpers_int.o small_primes.o common.o test/main.o \
 find_non_smooth_numbers: find_non_smooth_numbers.o small_primes.o
 	$(CC) $(CFLAGS) -o $@ $^ -lgmp
 
+nextprime: nextprime.o common.o
+	$(CC) $(CFLAGS) -o $@ $^ -lgmp
+
 test/main.o: test/main.c
 	$(CC) $(CFLAGS) -c -o $@ $^
 
