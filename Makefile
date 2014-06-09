@@ -1,8 +1,8 @@
 CC = clang
 ifeq ($(CC),clang)
-DEBUG := -DDEBUG -g -Wall -Werror -Wextra -Wmost -Weverything -Wno-pointer-arith -Wno-empty-translation-unit
+DEBUG := -DDEBUG -g -Wall -Werror -Wextra -Wmost -Weverything -Wno-pointer-arith -Wno-empty-translation-unit -Wno-format-nonliteral
 else
-DEBUG := -DDEBUG -g -Wall -Werror -Wextra -Wno-pointer-arith
+DEBUG := -DDEBUG -g -Wall -Werror -Wextra -Wno-pointer-arith -Wno-format-nonliteral
 endif
 OPT = -O3 -mtune=native -march=native
 CFLAGS = -std=c11 $(DEBUG) $(OPT)
@@ -31,6 +31,8 @@ run_tests: helpers.o helpers_int.o small_primes.o common.o test/main.o \
 	test/test_miller_rabin_long.o test/test_miller_rabin_int.o test/test_frobenius_long.o
 	$(CC) $(CFLAGS) -o $@ $^ -lm -lcunit -lgmp
 
+find_non_smooth_numbers: find_non_smooth_numbers.o small_primes.o
+	$(CC) $(CFLAGS) -o $@ $^ -lgmp
 
 test/main.o: test/main.c
 	$(CC) $(CFLAGS) -c -o $@ $^
