@@ -10,8 +10,8 @@
 static void *run(void *worker_id_cast_to_void_star)
 {
 	unsigned long upper_bound = /*1lu << 32*/50000lu*50000+(1lu<<27), dots_every = 1lu << 25;
-	unsigned long counter = 0, i;
-	unsigned long worker_id = (unsigned long)worker_id_cast_to_void_star;
+	unsigned long counter = 0;
+	unsigned worker_id = (unsigned)(long)worker_id_cast_to_void_star;
 
 #ifdef WRITE_PRIMES
 	char str[32];
@@ -20,7 +20,7 @@ static void *run(void *worker_id_cast_to_void_star)
 	primes = fopen(str, "a");
 #endif
 
-	for (i = B * B + 1 + 2 * worker_id; i < upper_bound; i += 2 * N) {
+	for (unsigned i = B * B + 1 + 2 * worker_id; i < upper_bound; i += 2 * N) {
 		if ((i & (dots_every - 1)) == 1) {  /* we need to check for == 1 since i will always be odd */
 			printf(".");
 			(void)fflush(stdout);
