@@ -8,10 +8,19 @@ OPT = -O3 -mtune=native -march=native
 CFLAGS = -std=c11 $(DEBUG) $(OPT)
 
 
-all: miller_rabin miller_rabin_int frobenius frobenius_int
+all: miller_rabin miller_rabin_int frobenius frobenius_int benchmark
 
 test: run_tests
 	./run_tests
+
+INT_OBJECTS = miller_rabin_int.o frobenius_int.o helpers_int.o
+GMP_OBJECTS = miller_rabin.o frobenius.o helpers.o
+
+benchmark: $(INT_OBJECTS) $(GMP_OBJECTS) benchmark.o common.o helpers_int.o helpers.o small_primes.o
+	$(CC) $(CFLAGS) -o $@ $^ -lrt -lgmp -lm
+
+benchmark.o: benchmark.c benchmark_algo.def
+	$(CC) $(CFLAGS) -c -o $@ benchmark.c
 
 
 frobenius: run_frobenius.o frobenius.o helpers.o small_primes.o common.o
@@ -54,8 +63,8 @@ test/test_frobenius_long.o: test/test_frobenius_long.c test/test_frobenius_long.
 
 
 clean:
-	-rm *.o miller_rabin frobenius miller_rabin_int frobenius_int
-	-rm nextprime find_non_smooth_numbers
-	-rm test/*.o run_tests
+	-rm *.o test/*.o
+	-rm miller_rabin frobenius miller_rabin_int frobenius_int
+	-rm run_tests benchmark nextprime find_non_smooth_numbers
 
 .PHONY: all clean test test_python
