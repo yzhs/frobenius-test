@@ -55,6 +55,7 @@ test/test_frobenius_long.o: test/test_frobenius_long.c test/test_frobenius_long.
 
 clean:
 	-rm *.o miller_rabin frobenius miller_rabin_int frobenius_int
+	-rm nextprime find_non_smooth_numbers
 	-rm test/*.o run_tests
 
 .PHONY: all clean test test_python
