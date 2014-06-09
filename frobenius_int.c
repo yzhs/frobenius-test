@@ -164,8 +164,9 @@ static Primality steps_3_4_5_int(const unsigned long n, const unsigned long b, c
  * Returns 'prime' if n is certainly prime, 'probably_prime' if no evidence
  * could be found that n might be composite and 'composite' otherwise.
  */
-Primality QFT_int(const unsigned long n, const unsigned long b, const unsigned long c)
+Primality QFT_int(const unsigned n_, const unsigned b_, const unsigned c_)
 {
+	const unsigned long n = n_, b = b_, c = c_;
 	Primality result = steps_1_2_int(n);
 
 	if (result != probably_prime)
@@ -185,8 +186,9 @@ Primality QFT_int(const unsigned long n, const unsigned long b, const unsigned l
  * prime.  The Parameter [k] determines how many times the test will be run at
  * most.  If the test returns "composite", it will not be run again.
  */
-Primality RQFT_int(const unsigned long n, const unsigned k)
+Primality RQFT_int(const unsigned n_, const unsigned k)
 {
+	unsigned long n = n_;
 	Primality result;
 	unsigned long b = 0, c = 0;
 	unsigned long bb4c, tmp;

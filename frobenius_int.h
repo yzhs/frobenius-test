@@ -3,7 +3,7 @@
 
 #include "common.h"
 
-Primality QFT_int(unsigned long n, unsigned long b, unsigned long c);
-Primality RQFT_int(unsigned long n, unsigned k);
+Primality QFT_int(const unsigned n, const unsigned b, const unsigned c);
+Primality RQFT_int(const unsigned n, const unsigned k);
 
 #endif
