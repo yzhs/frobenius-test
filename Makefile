@@ -1,11 +1,13 @@
 CC = clang
+CXX = clang
 ifeq ($(CC),clang)
 DEBUG := -DDEBUG -g -Wall -Werror -Wextra -Wmost -Weverything -Wno-pointer-arith -Wno-empty-translation-unit -Wno-format-nonliteral
 else
 DEBUG := -DDEBUG -g -Wall -Werror -Wextra -Wno-pointer-arith -Wno-format-nonliteral
 endif
 OPT = -O3 -mtune=native -march=native
-CFLAGS = -std=c11 $(DEBUG) $(OPT)
+CFLAGS = -std=gnu11 $(DEBUG) $(OPT)
+CXXFLAGS = -std=gnu++11 $(DEBUG) -Wno-c++98-compat-pedantic $(OPT)
 
 
 all: miller_rabin miller_rabin_int frobenius frobenius_int benchmark
@@ -17,10 +19,10 @@ INT_OBJECTS = miller_rabin_int.o frobenius_int.o helpers_int.o
 GMP_OBJECTS = miller_rabin.o frobenius.o helpers.o
 
 benchmark: $(INT_OBJECTS) $(GMP_OBJECTS) benchmark.o common.o helpers_int.o helpers.o small_primes.o
-	$(CC) $(CFLAGS) -o $@ $^ -lrt -lgmp -lm
+	$(CXX) $(CXXFLAGS) -o $@ $^ -lgmp -lm
 
-benchmark.o: benchmark.c benchmark_algo.def
-	$(CC) $(CFLAGS) -c -o $@ benchmark.c
+benchmark.o: benchmark.cc
+	$(CXX) $(CXXFLAGS) -c -o $@ $^
 
 
 frobenius: run_frobenius.o frobenius.o helpers.o small_primes.o common.o
