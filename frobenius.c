@@ -14,6 +14,8 @@ static mpz_t tmp0, tmp1, tmp2;
 
 static mpz_t base0, base1, exponent;
 
+unsigned long multiplications;
+
 /*
  * Return f(x)*g(x) mod (n, x^2 - b*x - c) where f(x) = d*x + e and g(x) = f*x + g in the return arguments res0 and
  * res1, representing the polynomial res0*x + res1.
@@ -31,6 +33,9 @@ static void mult_mod(mpz_t res0, mpz_t res1,
 		mpz_mul(res1, e, g);
 		mpz_mod(res0, res0, n);
 		mpz_mod(res1, res1, n);
+
+		multiplications += 2;
+
 		return;
 	}
 
@@ -46,6 +51,8 @@ static void mult_mod(mpz_t res0, mpz_t res1,
 
 	mpz_mod(res0, tmp0, n);
 	mpz_mod(res1, tmp1, n);
+
+	multiplications += 6;
 }
 
 static void square_mod(mpz_t res0, mpz_t res1,
@@ -56,6 +63,9 @@ static void square_mod(mpz_t res0, mpz_t res1,
 		mpz_set_ui(res0, 0);
 		mpz_mul(res1, e, e);
 		mpz_mod(res1, res1, n);
+
+		multiplications += 1;
+
 		return;
 	}
 
@@ -72,6 +82,8 @@ static void square_mod(mpz_t res0, mpz_t res1,
 
 	mpz_mod(res0, tmp0, n);
 	mpz_mod(res1, tmp1, n);
+
+	multiplications += 5;
 }
 
 static void powm(mpz_t res0, mpz_t res1,

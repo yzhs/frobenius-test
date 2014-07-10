@@ -25,6 +25,8 @@ extern "C" {
 #define max(x,y) (((x) < (y)) ? (y) : (x))
 #define log(...) fprintf(stderr, __VA_ARGS__)
 
+extern unsigned long multiplications;
+
 /*
  * How long to run the tests to figure out how many iterations to run to get to
  * at least about one second of runtime.
@@ -95,30 +97,64 @@ static double get_duration(struct timespec start, struct timespec stop, unsigned
  */
 struct GMP {
 	static const char name[];
-	static const unsigned iterations = 368; // 4^368 ~= 7710^57
+	static const char mode[];
 	static Primality check(const mpz_t n) {
-		return (Primality)mpz_probab_prime_p(n, iterations);
+		return (Primality)mpz_probab_prime_p(n, 1);
 	}
 };
 const char GMP::name[] = "mpz_probab_prime_p";
+const char GMP::mode[] = "full";
 
 struct MillerRabin {
 	static const char name[];
-	static const unsigned iterations = 368; // 4^368 ~= 7710^57
+	static const char mode[];
 	static Primality check(const mpz_t n) {
-		return miller_rabin(n, iterations);
+		return miller_rabin(n, 1);
 	}
 };
 const char MillerRabin::name[] = "Miller-Rabin";
+const char MillerRabin::mode[] = "full";
 
 struct Frobenius {
 	static const char name[];
-	static const unsigned iterations = 57; // 4^368 ~= 7710^57
+	static const char mode[];
 	static Primality check(const mpz_t n) {
-		return RQFT(n, iterations);
+		return RQFT(n, 1);
 	}
 };
 const char Frobenius::name[] = "Frobenius";
+const char Frobenius::mode[] = "full";
+
+struct GMP_precomputation {
+	static const char name[];
+	static const char mode[];
+	static Primality check(const mpz_t n) {
+		return (Primality)mpz_probab_prime_p(n, 0);
+	}
+};
+const char GMP_precomputation::name[] = "mpz_probab_prime_p";
+const char GMP_precomputation::mode[] = "prep";
+
+struct MillerRabin_precomputation {
+	static const char name[];
+	static const char mode[];
+	static Primality check(const mpz_t n) {
+		return miller_rabin(n, 0);
+	}
+};
+const char MillerRabin_precomputation::name[] = "Miller-Rabin";
+const char MillerRabin_precomputation::mode[] = "prep";
+
+struct Frobenius_precomputation {
+	static const char name[];
+	static const char mode[];
+	static Primality check(const mpz_t n) {
+		return RQFT(n, 0);
+	}
+};
+const char Frobenius_precomputation::name[] = "Frobenius";
+const char Frobenius_precomputation::mode[] = "prep";
+
 
 /*
  * Figure out how often to repeat each test so that the overall runtime for
@@ -167,15 +203,17 @@ static void time_it(const unsigned *bits, const mpz_t *numbers,
 		log("will perform %d iterations to reach a runtime of about 1 second\n", its);
 
 		for (unsigned k = 0; k < NUM_MEASUREMENTS; k++) {
-
+			unsigned l = 0;
+			multiplications = 0;
 			clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
 			for (unsigned j = 0; j < its; j++) {
-				phantom += T::check(numbers[i]);
+				l += (T::check(numbers[i]) != composite);
 			}
 			clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &stop);
 			duration = get_duration(start, stop, its);
 
-			fprintf(output, "%d\t%E\t%s (%s)\n", bits[i], duration, T::name, num_name);
+			fprintf(output, "%d,%lu,%lu,%E,%s,%s,%s,%u,%u\n", bits[i], mpz_popcount(numbers[i]),
+					multiplications, duration, T::name, num_name, T::mode, its, l);
 			fflush(output);
 		}
 	}
@@ -197,7 +235,12 @@ int main(int argc, char *argv[])
 	if (argc < 2)
 		output = stdout;
 	else
-		output = fopen(argv[1], "w");
+		output = fopen(argv[1], "a");
+
+	if (output != stdout && ftell(output) == 0)
+		fprintf(output, "Bits,HammingWeight,Multiplications,Time,Algorithm,Set,Mode,Iterations,IsPrime\n");
+	fflush(output);
+
 	if (NULL == output)
 		die("failed to open output file");
 
@@ -223,17 +266,25 @@ int main(int argc, char *argv[])
 #define TIME_IT(alg, set) \
 	time_it<alg>(bits_##set##s, set##s, first_##set, last_##set, set##s_name)
 
-	fprintf(output, "Bits,Time,Algorithm\n");
-	fflush(output);
-	fflush(stdout);
+	// Apply the different tests to primes
+	TIME_IT(GMP_precomputation, prime);
+	TIME_IT(MillerRabin_precomputation, prime);
+	TIME_IT(Frobenius_precomputation, prime);
 
-	time_it<GMP>        (primes, len(primes), primes_name);
-	time_it<MillerRabin>(primes, len(primes), primes_name);
-	time_it<Frobenius>  (primes, len(primes), primes_name);
+	// composites
+	TIME_IT(GMP_precomputation, composite);
+	TIME_IT(MillerRabin_precomputation, composite);
+	TIME_IT(Frobenius_precomputation, composite);
 
-	time_it<GMP>        (composites, len(composites), composites_name);
-	time_it<MillerRabin>(composites, len(composites), composites_name);
-	time_it<Frobenius>  (composites, len(composites), composites_name);
+	// some Mersenne numbers
+	TIME_IT(GMP_precomputation, mersenne_number);
+	TIME_IT(MillerRabin_precomputation, mersenne_number);
+	TIME_IT(Frobenius_precomputation, mersenne_number);
+
+	// and 25 Mersenne primes
+	TIME_IT(GMP_precomputation, mersenne_prime);
+	TIME_IT(MillerRabin_precomputation, mersenne_prime);
+	TIME_IT(Frobenius_precomputation, mersenne_prime);
 
 	// Apply the different tests to primes
 	TIME_IT(GMP, prime);
