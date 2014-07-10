@@ -42,13 +42,10 @@ int cleanup(void)
  */
 void split(unsigned long *s, mpz_t d, const mpz_t n)
 {
-	*s = 0;
-	mpz_sub_ui(d, n, 1);
+	// Find the least significant bit that is set, except for the 2^0 bit.
+	*s = mpz_scan1(n, 1);
 
-	while (mpz_even_p(d)) {
-		(*s)++;
-		mpz_fdiv_q_2exp(d, d, 1); // divide by 2^1
-	}
+	mpz_fdiv_q_2exp(d, n, *s);
 }
 
 /**
