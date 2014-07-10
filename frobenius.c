@@ -12,6 +12,8 @@
 
 static mpz_t tmp0, tmp1, tmp2;
 
+static mpz_t base0, base1, exponent;
+
 /*
  * Return f(x)*g(x) mod (n, x^2 - b*x - c) where f(x) = d*x + e and g(x) = f*x + g in the return arguments res0 and
  * res1, representing the polynomial res0*x + res1.
@@ -61,7 +63,8 @@ static void square_mod(mpz_t res0, mpz_t res1,
 	mpz_mul(tmp2, d, d);
 	mpz_mul(tmp0, tmp2, b);
 	mpz_mul(tmp1, d, e);
-	mpz_addmul_ui(tmp0, tmp1, 2);
+	mpz_add(tmp1, tmp1, tmp1);
+	mpz_add(tmp0, tmp0, tmp1);
 
 	// and res1 = d^2*c + e^2
 	mpz_mul(tmp1, tmp2, c);
@@ -75,23 +78,21 @@ static void powm(mpz_t res0, mpz_t res1,
                  const mpz_t b0, const mpz_t b1, const mpz_t e,
                  const mpz_t n, const mpz_t b, const mpz_t c)
 {
-	mpz_t base0, base1, exp;
-	mpz_inits(base0, base1, exp, NULL);
 
 	// Copy all input parameters that will be changed in this function.
 	mpz_set(base0, b0);
 	mpz_set(base1, b1);
-	mpz_set(exp, e);
+	mpz_set(exponent, e);
 
 	// Initialize the return value.
 	mpz_set_ui(res0, 0);
 	mpz_set_ui(res1, 1);
 
-	while (mpz_sgn(exp) != 0) {
-		if (mpz_odd_p(exp))
+	while (mpz_sgn(exponent) != 0) {
+		if (mpz_odd_p(exponent))
 			mult_mod(res0, res1, base0, base1, res0, res1, n, b, c);
 		square_mod(base0, base1, base0, base1, n, b, c);
-		mpz_fdiv_q_ui(exp, exp, 2);
+		mpz_fdiv_q_2exp(exponent, exponent, 1);
 	}
 }
 
@@ -146,7 +147,7 @@ static Primality steps_3_4_5(const mpz_t n, const mpz_t b, const mpz_t c)
 	 * (3) Compute x^((n+1)/2) mod (n, x^2-bx-c).  If x^((n+1)/2) not in ℤ/nℤ,
 	 * declare n to be composite and stop.
 	 */
-	mpz_add_ui(tmp, n, 1);          // tmp = n+1
+	mpz_add_ui(tmp, n, 1);		// tmp = n+1
 	mpz_fdiv_q_2exp(tmp, tmp, 1);   // tmp = (n+1)/2
 	powm(foo0, foo1, x0, x1, tmp, n, b, c);
 
@@ -238,19 +239,26 @@ Primality RQFT(const mpz_t n, const unsigned k)
 		ret(result);
 
 	for (unsigned j = 0; j < k; j++) {
+		do {
+			get_random(c, n);
+			mpz_mul(c, c, c);
+			mpz_mod(c, c, n);
+			mpz_sub(c, n, c);
+		} while (mpz_cmp_ui(c, 3) < 0);
+		check_non_trivial_divisor(c);
+		j2 = 1;
+
 		for (unsigned i = 0; i < B; i++) {
 			get_random(b, n);
-			get_random(c, n);
 
 			mpz_mul(bb4c, b, b);
 			mpz_addmul_ui(bb4c, c, 4);
 			j1 = mpz_jacobi(bb4c, n);
-			mpz_neg(neg_c, c);
-			j2 = mpz_jacobi(neg_c, n);
+			//mpz_sub(neg_c, n, c);
+			//j2 = mpz_jacobi(neg_c, n);
 			if (j1 == -1 && j2 == 1) {
 				check_non_trivial_divisor(bb4c);
 				check_non_trivial_divisor(b);
-				check_non_trivial_divisor(c);
 				break;
 			}
 		}
