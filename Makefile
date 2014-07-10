@@ -1,16 +1,17 @@
-CC = clang
-CXX = clang
+PROFILE=
+#CC = clang
+#CXX = clang
 ifeq ($(CC),clang)
-DEBUG := -DDEBUG -g -Wall -Werror -Wextra -Wmost -Weverything -Wno-pointer-arith -Wno-empty-translation-unit -Wno-format-nonliteral
+DEBUG = -DDEBUG -g -Wall -Wextra -Wmost -Weverything -Wno-pointer-arith -Wno-empty-translation-unit -Wno-format-nonliteral
 else
-DEBUG := -DDEBUG -g -Wall -Werror -Wextra -Wno-pointer-arith -Wno-format-nonliteral
+DEBUG = -DDEBUG -g -Wall -Wextra -Wno-pointer-arith -Wno-format-nonliteral
 endif
 OPT = -O3 -mtune=native -march=native
-CFLAGS = -std=gnu11 $(DEBUG) $(OPT)
-CXXFLAGS = -std=gnu++11 $(DEBUG) -Wno-c++98-compat-pedantic $(OPT)
+CFLAGS = -std=gnu11 $(DEBUG) $(OPT) $(PROFILE)
+CXXFLAGS = -std=gnu++11 $(DEBUG) -Wno-c++98-compat-pedantic $(OPT) $(PROFILE)
 
 
-all: miller_rabin miller_rabin_int frobenius frobenius_int benchmark
+all: benchmark
 
 test: run_tests
 	./run_tests
