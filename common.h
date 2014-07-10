@@ -17,7 +17,7 @@ int die(const char *format, ...);
 
 
 // Upper bound for the prime numbers to be use for trial division.
-#define B 50000lu
+#define B 44958lu
 
 // Possible result of primality tests that prove compositeness.
 typedef enum { composite = 0, probably_prime, prime } Primality;
