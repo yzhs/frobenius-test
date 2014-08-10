@@ -5,5 +5,8 @@ miller_rabin
 miller_rabin_int
 nextprime
 find_non_smooth_numbers
+run_tests
 pic/
-*.csv
+pictures/
+data/
+test/data/
