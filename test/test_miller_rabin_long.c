@@ -34,13 +34,13 @@ void test_miller_rabin_some_numbers(void)
 
 void test_miller_rabin_primes(void)
 {
-	FILE *fp = fopen("data/primelist.txt", "r");
+	FILE *fp = fopen(TEST_DATA_PATH "primelist.txt", "r");
 	unsigned p;
 	unsigned long i = 0;
 	mpz_t prime;
 
 	if (NULL == fp)
-		die("data/primelist.txt: %s\n", strerror(errno));
+		die(TEST_DATA_PATH "primelist.txt: %s\n", strerror(errno));
 
 	while (EOF != fscanf(fp, "%u\n", &p))
 		large_primes[i++] = p;
@@ -60,7 +60,7 @@ void test_miller_rabin_primes(void)
 
 void test_miller_rabin_composites(void)
 {
-	FILE *fp = fopen("data/composites.txt", "r");
+	FILE *fp = fopen(TEST_DATA_PATH "composites.txt", "r");
 	unsigned long i;
 
 	for (i = 0; i < len(composites); i++)

@@ -33,7 +33,7 @@ void test_miller_rabin_powm_int(void)
 
 void test_miller_rabin_primes_int(void)
 {
-	FILE *fp = fopen("data/primelist.txt", "r");
+	FILE *fp = fopen(TEST_DATA_PATH "primelist.txt", "r");
 	unsigned p;
 	unsigned long i = 0;
 

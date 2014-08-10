@@ -137,7 +137,7 @@ void test_frobenius_squares(void)
 void test_frobenius_trial_division(void)
 {
 	for (int i = 0; i < num_iterations; i++) {
-		unsigned long n = 2 + (unsigned long)rand() % ((1lu<<32) - 2);
+		unsigned long n = 2 + (unsigned long)rand() % ((1lu<<31) - 2);
 		mpz_t n_;
 		mpz_init_set_ui(n_, n);
 
@@ -149,7 +149,7 @@ void test_frobenius_trial_division(void)
 void test_frobenius_rqft_small_primes(void)
 {
 	for (int i = 0; i < num_iterations; i++) {
-		unsigned long n = 2 + (unsigned long)rand() % ((1lu<<32) - 2);
+		unsigned long n = 2 + (unsigned long)rand() % ((1lu<<31) - 2);
 		mpz_t n_;
 		mpz_init_set_ui(n_, n);
 
@@ -161,14 +161,14 @@ void test_frobenius_rqft_small_primes(void)
 
 void test_frobenius_primelist(void)
 {
-	FILE *fp = fopen("data/primelist.txt", "r");
+	FILE *fp = fopen(TEST_DATA_PATH "primelist.txt", "r");
 	unsigned p;
 	unsigned long i = 0;
 	static unsigned large_primes[3069262];
 	mpz_t n;
 
 	if (NULL == fp)
-		die("data/primelist.txt: %s\n", strerror(errno));
+		die(TEST_DATA_PATH "primelist.txt: %s\n", strerror(errno));
 
 	while (EOF != fscanf(fp, "%u\n", &p))
 		large_primes[i++] = p;

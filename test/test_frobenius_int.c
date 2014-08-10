@@ -251,13 +251,13 @@ void test_frobenius_problematic_primes_int(void)
 
 void test_frobenius_primelist_int(void)
 {
-	FILE *fp = fopen("data/primelist.txt", "r");
+	FILE *fp = fopen(TEST_DATA_PATH "primelist.txt", "r");
 	unsigned p;
 	unsigned long i = 0;
 	static unsigned large_primes[3069262];
 
 	if (NULL == fp)
-		die("data/primelist.txt: %s\n", strerror(errno));
+		die(TEST_DATA_PATH "primelist.txt: %s\n", strerror(errno));
 
 	while (EOF != fscanf(fp, "%u\n", &p))
 		large_primes[i++] = p;

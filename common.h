@@ -26,4 +26,6 @@ typedef enum { composite = 0, probably_prime, prime } Primality;
 // Get the number of elements a (statically sized) array has.
 #define len(a) (sizeof(a) / sizeof(a[0]))
 
+#define TEST_DATA_PATH "test/data/"
+
 #endif
