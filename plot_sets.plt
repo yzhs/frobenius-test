@@ -76,6 +76,12 @@ set yrange [1:80]
 set ytics 1,2,80
 
 # Normalized runtime
+set output 'pic/all_primes_normalized.tex'
+plot 'data/normalized_primes_gmp.csv' using 1:2 title 'GMP ($2^k+\varepsilon$)', \
+     'data/normalized_primes_frob.csv' using 1:2 title 'Frobenius ($2^k+\varepsilon$)', \
+     'data/normalized_mersenne_primes_gmp.csv' using 1:2 title 'GMP ($2^p-1$)', \
+     'data/normalized_mersenne_primes_frob.csv' using 1:2 title 'Frobenius ($2^p-1$)'
+
 set output 'pic/normalized_primes.tex'
 plot 'data/normalized_primes_gmp.csv' using 1:2 title 'GMP', \
      'data/normalized_primes_frob.csv' using 1:2 title 'Frobenius'
@@ -95,4 +101,3 @@ set output 'pic/normalized_mersenne_numbers.tex'
 plot 'data/normalized_mersenne_numbers_gmp.csv' using 1:2 title 'GMP', \
      'data/normalized_mersenne_numbers_frob.csv' using 1:2 title 'Frobenius'
 set xrange [32:131072]
-
