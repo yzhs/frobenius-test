@@ -30,6 +30,7 @@ SET_TEX = pic/primes.tex pic/composites.tex pic/mersenne_numbers.tex pic/mersenn
 	pic/prep_primes.tex pic/prep_composites.tex pic/prep_mersenne_numbers.tex pic/prep_mersenne_primes.tex
 ALG_TEX = pic/gmp.tex pic/mr.tex pic/frob.tex pic/prep_gmp.tex pic/prep_mr.tex pic/prep_frob.tex
 MULT_TEX = pic/multiplications.tex
+MISC_TEX = pic/all.tex
 
 plots: $(SET_TEX) $(ALG_TEX) $(MULT_TEX)
 
