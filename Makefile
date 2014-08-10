@@ -11,7 +11,7 @@ CFLAGS = -std=gnu11 $(DEBUG) $(OPT) $(PROFILE)
 CXXFLAGS = -std=gnu++11 $(DEBUG) -Wno-c++98-compat-pedantic $(OPT) $(PROFILE)
 
 
-all: benchmark
+all: benchmark plots
 
 test: run_tests
 	./run_tests
@@ -25,6 +25,22 @@ benchmark: $(INT_OBJECTS) $(GMP_OBJECTS) benchmark.o common.o helpers_int.o help
 benchmark.o: benchmark.cc
 	$(CXX) $(CXXFLAGS) -c -o $@ $^
 
+
+SET_TEX = pic/primes.tex pic/composites.tex pic/mersenne_numbers.tex pic/mersenne_primes.tex \
+	pic/prep_primes.tex pic/prep_composites.tex pic/prep_mersenne_numbers.tex pic/prep_mersenne_primes.tex
+ALG_TEX = pic/gmp.tex pic/mr.tex pic/frob.tex pic/prep_gmp.tex pic/prep_mr.tex pic/prep_frob.tex
+MULT_TEX = pic/multiplications.tex
+
+plots: $(SET_TEX) $(ALG_TEX) $(MULT_TEX)
+
+$(SET_TEX): plot_sets.plt
+	gnuplot $^
+
+$(ALG_TEX): plot_algorithms.plt
+	gnuplot $^
+
+$(MULT_TEX): plot_mults.plt
+	gnuplot $^
 
 frobenius: run_frobenius.o frobenius.o helpers.o small_primes.o common.o
 	$(CC) $(CFLAGS) -o $@ $^ -lgmp

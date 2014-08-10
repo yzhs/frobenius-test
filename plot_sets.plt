@@ -1,0 +1,98 @@
+set datafile separator ','
+
+set terminal epslatex color size 15cm,10cm
+
+set xlabel '$\log_2 n$'
+set ylabel 'Laufzeit in Sekunden'
+
+set xrange [32:131072]
+set logscale x 2
+set logscale y
+
+set key top left
+set ytics 1e-6,1e2,1e8
+
+# Full test
+set output 'pic/primes.tex'
+plot 'data/primes_gmp.csv' using 1:2 title 'GMP', \
+     'data/primes_mr.csv' using 1:2 title 'Miller-Rabin', \
+     'data/primes_frob.csv' using 1:2 title 'Frobenius'
+
+
+set output 'pic/composites.tex'
+plot 'data/composites_gmp.csv' using 1:2 title 'GMP', \
+     'data/composites_mr.csv' using 1:2 title 'Miller-Rabin', \
+     'data/composites_frob.csv' using 1:2 title 'Frobenius'
+
+
+set output 'pic/mersenne_primes.tex'
+plot 'data/mersenne_primes_gmp.csv' using 1:2 title 'GMP', \
+     'data/mersenne_primes_mr.csv' using 1:2 title 'Miller-Rabin', \
+     'data/mersenne_primes_frob.csv' using 1:2 title 'Frobenius'
+
+set xrange [32:2048]
+set output 'pic/mersenne_numbers.tex'
+plot 'data/mersenne_numbers_gmp.csv' using 1:2 title 'GMP', \
+     'data/mersenne_numbers_mr.csv' using 1:2 title 'Miller-Rabin', \
+     'data/mersenne_numbers_frob.csv' using 1:2 title 'Frobenius'
+set xrange [32:131072]
+
+
+# Precomputation
+set output 'pic/prep_primes.tex'
+plot 'data/prep_primes_gmp.csv' using 1:2 title 'GMP', \
+     'data/prep_primes_mr.csv' using 1:2 title 'Miller-Rabin', \
+     'data/prep_primes_frob.csv' using 1:2 title 'Frobenius'
+
+
+set output 'pic/prep_composites.tex'
+plot 'data/prep_composites_gmp.csv' using 1:2 title 'GMP', \
+     'data/prep_composites_mr.csv' using 1:2 title 'Miller-Rabin', \
+     'data/prep_composites_frob.csv' using 1:2 title 'Frobenius'
+
+
+set output 'pic/prep_mersenne_primes.tex'
+plot 'data/prep_mersenne_primes_gmp.csv' using 1:2 title 'GMP', \
+     'data/prep_mersenne_primes_mr.csv' using 1:2 title 'Miller-Rabin', \
+     'data/prep_mersenne_primes_frob.csv' using 1:2 title 'Frobenius'
+
+set xrange [32:2048]
+set output 'pic/prep_mersenne_numbers.tex'
+plot 'data/prep_mersenne_numbers_gmp.csv' using 1:2 title 'GMP', \
+     'data/prep_mersenne_numbers_mr.csv' using 1:2 title 'Miller-Rabin', \
+     'data/prep_mersenne_numbers_frob.csv' using 1:2 title 'Frobenius'
+set xrange [32:131072]
+
+
+set ylabel "Laufzeit relativ zu Miller-Rabin"
+set grid y
+
+#set nologscale y
+#set yrange [0:100]
+#set ytics 1,10,100
+
+set key top right
+set yrange [1:80]
+set ytics 1,2,80
+
+# Normalized runtime
+set output 'pic/normalized_primes.tex'
+plot 'data/normalized_primes_gmp.csv' using 1:2 title 'GMP', \
+     'data/normalized_primes_frob.csv' using 1:2 title 'Frobenius'
+
+
+set output 'pic/normalized_composites.tex'
+plot 'data/normalized_composites_gmp.csv' using 1:2 title 'GMP', \
+     'data/normalized_composites_frob.csv' using 1:2 title 'Frobenius'
+
+
+set output 'pic/normalized_mersenne_primes.tex'
+plot 'data/normalized_mersenne_primes_gmp.csv' using 1:2 title 'GMP', \
+     'data/normalized_mersenne_primes_frob.csv' using 1:2 title 'Frobenius'
+
+set xrange [32:2048]
+set output 'pic/normalized_mersenne_numbers.tex'
+plot 'data/normalized_mersenne_numbers_gmp.csv' using 1:2 title 'GMP', \
+     'data/normalized_mersenne_numbers_frob.csv' using 1:2 title 'Frobenius'
+set xrange [32:131072]
+
