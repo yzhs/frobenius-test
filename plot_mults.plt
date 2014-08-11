@@ -2,7 +2,7 @@ set datafile separator ','
 
 set terminal epslatex color size 15cm,10cm
 
-set xlabel '$\log_2 n$'
+set xlabel '$\lfloor\log_2 n\rfloor$'
 set ylabel 'Anzahl der Multiplikationen'
 
 
