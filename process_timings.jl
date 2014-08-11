@@ -212,7 +212,7 @@ if plot_data
 end
 
 # How number of multiplications correlate with runtime
-save_data_by_set(frob, [:Multiplications, :MeanTime], "time_vs_multiplications");
+save_data_by_set(frob, [:Multiplications, :MeanTime, :Bits], "time_vs_multiplications");
 if plot_data
     p = plot(frob, x=:Multiplications, y=:MeanTime, color=:Set,
              Guide.XLabel("Anzahl der Multiplikationen"), Guide.YLabel("Zeit in Sekunden"),
