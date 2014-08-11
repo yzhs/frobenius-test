@@ -34,13 +34,12 @@ plot 'data/multiplications_primes.csv' using 1:2 title 'Primzahlen', \
      h(x) title label_h ls 4, \
      3*x title '$3\log n$' ls 7
 
-set logscale x 10
-set xrange [100:1e7]
-set xlabel 'Anzahl der Multiplikationen'
-set ylabel 'Lauzfeit pro Multiplikation'
+set xrange [2048:65536*2]
+set ylabel 'Laufzeit pro Multiplikation'
+
 
 set output 'pic/time_vs_multiplications.tex'
-plot 'data/time_vs_multiplications_primes.csv' using 1:($2/$1) title 'Primzahlen', \
-     'data/time_vs_multiplications_composites.csv' using 1:($2/$1) title 'Zusammengesetzt', \
-     'data/time_vs_multiplications_mersenne_numbers.csv' using 1:($2/$1) title 'Mersenne-Zahlen', \
-     'data/time_vs_multiplications_mersenne_primes.csv' using 1:($2/$1) title 'Mersenne-Primzahlen', \
+plot 'data/time_vs_multiplications_primes.csv'           using 3:($2/$1) title 'Primzahlen', \
+     'data/time_vs_multiplications_composites.csv'       using 3:($2/$1) title 'Zusammengesetzt', \
+     'data/time_vs_multiplications_mersenne_numbers.csv' using 3:($2/$1) title 'Mersenne-Zahlen', \
+     'data/time_vs_multiplications_mersenne_primes.csv'  using 3:($2/$1) title 'Mersenne-Primzahlen', \
