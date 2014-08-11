@@ -115,8 +115,8 @@ static Primality steps_1_2(const mpz_t n)
 	if (mpz_perfect_square_p(n))
 		return composite;
 
-	/* Every number larger than 2^31 is certainly larger then B = 50000, whence
-	 * the full list of small primes has to be used in trial division. */
+	/* Every number larger than 2^31 is certainly larger than B, whence the
+	 * full list of small primes has to be used in trial division. */
 	if (mpz_fits_sint_p(n)) {
 		unsigned long sqrt;
 		mpz_sqrt(tmp, n);
@@ -129,7 +129,7 @@ static Primality steps_1_2(const mpz_t n)
 
 		/* If n < B^2, we have either found a prime factor already or n itself
 		 * is prime. */
-		if (sqrt < 50000)
+		if (sqrt < B)
 			return prime;
 	} else {
 		// Start from prime_list[1] == 3 stead of prime_list[0] == 2.
