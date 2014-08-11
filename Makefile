@@ -34,14 +34,17 @@ MISC_TEX = pic/all.tex
 
 plots: $(SET_TEX) $(ALG_TEX) $(MULT_TEX)
 
-$(SET_TEX): plot_sets.plt
-	gnuplot $^
+data/primes_gmp.csv: process_timings.jl timings_20140708.csv
+	julia $^
 
-$(ALG_TEX): plot_algorithms.plt
-	gnuplot $^
+$(SET_TEX): plot_sets.plt data/primes_gmp.csv
+	gnuplot plot_sets.plt
 
-$(MULT_TEX): plot_mults.plt
-	gnuplot $^
+$(ALG_TEX): plot_algorithms.plt data/primes_gmp.csv
+	gnuplot plot_algorithms.plt
+
+$(MULT_TEX): plot_mults.plt data/primes_gmp.csv
+	gnuplot plot_mults.plt
 
 frobenius: run_frobenius.o frobenius.o helpers.o small_primes.o common.o
 	$(CC) $(CFLAGS) -o $@ $^ -lgmp
