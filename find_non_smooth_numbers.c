@@ -4,8 +4,7 @@
 #include <gmp.h>
 
 #include "small_primes.h"
-
-#define len(a) (sizeof(a)/sizeof(a[0]))
+#include "common.h"
 
 static int has_small_prime_factor(mpz_t n)
 {
@@ -38,7 +37,7 @@ int main()
 		mpz_ui_pow_ui(n, 2, ints[i]);
 		mpz_add_ui(n, n, 1);
 
-		while (mpz_cmp_ui(n, 50000*50000lu) < 0 || has_small_prime_factor(n) || mpz_probab_prime_p(n, 20)) {
+		while (mpz_cmp_ui(n, B*(unsigned long)B) < 0 || has_small_prime_factor(n) || mpz_probab_prime_p(n, 20)) {
 			mpz_add_ui(n, n, 2);
 			counter++;
 			if (counter >= 10) {
