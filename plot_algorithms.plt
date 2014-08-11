@@ -6,7 +6,7 @@ set xlabel '$\log_2 n$'
 set ylabel 'Laufzeit in Sekunden'
 
 
-set xrange [32:100000]
+set xrange [32:65536*2]
 set logscale x 2
 set logscale y
 
