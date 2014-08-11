@@ -242,7 +242,7 @@ mersenne_composites = mersenne_composites[mersenne_composites[:NumPrimes] .!= me
 # composite.  This ignores the iterations 
 num_iterations = sum(timings[timings[:Set] .== "composites", :][:Iterations]) + sum(mersenne_composites[:Iterations]);
 file = open(string(tex_output, "false_positives.tex"), "w");
-println(file, "Bei den insgesamt \$$num_iterations\$ Iterationen der verschiedenen ",
-        "Tests, die bei den zusammengesetzten durchgeführt wurden, sind nur ",
-        "\$$num_false_positives\$ false positives aufgetreten.")
+println(file, "Bei den insgesamt \$\\num{$num_iterations}\$ Iterationen der verschiedenen ",
+        "Tests, die bei den zusammengesetzten Zahlen durchgeführt wurden, sind nur ",
+        "\$\\num{$num_false_positives}\$ false positives aufgetreten.")
 close(file);
