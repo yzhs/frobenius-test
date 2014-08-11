@@ -17,10 +17,10 @@ static mpz_t base0, base1, exponent;
 unsigned long multiplications;
 
 /*
- * Return f(x)*g(x) mod (n, x^2 - b*x - c) where f(x) = d*x + e and g(x) = f*x + g in the return arguments res0 and
- * res1, representing the polynomial res0*x + res1.
+ * Return f(x)*g(x) mod (n, x^2 - b*x - c) where f(x) = d*x + e and g(x) = f*x + g in the return arguments res_x and
+ * res_1, representing the polynomial res_x*x + res_1.
  */
-static void mult_mod(mpz_t res0, mpz_t res1,
+static void mult_mod(mpz_t res_x, mpz_t res_1,
                      const mpz_t d, const mpz_t e, const mpz_t f, const mpz_t g,
                      const mpz_t n, const mpz_t b, const mpz_t c)
 {
@@ -29,64 +29,64 @@ static void mult_mod(mpz_t res0, mpz_t res1,
 	 * modulo n.
 	 */
 	if (mpz_sgn(d) == 0) {
-		mpz_mul(res0, e, f);
-		mpz_mul(res1, e, g);
-		mpz_mod(res0, res0, n);
-		mpz_mod(res1, res1, n);
+		mpz_mul(res_x, e, f);
+		mpz_mul(res_1, e, g);
+		mpz_mod(res_x, res_x, n);
+		mpz_mod(res_1, res_1, n);
 
 		multiplications += 2;
 
 		return;
 	}
 
-	// res0 = (d*f*b + d*g + e*f) % n
+	// res_x = (d*f*b + d*g + e*f) % n
 	mpz_mul(tmp2, d, f);
 	mpz_mul(tmp0, tmp2, b);
 	mpz_addmul(tmp0, d, g);
 	mpz_addmul(tmp0, e, f);
 
-	// res1 = (d*f*c + e*g) % n
+	// res_1 = (d*f*c + e*g) % n
 	mpz_mul(tmp1, tmp2, c);
 	mpz_addmul(tmp1, e, g);
 
-	mpz_mod(res0, tmp0, n);
-	mpz_mod(res1, tmp1, n);
+	mpz_mod(res_x, tmp0, n);
+	mpz_mod(res_1, tmp1, n);
 
 	multiplications += 6;
 }
 
-static void square_mod(mpz_t res0, mpz_t res1,
+static void square_mod(mpz_t res_x, mpz_t res_1,
                        const mpz_t d, const mpz_t e,
                        const mpz_t n, const mpz_t b, const mpz_t c)
 {
 	if (mpz_sgn(d) == 0) {
-		mpz_set_ui(res0, 0);
-		mpz_mul(res1, e, e);
-		mpz_mod(res1, res1, n);
+		mpz_set_ui(res_x, 0);
+		mpz_mul(res_1, e, e);
+		mpz_mod(res_1, res_1, n);
 
 		multiplications += 1;
 
 		return;
 	}
 
-	// compute res0 = d^2*b + 2*d*e
+	// compute res_x = d^2*b + 2*d*e
 	mpz_mul(tmp2, d, d);
 	mpz_mul(tmp0, tmp2, b);
 	mpz_mul(tmp1, d, e);
 	mpz_add(tmp1, tmp1, tmp1);
 	mpz_add(tmp0, tmp0, tmp1);
 
-	// and res1 = d^2*c + e^2
+	// and res_1 = d^2*c + e^2
 	mpz_mul(tmp1, tmp2, c);
 	mpz_addmul(tmp1, e, e);
 
-	mpz_mod(res0, tmp0, n);
-	mpz_mod(res1, tmp1, n);
+	mpz_mod(res_x, tmp0, n);
+	mpz_mod(res_1, tmp1, n);
 
 	multiplications += 5;
 }
 
-static void powm(mpz_t res0, mpz_t res1,
+static void powm(mpz_t res_x, mpz_t res_1,
                  const mpz_t b0, const mpz_t b1, const mpz_t e,
                  const mpz_t n, const mpz_t b, const mpz_t c)
 {
@@ -97,12 +97,12 @@ static void powm(mpz_t res0, mpz_t res1,
 	mpz_set(exponent, e);
 
 	// Initialize the return value.
-	mpz_set_ui(res0, 0);
-	mpz_set_ui(res1, 1);
+	mpz_set_ui(res_x, 0);
+	mpz_set_ui(res_1, 1);
 
 	while (mpz_sgn(exponent) != 0) {
 		if (mpz_odd_p(exponent))
-			mult_mod(res0, res1, base0, base1, res0, res1, n, b, c);
+			mult_mod(res_x, res_1, base0, base1, res_x, res_1, n, b, c);
 		square_mod(base0, base1, base0, base1, n, b, c);
 		mpz_fdiv_q_2exp(exponent, exponent, 1);
 	}
