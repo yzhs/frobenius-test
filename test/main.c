@@ -18,16 +18,16 @@ int main()
 
 	init_int();
 
-	suite = CU_add_suite("Miller-Rabin (int)", NULL, NULL);
-	CU_ADD_TEST(suite, test_miller_rabin_powm_int);
-	CU_ADD_TEST(suite, test_miller_rabin_primes_int);
+//	suite = CU_add_suite("Miller-Rabin (int)", NULL, NULL);
+//	CU_ADD_TEST(suite, test_miller_rabin_powm_int);
+//	CU_ADD_TEST(suite, test_miller_rabin_primes_int);
 
-	suite = CU_add_suite("Miller-Rabin (GMP)", init, cleanup);
-	CU_ADD_TEST(suite, test_miller_rabin_some_numbers);
-	CU_ADD_TEST(suite, test_miller_rabin_primes);
-	CU_ADD_TEST(suite, test_miller_rabin_composites);
-	CU_ADD_TEST(suite, test_miller_rabin_composites2);
-	CU_ADD_TEST(suite, test_miller_rabin_both);
+//	suite = CU_add_suite("Miller-Rabin (GMP)", init, cleanup);
+//	CU_ADD_TEST(suite, test_miller_rabin_some_numbers);
+//	CU_ADD_TEST(suite, test_miller_rabin_primes);
+//	CU_ADD_TEST(suite, test_miller_rabin_composites);
+//	CU_ADD_TEST(suite, test_miller_rabin_composites2);
+//	CU_ADD_TEST(suite, test_miller_rabin_both);
 
 //	suite = CU_add_suite("Frobenius (int)", NULL, NULL);
 //	CU_ADD_TEST(suite, test_frobenius_int_int_sqrt);
