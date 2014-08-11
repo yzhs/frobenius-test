@@ -67,10 +67,6 @@ set xrange [32:131072]
 set ylabel "Laufzeit relativ zu Miller-Rabin"
 set grid y
 
-#set nologscale y
-#set yrange [0:100]
-#set ytics 1,10,100
-
 set key top right
 set yrange [1:80]
 set ytics 1,2,80
