@@ -166,12 +166,12 @@ static void sigma(POLY_ARGS(res), CONST_POLY_ARGS(f), MODULUS_ARGS)
 
 static Primality steps_3_4_5(MODULUS_ARGS)
 {
-	mpz_t POLY(x), POLY(x_t), s, t, tmp, POLY(foo);
+	mpz_t POLY(x), POLY(x_t), POLY(x_n_1_2), s, t, tmp, POLY(foo);
 	bool n_is_1_mod_4;
 	unsigned long r;
 	Primality result = composite;
 
-	mpz_inits(POLY(x), POLY(x_t), s, t, tmp, POLY(foo), NULL);
+	mpz_inits(POLY(x), POLY(x_t), POLY(x_n_1_2), s, t, tmp, POLY(foo), NULL);
 
 	mpz_set_ui(x_x, 1);
 	// x_1 is initialized as 0 by mpz_inits
@@ -208,10 +208,13 @@ static Primality steps_3_4_5(MODULUS_ARGS)
 	for (unsigned long i = 0; i < r-1; i++)
 		square_mod(POLY(foo), POLY(foo), MODULUS);
 
-	if (n_is_1_mod_4)
+	if (n_is_1_mod_4) {
 		// At this point, foo_x * x + foo_1 = x^(n-1)/2.  We need to
 		// calculate x^(n+1)/2, so we multiply the result by x again.
-		mult_x_mod(POLY(foo), POLY(foo), MODULUS);
+		mult_x_mod(POLY(x_n_1_2), POLY(foo), MODULUS);
+		mpz_set(foo_x, x_n_1_2_x);
+		mpz_set(foo_1, x_n_1_2_1);
+	}
 
 	mpz_add_ui(tmp, n, 1);
 	mpz_fdiv_q_2exp(tmp, tmp, 1);
@@ -240,7 +243,13 @@ static Primality steps_3_4_5(MODULUS_ARGS)
 	mpz_mul(tmp, n, n);
 	/* calculate r,s such that 2^r*s + 1 == n^2 */
 	split(&r, s, tmp);
-	powm(POLY(foo), POLY(x), s, MODULUS);
+	if (n_is_1_mod_4) {
+		sigma(POLY(foo), POLY(x_t), MODULUS);
+		mult_mod(POLY(foo), POLY(foo), POLY(x_t), MODULUS);
+		mult_mod(POLY(foo), POLY(foo), POLY(x_n_1_2), MODULUS);
+	} else {
+		powm(POLY(foo), POLY(x), s, MODULUS);
+	}
 	mpz_sub_ui(tmp, n, 1);
 
 	if (mpz_sgn(foo_x) == 0 && mpz_cmp_ui(foo_1, 1) == 0)
@@ -254,7 +263,7 @@ static Primality steps_3_4_5(MODULUS_ARGS)
 
 exit:
 	// cleanup
-	mpz_clears(POLY(x), POLY(x_t), s, tmp, POLY(foo), NULL);
+	mpz_clears(POLY(x), POLY(x_t), POLY(x_n_1_2), s, tmp, POLY(foo), NULL);
 	return result;
 }
 
