@@ -149,12 +149,13 @@ static void mult_x_mod(mpz_t res_x, mpz_t res_1, const mpz_t d, const mpz_t e, c
 {
 	// In case res_1 and d point to the same memory, we have to make a copy.
 	mpz_set(tmp0, d);
+	mpz_set(tmp1, e);
 
 	mpz_mul(res_1, c, d);
 	mpz_mod(res_1, res_1, n);
 
 	mpz_mul(res_x, b, tmp0);
-	mpz_add(res_x, res_x, e);
+	mpz_add(res_x, res_x, tmp1);
 	mpz_mod(res_x, res_x, n);
 }
 
