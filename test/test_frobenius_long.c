@@ -9,6 +9,74 @@
 
 static int num_iterations = 10000;
 
+void test_frobenius_power(void)
+{
+	unsigned long r, n_;
+	mpz_t MODULUS, s, t, poly(foo), poly(bar), poly(x), tmp1, tmp2;
+	mpz_inits(MODULUS, s, t, poly(foo), poly(bar), poly(x), tmp1, tmp2, NULL);
+
+	// Initialize poly(x)
+	mpz_set_ui(x_x, 1);
+	n_ = 2500000001;
+	// n
+	mpz_set_ui(n, n_);
+
+	// Make sure the basics are working
+	mult_x_mod(poly(foo), poly(x), MODULUS);
+	CU_ASSERT_FATAL(mpz_cmp(foo_x, b) == 0);
+	CU_ASSERT_FATAL(mpz_cmp(foo_1, c) == 0);
+
+	for (unsigned long c_ = 1; c_ < 100; c_++) {
+		if (jacobi(n_ - c_, n_) != 1)
+			continue;
+		mpz_set_ui(c, c_);
+
+		for (unsigned long b_ = 1; b_ < 100; b_++) {
+			if (jacobi(b_*b_+4*c_, n_) != -1)
+				continue;
+			mpz_set_ui(b, b_);
+
+			// Compute r' and s' such that 2^r' s' = n-1 (as n is 1 mod 4)
+			mpz_sub_ui(tmp1, n, 1);
+			split(&r, s, tmp1);
+
+			// Directly compute poly(foo) = x^s'
+			powm(poly(foo), poly(x), s, MODULUS);
+
+			// And compute it via x^t
+			mpz_fdiv_q_2exp(t, s, 1);
+			powm(poly(bar), poly(x), t, MODULUS);
+			square_mod(poly(bar), poly(bar), MODULUS);
+			mult_x_mod(poly(bar), poly(bar), MODULUS);
+
+			// Make sure that the two methods agree...
+			CU_ASSERT(mpz_cmp(foo_x, bar_x) == 0);
+			CU_ASSERT(mpz_cmp(foo_1, bar_1) == 0);
+
+			// Calculate x^(n+1) directly
+			mpz_add_ui(tmp1, n, 1);
+			powm(poly(foo), poly(x), tmp1, MODULUS);
+
+			// Given x^s, comput x^((n-1)/2) = (x^s')^(2^r'-1)
+			for (unsigned long i = 0; i < r-1; i++)
+				square_mod(poly(bar), poly(bar), MODULUS);
+			// Now x^((n+1)/2) = x^((n-1)/2) * x
+			mult_x_mod(poly(bar), poly(bar), MODULUS);
+			// and x^(n+1) = (x^((n+1)/2))^2
+			square_mod(poly(bar), poly(bar), MODULUS);
+
+			CU_ASSERT(mpz_cmp(foo_x, bar_x) == 0);
+			CU_ASSERT(mpz_cmp(foo_1, bar_1) == 0);
+
+			CU_ASSERT(mpz_sgn(foo_x) == 0);
+			mpz_sub(tmp1, n, c);
+			CU_ASSERT(mpz_cmp(foo_1, tmp1) == 0);
+		}
+	}
+
+	mpz_clears(MODULUS, s, t, poly(foo), poly(bar), poly(x), tmp1, tmp2, NULL);
+}
+
 void test_frobenius_split(void)
 {
 	unsigned long max = 1000*1000*1000;
