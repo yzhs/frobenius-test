@@ -142,6 +142,46 @@ static Primality steps_1_2(const mpz_t n)
 #undef tmp
 }
 
+static inline void mult_x_mod(mpz_t res_x, mpz_t res_1, const mpz_t d, const mpz_t e, const mpz_t n, const mpz_t b, const mpz_t c)
+{
+	// In case res_1 and d point to the same memory, we have to make a copy.
+	mpz_set(tmp0, d);
+
+	mpz_mul(res_1, c, d);
+	mpz_mod(res_1, res_1, n);
+
+	mpz_mul(res_x, b, tmp0);
+	mpz_add(res_x, res_x, e);
+	mpz_mod(res_x, res_x, n);
+}
+
+static inline void invert(mpz_t res_x, mpz_t res_1, const mpz_t d, const mpz_t e, const mpz_t n, const mpz_t b, const mpz_t c)
+{
+	// (dx+e)^(-1) = (bde-cd^2+e)^(-1)(-dx + bde)
+	mpz_t foo;
+	mpz_init(foo);
+
+	mpz_neg(res_x, d);
+
+	mpz_mul(res_1, b, d);
+	mpz_mul(res_1, res_1, e);
+	mpz_mod(res_1, res_1, n);
+
+	mpz_mul(foo, d, d);
+	mpz_mul(foo, foo, c);
+	mpz_sub(foo, e, foo);
+	mpz_add(foo, foo, res_1);
+	mpz_invert(foo, foo, n);
+
+	mpz_mul(res_x, res_x, foo);
+	mpz_mul(res_1, res_1, foo);
+
+	mpz_mod(res_x, res_x, n);
+	mpz_mod(res_1, res_1, n);
+
+	mpz_clear(foo);
+}
+
 #define ret(x) do { result = (x); goto exit; } while (0)
 
 static Primality steps_3_4_5(const mpz_t n, const mpz_t b, const mpz_t c)
