@@ -145,7 +145,7 @@ static Primality steps_1_2(const mpz_t n)
 #undef tmp
 }
 
-static inline void mult_x_mod(mpz_t res_x, mpz_t res_1, const mpz_t d, const mpz_t e, const mpz_t n, const mpz_t b, const mpz_t c)
+static void mult_x_mod(mpz_t res_x, mpz_t res_1, const mpz_t d, const mpz_t e, const mpz_t n, const mpz_t b, const mpz_t c)
 {
 	// In case res_1 and d point to the same memory, we have to make a copy.
 	mpz_set(tmp0, d);
@@ -158,7 +158,7 @@ static inline void mult_x_mod(mpz_t res_x, mpz_t res_1, const mpz_t d, const mpz
 	mpz_mod(res_x, res_x, n);
 }
 
-static inline void invert(mpz_t res_x, mpz_t res_1, const mpz_t d, const mpz_t e, const mpz_t n, const mpz_t b, const mpz_t c)
+static void invert(mpz_t res_x, mpz_t res_1, const mpz_t d, const mpz_t e, const mpz_t n, const mpz_t b, const mpz_t c)
 {
 	// (dx+e)^(-1) = (bde-cd^2+e)^(-1)(-dx + bde)
 	mpz_t foo;
