@@ -160,7 +160,7 @@ static void sigma(POLY_ARGS(res), CONST_POLY_ARGS(f), MODULUS_ARGS)
 
 #define ret(x) do { result = (x); goto exit; } while (0)
 
-static Primality steps_3_4_5(const mpz_t n, const mpz_t b, const mpz_t c)
+static Primality steps_3_4_5(MODULUS_ARGS)
 {
 	mpz_t POLY(x), POLY(x_t), s, t, tmp, POLY(foo);
 	bool n_is_1_mod_4;
@@ -258,7 +258,7 @@ exit:
  * The Quadratic Frobenius Test (QFT) with parameters (b,c) consists of the
  * following.
  */
-Primality QFT(const mpz_t n, const mpz_t b, const mpz_t c)
+Primality QFT(MODULUS_ARGS)
 {
 	Primality result = steps_1_2(n);
 
