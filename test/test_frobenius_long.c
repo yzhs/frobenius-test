@@ -149,7 +149,7 @@ void test_frobenius_trial_division(void)
 void test_frobenius_rqft_small_primes(void)
 {
 	for (int i = 0; i < num_iterations; i++) {
-		unsigned long n = 2 + (unsigned long)rand() % ((1lu<<31) - 2);
+		unsigned long n = 2 + (unsigned long)rand() % ((1lu<<30) - 2);
 		mpz_t n_;
 		mpz_init_set_ui(n_, n);
 
@@ -191,18 +191,23 @@ void test_frobenius_larger_primes(void)
 {
 	mpz_t n;
 	mpz_init_set_ui(n, 2500000001);
+	printf("%d != %d\n", RQFT(n, 1), probably_prime);
 	CU_ASSERT_EQUAL(RQFT(n, 1), probably_prime);
 
 	mpz_set_ui(n, 2500000033);
+	printf("%d != %d\n", RQFT(n, 1), probably_prime);
 	CU_ASSERT_EQUAL(RQFT(n, 1), probably_prime);
 
 	mpz_set_ui(n, 2500000039);
+	printf("%d != %d\n", RQFT(n, 1), probably_prime);
 	CU_ASSERT_EQUAL(RQFT(n, 1), probably_prime);
 
 	mpz_set_ui(n, 2500000043);
+	printf("%d != %d\n", RQFT(n, 1), probably_prime);
 	CU_ASSERT_EQUAL(RQFT(n, 1), probably_prime);
 
 	mpz_set_ui(n, 2500000057);
+	printf("%d != %d\n", RQFT(n, 1), probably_prime);
 	CU_ASSERT_EQUAL(RQFT(n, 1), probably_prime);
 }
 
