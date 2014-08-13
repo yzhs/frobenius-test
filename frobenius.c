@@ -148,6 +148,8 @@ static void mult_x_mod(POLY_ARGS(res), CONST_POLY_ARGS(f), MODULUS_ARGS)
 	mpz_mul(res_x, b, tmp0);
 	mpz_add(res_x, res_x, tmp1);
 	mpz_mod(res_x, res_x, n);
+
+	multiplications += 2;
 }
 
 static void sigma(POLY_ARGS(res), CONST_POLY_ARGS(f), MODULUS_ARGS)
@@ -156,6 +158,8 @@ static void sigma(POLY_ARGS(res), CONST_POLY_ARGS(f), MODULUS_ARGS)
 	mpz_mul(res_1, f_x, b);
 	mpz_add(res_1, res_1, f_1);
 	mpz_mod(res_1, res_1, n);
+
+	multiplications += 1;
 }
 
 #define ret(x) do { result = (x); goto exit; } while (0)
