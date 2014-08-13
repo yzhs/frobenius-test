@@ -157,31 +157,12 @@ static void mult_x_mod(POLY_ARGS(res), CONST_POLY_ARGS(f), MODULUS_ARGS)
 	mpz_mod(res_x, res_x, n);
 }
 
-static void invert(mpz_t res_x, mpz_t res_1, const mpz_t d, const mpz_t e, const mpz_t n, const mpz_t b, const mpz_t c)
+static void sigma(POLY_ARGS(res), CONST_POLY_ARGS(f), MODULUS_ARGS)
 {
-	// (dx+e)^(-1) = (bde-cd^2+e)^(-1)(-dx + bde)
-	mpz_t foo;
-	mpz_init(foo);
-
-	mpz_neg(res_x, d);
-
-	mpz_mul(res_1, b, d);
-	mpz_mul(res_1, res_1, e);
+	mpz_sub(res_x, n, f_x);
+	mpz_mul(res_1, f_x, b);
+	mpz_add(res_1, res_1, f_1);
 	mpz_mod(res_1, res_1, n);
-
-	mpz_mul(foo, d, d);
-	mpz_mul(foo, foo, c);
-	mpz_sub(foo, e, foo);
-	mpz_add(foo, foo, res_1);
-	mpz_invert(foo, foo, n);
-
-	mpz_mul(res_x, res_x, foo);
-	mpz_mul(res_1, res_1, foo);
-
-	mpz_mod(res_x, res_x, n);
-	mpz_mod(res_1, res_1, n);
-
-	mpz_clear(foo);
 }
 
 #define ret(x) do { result = (x); goto exit; } while (0)
