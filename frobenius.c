@@ -191,6 +191,7 @@ static void invert(mpz_t res_x, mpz_t res_1, const mpz_t d, const mpz_t e, const
 static Primality steps_3_4_5(const mpz_t n, const mpz_t b, const mpz_t c)
 {
 	mpz_t poly(x), poly(x_t), s, t, tmp, poly(foo);
+	bool n_is_1_mod_4;
 	unsigned long r;
 	Primality result = composite;
 
@@ -203,9 +204,41 @@ static Primality steps_3_4_5(const mpz_t n, const mpz_t b, const mpz_t c)
 	 * (3) Compute x^((n+1)/2) mod (n, x^2-bx-c).  If x^((n+1)/2) not in ℤ/nℤ,
 	 * declare n to be composite and stop.
 	 */
-	mpz_add_ui(tmp, n, 1);		// tmp = n+1
-	mpz_fdiv_q_2exp(tmp, tmp, 1);   // tmp = (n+1)/2
-	powm(foo0, foo1, x0, x1, tmp, n, b, c);
+
+	// According to Grantham, Theorem 3.4, we have to differentiate the
+	// cases where n=1 mod 4 and n=3 mod 4
+	// So we check whether n = 1 mod 2^2 (x_x is 1 at this point anyway).
+	n_is_1_mod_4 = mpz_congruent_2exp_p(n, x_x, 2);
+	if (n_is_1_mod_4)
+		mpz_sub_ui(tmp, n, 1);
+	else
+		mpz_add_ui(tmp, n, 1);
+
+	split(&r, s, tmp);
+	mpz_fdiv_q_2exp(t, s, 1);  // t = (s-1)/2
+
+	// Calculate x_t_x and x_t_1, such that (x_t_x*x+x_t_1) = x^t mod (n, x^2-bx-c).
+	powm(poly(x_t), poly(x), t, MODULUS);
+
+	// Calculate (x^t)^2 = x^(s-1)
+	square_mod(poly(foo), poly(x_t), MODULUS);
+
+	// Now compute x * x^(s-1) = x^s
+	mult_x_mod(poly(foo), poly(foo), MODULUS);
+
+	// We now have foo_x * x + foo_1 = x^s.  All we have to do, to
+	// calculate x^(n-1)/2 or x^(n+1)/2, is to square this polynomial r-1
+	// times.
+	for (unsigned long i = 0; i < r-1; i++)
+		square_mod(poly(foo), poly(foo), MODULUS);
+
+	if (n_is_1_mod_4)
+		// At this point, foo_x * x + foo_1 = x^(n-1)/2.  We need to
+		// calculate x^(n+1)/2, so we multiply the result by x again.
+		mult_x_mod(poly(foo), poly(foo), MODULUS);
+
+	mpz_add_ui(tmp, n, 1);
+	mpz_fdiv_q_2exp(tmp, tmp, 1);
 	powm(poly(foo), poly(x), tmp, MODULUS);
 
 	/* check whether x^((n+1)/2) has degree 1 */
