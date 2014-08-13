@@ -10,9 +10,12 @@
 #include "small_primes.h"
 #include "frobenius.h"
 
+#define MODULUS n, b, c
+#define poly(name) name##_x, name##_1
+
 static mpz_t tmp0, tmp1, tmp2;
 
-static mpz_t base0, base1, exponent;
+static mpz_t poly(base), exponent;
 
 unsigned long multiplications;
 
@@ -92,8 +95,8 @@ static void powm(mpz_t res_x, mpz_t res_1,
 {
 
 	// Copy all input parameters that will be changed in this function.
-	mpz_set(base0, b0);
-	mpz_set(base1, b1);
+	mpz_set(base_x, b0);
+	mpz_set(base_1, b1);
 	mpz_set(exponent, e);
 
 	// Initialize the return value.
@@ -102,8 +105,8 @@ static void powm(mpz_t res_x, mpz_t res_1,
 
 	while (mpz_sgn(exponent) != 0) {
 		if (mpz_odd_p(exponent))
-			mult_mod(res_x, res_1, base0, base1, res_x, res_1, n, b, c);
-		square_mod(base0, base1, base0, base1, n, b, c);
+			mult_mod(poly(res), poly(base), poly(res), MODULUS);
+		square_mod(poly(base), poly(base), MODULUS);
 		mpz_fdiv_q_2exp(exponent, exponent, 1);
 	}
 }
@@ -186,14 +189,14 @@ static inline void invert(mpz_t res_x, mpz_t res_1, const mpz_t d, const mpz_t e
 
 static Primality steps_3_4_5(const mpz_t n, const mpz_t b, const mpz_t c)
 {
-	mpz_t x0, x1, s, tmp, foo0, foo1;
+	mpz_t poly(x), poly(x_t), s, t, tmp, poly(foo);
 	unsigned long r;
 	Primality result = composite;
 
-	mpz_inits(x0, x1, s, tmp, foo0, foo1, NULL);
+	mpz_inits(poly(x), poly(x_t), s, t, tmp, poly(foo), NULL);
 
-	mpz_set_ui(x0, 1);
-	// x1 is initialized as 0 by mpz_inits
+	mpz_set_ui(x_x, 1);
+	// x_1 is initialized as 0 by mpz_inits
 
 	/*
 	 * (3) Compute x^((n+1)/2) mod (n, x^2-bx-c).  If x^((n+1)/2) not in ℤ/nℤ,
@@ -202,18 +205,19 @@ static Primality steps_3_4_5(const mpz_t n, const mpz_t b, const mpz_t c)
 	mpz_add_ui(tmp, n, 1);		// tmp = n+1
 	mpz_fdiv_q_2exp(tmp, tmp, 1);   // tmp = (n+1)/2
 	powm(foo0, foo1, x0, x1, tmp, n, b, c);
+	powm(poly(foo), poly(x), tmp, MODULUS);
 
 	/* check whether x^((n+1)/2) has degree 1 */
-	if (mpz_sgn(foo0) != 0)
+	if (mpz_sgn(foo_x) != 0)
 		ret(composite);
 
 	/*
 	 * (4) Compute x^(n+1) mod (n, x^2-bx-c).  If x^(n+1) not congruent -c,
 	 * declare n to be composite and stop.
 	 */
-	mpz_mul(foo1, foo1, foo1);
+	mpz_mul(foo_1, foo_1, foo_1);
 	mpz_sub(tmp, n, c);
-	if (!mpz_congruent_p(foo1, tmp, n))
+	if (!mpz_congruent_p(foo_1, tmp, n))
 		ret(composite);
 
 	/*
@@ -226,21 +230,21 @@ static Primality steps_3_4_5(const mpz_t n, const mpz_t b, const mpz_t c)
 	mpz_mul(tmp, n, n);
 	/* calculate r,s such that 2^r*s + 1 == n^2 */
 	split(&r, s, tmp);
-	powm(foo0, foo1, x0, x1, s, n, b, c);
+	powm(poly(foo), poly(x), s, MODULUS);
 	mpz_sub_ui(tmp, n, 1);
 
-	if (mpz_sgn(foo0) == 0 && mpz_cmp_ui(foo1, 1) == 0)
+	if (mpz_sgn(foo_x) == 0 && mpz_cmp_ui(foo_1, 1) == 0)
 		ret(probably_prime);
 
 	for (unsigned long i = 0; i < r - 1; i++) {
-		if (mpz_sgn(foo0) == 0 && mpz_congruent_p(foo1, tmp, n))
+		if (mpz_sgn(foo_x) == 0 && mpz_congruent_p(foo_1, tmp, n))
 			ret(probably_prime);
-		square_mod(foo0, foo1, foo0, foo1, n, b, c);
+		square_mod(poly(foo), poly(foo), MODULUS);
 	}
 
 exit:
 	// cleanup
-	mpz_clears(x0, x1, s, tmp, foo0, foo1, NULL);
+	mpz_clears(poly(x), poly(x_t), s, tmp, poly(foo), NULL);
 	return result;
 }
 
@@ -255,7 +259,7 @@ Primality QFT(const mpz_t n, const mpz_t b, const mpz_t c)
 	if (result != probably_prime)
 		return result;
 
-	return steps_3_4_5(n, b, c);
+	return steps_3_4_5(MODULUS);
 }
 
 #define check_non_trivial_divisor(num) do { \
@@ -318,7 +322,7 @@ Primality RQFT(const mpz_t n, const unsigned k)
 			gmp_printf("Found no suitable pair (b,c) modulo n=%Zd.  This is highly " \
 					"unlikely unless the programme is wrong.  Assuming n is a prime...\n", n);
 		} else {
-			result = steps_3_4_5(n, b, c);
+			result = steps_3_4_5(MODULUS);
 			if (result != probably_prime)
 				ret(result);
 		}
