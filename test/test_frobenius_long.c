@@ -132,13 +132,13 @@ void test_frobenius_mult_mod(void)
 		mpz_set_ui(f_, f);
 		mpz_set_ui(g_, g);
 
-		mult_mod_int(&res0, &res1, d, e, f, g, n, b, c);
+		mult_mod_int(&res0, &res1, d, e, f, g, MODULUS);
 		mult_mod(res0_, res1_, d_, e_, f_, g_, n_, b_, c_);
 
 		CU_ASSERT_FATAL(mpz_cmp_ui(res0_, res0) == 0);
 		CU_ASSERT_FATAL(mpz_cmp_ui(res1_, res1) == 0);
 
-		square_mod_int(&res0, &res1, d, e, n, b, c);
+		square_mod_int(&res0, &res1, d, e, MODULUS);
 		square_mod(res0_, res1_, d_, e_, n_, b_, c_);
 
 		CU_ASSERT_FATAL(mpz_cmp_ui(res0_, res0) == 0);
@@ -179,7 +179,7 @@ void test_frobenius_powm_mod(void)
 		mpz_set_ui(e_, e);
 		mpz_set_ui(k_, k);
 
-		powm_int(&res0, &res1, d, e, k, n, b, c);
+		powm_int(&res0, &res1, d, e, k, MODULUS);
 		powm(res0_, res1_, d_, e_, k_, n_, b_, c_);
 
 		CU_ASSERT(mpz_cmp_ui(res0_, res0) == 0);
