@@ -70,7 +70,7 @@ function save_plot(plot, filename::String)
 end
 
 function plot_with_and_without_errorbars(data::DataFrame, filename::String)
-    save_data_by_algo(data, [:Bits, :MeanTime], filename);
+    save_data_by_algo(data, [:Bits, :MeanTime, :Min, :Max], filename);
     if plot_data
         save_plot(plot_timings(data, true), filename * "_error");
         save_plot(plot_timings(data, false), filename);
