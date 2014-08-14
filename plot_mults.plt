@@ -13,8 +13,9 @@ set terminal epslatex color size 17cm,10cm
 set xlabel '$\lfloor\log_2 n\rfloor$'
 set ylabel 'Anzahl der Multiplikationen'
 
+set format x '$2^{%L}$'
 
-set xrange [32:65536*2]
+set xrange [32:131072]
 set logscale x 2
 set logscale y
 

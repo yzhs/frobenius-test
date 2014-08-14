@@ -13,8 +13,9 @@ set style line 7 lt rgb "violet" lw 2
 set xlabel '$\lfloor\log_2 n\rfloor$'
 set ylabel 'Laufzeit in Sekunden'
 
+set format x '$2^{%L}$'
 
-set xrange [32:65536*2]
+set xrange [32:131072]
 set logscale x 2
 set logscale y
 
