@@ -246,6 +246,8 @@ void test_frobenius_primelist(void)
 	mpz_init(n);
 	for (i = 0; i < len(large_primes); i++) {
 		Primality foo;
+		if (large_primes[i] < B*B)
+			continue;
 		mpz_set_ui(n, large_primes[i]);
 		foo = RQFT(n, 1);
 		if (foo == composite && large_primes[i] % 16 != 15)
