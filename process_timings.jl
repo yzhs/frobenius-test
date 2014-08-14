@@ -2,6 +2,8 @@ using DataFrames
 
 plot_data = false
 
+factor = 5
+
 tex_output = "pic/"
 pic_output = "pictures/"
 
@@ -43,7 +45,7 @@ function process_raw_data(df)
     iters = sum(df[:Iterations])
     mults_per_iter = sum(df[:Multiplications]) / sum(df[:Iterations])
     number_of_pprimes = sum(df[:IsPrime])
-    return DataFrame(MeanTime = μ, Min = μ - 4σ, Max = μ + 4σ,
+    return DataFrame(MeanTime = μ, Min = μ - factor*σ, Max = μ + factor*σ,
                      Iterations = iters, Multiplications = mults_per_iter,
                      NumPrimes = number_of_pprimes)
 end
