@@ -34,16 +34,16 @@ label_D = sprintf("$(3 + %d)\\log n$", d+0.5)
 label_E = sprintf("$(3 + %d)\\log n$", e+0.5)
 
 set output 'pic/multiplications.tex'
-plot 'data/multiplications_primes.csv' using 1:2 title 'Primzahlen', \
-     'data/multiplications_composites.csv' using 1:2 title 'Zusammengesetzt', \
+plot 'data/multiplications_primes.csv'           using 1:2 title 'Primzahlen', \
+     'data/multiplications_composites.csv'       using 1:2 title 'Zusammengesetzt', \
      'data/multiplications_mersenne_numbers.csv' using 1:2 title 'Mersenne-Zahlen', \
-     'data/multiplications_mersenne_primes.csv' using 1:2 title 'Mersenne-Primzahlen', \
+     'data/multiplications_mersenne_primes.csv'  using 1:2 title 'Mersenne-Primzahlen', \
      C(x) title label_C ls 1, \
      D(x) title label_D ls 2, \
      E(x) title label_E ls 4, \
      3*x title '$3\log n$' ls 7
 
-set xrange [2048:65536*2]
+set xrange [2048:131072]
 set ylabel 'Laufzeit pro Multiplikation'
 
 # Karatsuba multiplication takes time Θ(x^(log_2 3))
