@@ -2,6 +2,14 @@ set datafile separator ','
 
 set terminal epslatex color size 17cm,10cm
 
+#set style line 1 lt rgb "red" lw 2
+#set style line 2 lt rgb "orange" lw 2
+#set style line 3 lt rgb "#f0f000" lw 2
+#set style line 4 lt rgb "green" lw 2
+#set style line 5 lt rgb "cyan" lw 2
+#set style line 6 lt rgb "blue" lw 2
+#set style line 7 lt rgb "violet" lw 2
+
 set xlabel '$\lfloor\log_2 n\rfloor$'
 set ylabel 'Anzahl der Multiplikationen'
 
