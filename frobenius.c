@@ -256,7 +256,7 @@ static Primality steps_3_4_5(MODULUS_ARGS)
 		ret(probably_prime);
 
 	for (unsigned long i = 0; i < r - 1; i++) {
-		if (mpz_sgn(foo_x) == 0 && mpz_congruent_p(foo_1, tmp, n))
+		if (mpz_sgn(foo_x) == 0 && mpz_cmp(foo_1, tmp) == 0)
 			ret(probably_prime);
 		square_mod(POLY(foo), POLY(foo), MODULUS);
 	}
