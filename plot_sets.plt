@@ -28,6 +28,22 @@ plot 'data/primes_gmp.csv'  using 1:2 title 'GMP', \
      'data/primes_mr.csv'   using 1:2 title 'Miller-Rabin', \
      'data/primes_frob.csv' using 1:2 title 'Frobenius'
 
+set output 'pic/all_primes.tex'
+plot 'data/primes_gmp.csv'           using 1:2 ls 1 title 'GMP ($2^k+\varepsilon$)', \
+     'data/primes_mr.csv'            using 1:2 ls 2 title 'Miller-Rabin ($2^k+\varepsilon$)', \
+     'data/primes_frob.csv'          using 1:2 ls 3 title 'Frobenius ($2^k+\varepsilon$)', \
+     'data/mersenne_primes_gmp.csv'  using 1:2 ls 4 title 'GMP ($2^p-1$)', \
+     'data/mersenne_primes_mr.csv'   using 1:2 ls 5 title 'Miller-Rabin ($2^p-1$)', \
+     'data/mersenne_primes_frob.csv' using 1:2 ls 6 title 'Frobenius ($2^p-1$)'
+
+set output 'pic/all_primes_errorbars.tex'
+plot 'data/primes_gmp.csv'           using 1:2:3:4 with errorbars ls 1 title 'GMP ($2^k+\varepsilon$)', \
+     'data/primes_mr.csv'            using 1:2:3:4 with errorbars ls 2 title 'Miller-Rabin ($2^k+\varepsilon$)', \
+     'data/primes_frob.csv'          using 1:2:3:4 with errorbars ls 3 title 'Frobenius ($2^k+\varepsilon$)', \
+     'data/mersenne_primes_gmp.csv'  using 1:2:3:4 with errorbars ls 4 title 'GMP ($2^p-1$)', \
+     'data/mersenne_primes_mr.csv'   using 1:2:3:4 with errorbars ls 5 title 'Miller-Rabin ($2^p-1$)', \
+     'data/mersenne_primes_frob.csv' using 1:2:3:4 with errorbars ls 6 title 'Frobenius ($2^p-1$)'
+
 
 set output 'pic/composites.tex'
 plot 'data/composites_gmp.csv'  using 1:2 title 'GMP', \
