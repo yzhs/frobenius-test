@@ -25,6 +25,14 @@ extern "C" {
 #define max(x,y) (((x) < (y)) ? (y) : (x))
 #define log(...) fprintf(stderr, __VA_ARGS__)
 
+#define TIME_IT(alg, set) \
+	if (measure_full && measure_##set##s && measure_##alg) \
+		time_it<alg>(bits_##set##s, set##s, first_##set, last_##set, set##s_name)
+
+#define TIME_IT_PRECOMP(alg, set) \
+	if (measure_prep && measure_##set##s && measure_##alg) \
+		time_it<alg##_precomputation>(bits_##set##s, set##s, first_##set, last_##set, set##s_name)
+
 extern unsigned long multiplications;
 
 /*
@@ -249,7 +257,22 @@ int main(int argc, char *argv[])
 	load_numbers(bits_mersenne_numbers, mersenne_numbers, "mersenne_numbers.txt", NUM_MERSENNE_NUMBERS) || die("failed to load Mersenne numbers\n");
 	load_numbers(bits_mersenne_primes, mersenne_primes, "mersenne_primes.txt", NUM_MERSENNE_PRIMES) || die("failed to load Mersenne primes\n");
 
-	// Figure out how long the precomputation takes, so we can compute how long a single iteration really takes.
+	// Which tests to run
+	static bool measure_full, measure_prep;
+	static bool measure_primes, measure_composites, measure_mersenne_numbers, measure_mersenne_primes;
+	static bool measure_GMP, measure_MillerRabin, measure_Frobenius;
+
+	measure_full = true;
+	measure_prep = true;
+
+	measure_primes = true;
+	measure_composites = true;
+	measure_mersenne_numbers = true;
+	measure_mersenne_primes = true;
+
+	measure_GMP = false;
+	measure_MillerRabin = false;
+	measure_Frobenius = true;
 
 	first_prime = 0;
 	last_prime = NUM_PRIMES - 1;
@@ -263,28 +286,29 @@ int main(int argc, char *argv[])
 	first_mersenne_prime = 0;
 	last_mersenne_prime = 20;
 
-#define TIME_IT(alg, set) \
-	time_it<alg>(bits_##set##s, set##s, first_##set, last_##set, set##s_name)
+	// Figure out how long the precomputation takes, so we can compute how long a single iteration really takes.
 
 	// Apply the different tests to primes
-	TIME_IT(GMP_precomputation, prime);
-	TIME_IT(MillerRabin_precomputation, prime);
-	TIME_IT(Frobenius_precomputation, prime);
+	TIME_IT_PRECOMP(GMP, prime);
+	TIME_IT_PRECOMP(MillerRabin, prime);
+	TIME_IT_PRECOMP(Frobenius, prime);
 
 	// composites
-	TIME_IT(GMP_precomputation, composite);
-	TIME_IT(MillerRabin_precomputation, composite);
-	TIME_IT(Frobenius_precomputation, composite);
+	TIME_IT_PRECOMP(GMP, composite);
+	TIME_IT_PRECOMP(MillerRabin, composite);
+	TIME_IT_PRECOMP(Frobenius, composite);
 
 	// some Mersenne numbers
-	TIME_IT(GMP_precomputation, mersenne_number);
-	TIME_IT(MillerRabin_precomputation, mersenne_number);
-	TIME_IT(Frobenius_precomputation, mersenne_number);
+	TIME_IT_PRECOMP(GMP, mersenne_number);
+	TIME_IT_PRECOMP(MillerRabin, mersenne_number);
+	TIME_IT_PRECOMP(Frobenius, mersenne_number);
 
 	// and 25 Mersenne primes
-	TIME_IT(GMP_precomputation, mersenne_prime);
-	TIME_IT(MillerRabin_precomputation, mersenne_prime);
-	TIME_IT(Frobenius_precomputation, mersenne_prime);
+	TIME_IT_PRECOMP(GMP, mersenne_prime);
+	TIME_IT_PRECOMP(MillerRabin, mersenne_prime);
+	TIME_IT_PRECOMP(Frobenius, mersenne_prime);
+
+	// Measure the full algorithm
 
 	// Apply the different tests to primes
 	TIME_IT(GMP, prime);
