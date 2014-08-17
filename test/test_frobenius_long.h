@@ -3,6 +3,7 @@
 #include <CUnit/CUnit.h>
 
 void test_frobenius_sigma(void);
+void test_frobenius_power_x_lucas(void);
 void test_frobenius_power(void);
 void test_frobenius_split(void);
 void test_frobenius_get_random(void);

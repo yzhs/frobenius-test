@@ -46,6 +46,7 @@ int main()
 
 	suite = CU_add_suite("Frobenius (GMP)", init, NULL);
 	CU_ADD_TEST(suite, test_frobenius_sigma);
+	CU_ADD_TEST(suite, test_frobenius_power_x_lucas);
 	CU_ADD_TEST(suite, test_frobenius_power);
 	CU_ADD_TEST(suite, test_frobenius_split);
 	CU_ADD_TEST(suite, test_frobenius_mult_mod);

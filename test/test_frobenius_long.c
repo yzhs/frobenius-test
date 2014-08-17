@@ -29,6 +29,24 @@ void test_frobenius_sigma(void)
 #include "powers_tester.h"
 }
 
+#define RUN_TEST \
+	for (unsigned long k = 1; k < 1000; k++) { \
+		mpz_set_ui(baz, k); \
+		powm(POLY(foo), POLY(x), baz, MODULUS); \
+		powm_x_lucas(POLY(bar), baz, MODULUS); \
+		if (mpz_cmp(foo_x, bar_x) != 0 || mpz_cmp(foo_1, bar_1) != 0) { \
+			gmp_printf("\nError: x^%lu = %Zd x + %Zd mod (%Zd, x^2 - %Zd x - %Zd) according to powm, but\n" \
+				   "       x^%lu = %Zd x + %Zd mod (%Zd, x^2 - %Zd x - %Zd) according to powm_x_lucas\n",\
+					k, foo_x, foo_1, n, b, c, k, bar_x, bar_1, n, b, c); \
+			CU_ASSERT_FATAL(false); \
+		} \
+	}
+
+void test_frobenius_power_x_lucas(void)
+{
+#include "powers_tester.h"
+}
+
 void test_frobenius_power(void)
 {
 	unsigned long r, n_;
