@@ -158,10 +158,13 @@ static void mult_x_mod(POLY_ARGS(res), CONST_POLY_ARGS(f), MODULUS_ARGS)
 
 static void sigma(POLY_ARGS(res), CONST_POLY_ARGS(f), MODULUS_ARGS)
 {
-	mpz_sub(res_x, n, f_x);
+	mpz_set(tmp1, f_1);
+
 	mpz_mul(res_1, f_x, b);
-	mpz_add(res_1, res_1, f_1);
+	mpz_add(res_1, res_1, tmp1);
 	mpz_mod(res_1, res_1, n);
+
+	mpz_sub(res_x, n, f_x);
 
 	multiplications += 1;
 }
