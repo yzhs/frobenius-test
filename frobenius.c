@@ -136,6 +136,10 @@ static Primality steps_1_2(const mpz_t n)
 #undef tmp
 }
 
+/*
+ * Compute f*x = f_x * x^2 + f_1 * x = (b * f_x + f_1) * x + c * f_x for a
+ * given polynomial f. Thus res_x = b * f_x + f_1 and res_1 = c * f_x.
+ */
 static void mult_x_mod(POLY_ARGS(res), CONST_POLY_ARGS(f), MODULUS_ARGS)
 {
 	// In case res_1 and f_x point to the same memory, we have to make a copy.
@@ -162,6 +166,7 @@ static void sigma(POLY_ARGS(res), CONST_POLY_ARGS(f), MODULUS_ARGS)
 	multiplications += 1;
 }
 
+// Return a certain value x after deallocating the local big integer variables.
 #define ret(x) do { result = (x); goto exit; } while (0)
 
 static Primality steps_3_4_5(MODULUS_ARGS)
@@ -281,12 +286,19 @@ Primality QFT(MODULUS_ARGS)
 	return steps_3_4_5(MODULUS);
 }
 
+/*
+ * Check whether gcd(n, num) is either n or 1.  Otherwise return composite from
+ * RQFT.
+ */
 #define check_non_trivial_divisor(num) do { \
 		mpz_gcd(tmp, num, n); \
 		if (mpz_cmp_ui(tmp, 1) != 0 && mpz_cmp(tmp, n) != 0) \
 			ret(composite); \
 } while (0)
 
+/*
+ * The randomized quadratic Frobenius Test (RQFT).
+ */
 Primality RQFT(const mpz_t n, const unsigned k)
 {
 	mpz_t b, c, nm1;
