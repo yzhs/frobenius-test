@@ -156,6 +156,13 @@ static void mult_x_mod(POLY_ARGS(res), CONST_POLY_ARGS(f), MODULUS_ARGS)
 	multiplications += 2;
 }
 
+/*
+ * Apply the generator of the Galois group Gal(FF_{p^2}/FF_p) to an element of
+ * FF_{p^2}.  The generator is given both by the Frobenius map
+ * (dx+e) |--> (dx+e)^n and by the ring homomorphism defined by x |--> b-x.  We
+ * use the latter to avoid performing the exponentiation involved in the
+ * former.
+ */
 static void sigma(POLY_ARGS(res), CONST_POLY_ARGS(f), MODULUS_ARGS)
 {
 	mpz_set(tmp1, f_1);
