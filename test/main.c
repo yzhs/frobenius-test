@@ -45,6 +45,7 @@ int main()
 //	CU_ADD_TEST(suite, test_frobenius_larger_primes_int);
 
 	suite = CU_add_suite("Frobenius (GMP)", init, NULL);
+	CU_ADD_TEST(suite, test_frobenius_sigma);
 	CU_ADD_TEST(suite, test_frobenius_power);
 	CU_ADD_TEST(suite, test_frobenius_split);
 	CU_ADD_TEST(suite, test_frobenius_mult_mod);

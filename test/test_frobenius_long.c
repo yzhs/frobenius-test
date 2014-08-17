@@ -9,6 +9,26 @@
 
 static int num_iterations = 10000;
 
+#define RUN_TEST \
+	mpz_nextprime(n, n); \
+	sigma(POLY(foo), POLY(f), MODULUS); \
+	sigma(POLY(foo), POLY(foo), MODULUS); \
+	CU_ASSERT_TRUE(mpz_cmp(foo_x, f_x) == 0); \
+	CU_ASSERT_TRUE(mpz_cmp(foo_1, f_1) == 0); \
+	sigma(POLY(foo), POLY(f), MODULUS); \
+	powm(POLY(bar), POLY(f), n, MODULUS); \
+	if (mpz_cmp(foo_x, bar_x) != 0 || mpz_cmp(foo_1, bar_1) != 0) { \
+		gmp_printf("\nError: sigma(f) = %Zd x + %Zd, but\n" \
+			     "            f^n = %Zd x + %Zd\n",\
+				foo_x, foo_1, bar_x, bar_1); \
+		CU_ASSERT_FATAL(false); \
+	}
+
+void test_frobenius_sigma(void)
+{
+#include "powers_tester.h"
+}
+
 void test_frobenius_power(void)
 {
 	unsigned long r, n_;
