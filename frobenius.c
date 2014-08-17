@@ -231,10 +231,6 @@ static Primality steps_3_4_5(MODULUS_ARGS)
 		mpz_set(foo_1, x_n_1_2_1);
 	}
 
-	mpz_add_ui(tmp, n, 1);
-	mpz_fdiv_q_2exp(tmp, tmp, 1);
-	powm(POLY(foo), POLY(x), tmp, MODULUS);
-
 	/* check whether x^((n+1)/2) has degree 1 */
 	if (mpz_sgn(foo_x) != 0)
 		ret(composite);
@@ -256,6 +252,7 @@ static Primality steps_3_4_5(MODULUS_ARGS)
 	 * prime.
 	 */
 	mpz_mul(tmp, n, n);
+	mpz_sub_ui(tmp, tmp, 1);
 	/* calculate r,s such that 2^r*s + 1 == n^2 */
 	split(&r, s, tmp);
 	if (n_is_1_mod_4) {
@@ -263,7 +260,20 @@ static Primality steps_3_4_5(MODULUS_ARGS)
 		mult_mod(POLY(foo), POLY(foo), POLY(x_t), MODULUS);
 		mult_mod(POLY(foo), POLY(foo), POLY(x_n_1_2), MODULUS);
 	} else {
-		powm(POLY(foo), POLY(x), s, MODULUS);
+		sigma(POLY(foo), POLY(x_t), MODULUS);
+		mult_mod(POLY(foo), POLY(foo), POLY(x_t), MODULUS);
+		//sigma(POLY(foo), POLY(x_t), MODULUS);
+		//mpz_set(tmp, n);
+		//powm(POLY(foo), POLY(x), tmp, MODULUS);
+		//mult_mod(POLY(foo), POLY(foo), POLY(x_t), MODULUS);
+
+		//powm(POLY(x), POLY(x), s, MODULUS);
+		//mpz_sub(x_x, x_x, foo_x);
+		//mpz_sub(x_1, x_1, foo_1);
+		//gmp_printf("\n%Zd*x + %Zd, n == 3 mod 4\n", x_x, x_1);
+		//assert(mpz_sgn(x_x) == 0 && mpz_sgn(x_1) == 0);
+
+		//powm(POLY(foo), POLY(x), s, MODULUS);
 	}
 	mpz_sub_ui(tmp, n, 1);
 
