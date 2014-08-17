@@ -21,17 +21,17 @@ set logscale y
 
 set key top left
 
-C(x) = (3 + c)*x
-D(x) = (3 + d)*x
-E(x) = (3 + e)*x
+C(x) = c*x
+D(x) = d*x
+E(x) = e*x
 
 fit C(x) 'data/multiplications_primes.csv' using 1:2 via c
 fit D(x) 'data/multiplications_composites.csv' using 1:2 via d
 fit E(x) 'data/multiplications_mersenne_primes.csv' using 1:2 via e
 
-label_C = sprintf("$(3 + %d)\\log n$", c+0.5)
-label_D = sprintf("$(3 + %d)\\log n$", d+0.5)
-label_E = sprintf("$(3 + %d)\\log n$", e+0.5)
+label_C = sprintf("$%d\\log n$", c+0.5)
+label_D = sprintf("$%d\\log n$", d+0.5)
+label_E = sprintf("$%d\\log n$", e+0.5)
 
 set output 'pic/multiplications.tex'
 plot 'data/multiplications_primes.csv'           using 1:2 title 'Primzahlen', \
