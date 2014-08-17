@@ -232,7 +232,7 @@ void test_frobenius_primelist(void)
 	FILE *fp = fopen(TEST_DATA_PATH "primelist.txt", "r");
 	unsigned p;
 	unsigned long i = 0;
-	static unsigned large_primes[3069262];
+	static unsigned large_primes[23006166];
 	mpz_t n;
 
 	if (NULL == fp)
@@ -250,9 +250,9 @@ void test_frobenius_primelist(void)
 			continue;
 		mpz_set_ui(n, large_primes[i]);
 		foo = RQFT(n, 1);
-		if (foo == composite && large_primes[i] % 16 != 15)
-			printf("%x\n", large_primes[i]);
-		CU_ASSERT_NOT_EQUAL(foo, composite);
+		if (foo == composite)
+			printf("%u\n", large_primes[i]);
+		CU_ASSERT_NOT_EQUAL_FATAL(foo, composite);
 	}
 }
 
