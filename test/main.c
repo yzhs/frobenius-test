@@ -47,15 +47,15 @@ int main()
 	suite = CU_add_suite("Frobenius (GMP)", init, NULL);
 	CU_ADD_TEST(suite, test_frobenius_sigma);
 	CU_ADD_TEST(suite, test_frobenius_power_x_lucas);
-	CU_ADD_TEST(suite, test_frobenius_power);
-	CU_ADD_TEST(suite, test_frobenius_split);
-	CU_ADD_TEST(suite, test_frobenius_mult_mod);
-	CU_ADD_TEST(suite, test_frobenius_powm_mod);
-	CU_ADD_TEST(suite, test_frobenius_squares);
-	CU_ADD_TEST(suite, test_frobenius_trial_division);
-	CU_ADD_TEST(suite, test_frobenius_rqft_small_primes);
+//	CU_ADD_TEST(suite, test_frobenius_power);
+//	CU_ADD_TEST(suite, test_frobenius_split);
+//	CU_ADD_TEST(suite, test_frobenius_mult_mod);
+//	CU_ADD_TEST(suite, test_frobenius_powm_mod);
+//	CU_ADD_TEST(suite, test_frobenius_squares);
+//	CU_ADD_TEST(suite, test_frobenius_trial_division);
+//	CU_ADD_TEST(suite, test_frobenius_rqft_small_primes);
 	CU_ADD_TEST(suite, test_frobenius_larger_primes);
-	CU_ADD_TEST(suite, test_frobenius_primelist);
+//	CU_ADD_TEST(suite, test_frobenius_primelist);
 
 	CU_basic_set_mode(CU_BRM_VERBOSE);
 	CU_basic_run_tests();
