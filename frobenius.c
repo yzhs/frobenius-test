@@ -257,6 +257,9 @@ static void sigma(POLY_ARGS(res), CONST_POLY_ARGS(f), MODULUS_ARGS)
 // Return a certain value x after deallocating the local big integer variables.
 #define ret(x) do { result = (x); goto exit; } while (0)
 
+/*
+ * Perform the non-deterministic steps of the Quadratic Frobenius Test.
+ */
 static Primality steps_3_4_5(MODULUS_ARGS)
 {
 	mpz_t POLY(x), POLY(x_t), POLY(x_n_1_2), s, t, tmp, POLY(foo);
@@ -264,6 +267,7 @@ static Primality steps_3_4_5(MODULUS_ARGS)
 	unsigned long r;
 	Primality result = composite;
 
+	// Allocate memory for long integers
 	mpz_inits(POLY(x), POLY(x_t), POLY(x_n_1_2), s, t, tmp, POLY(foo), NULL);
 
 	mpz_set_ui(x_x, 1);
