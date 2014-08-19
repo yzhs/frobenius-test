@@ -108,22 +108,54 @@ static void powm_x_lucas(POLY_ARGS(res), const mpz_t e, MODULUS_ARGS)
 	mpz_inits(B_1, A_j, B_j, C_j, inverse_of_2, bb4c, tmp0, tmp1, NULL);
 
 	// Make a copy, so we can change the exponent.
-	mpz_set(exponent, e);
 	mpz_set_ui(tmp0, 2);
 	mpz_invert(inverse_of_2, tmp0, n);
 
-	// Start with A_1 = x^1 + (b-x)^1 = b
-#define A_1 b
+	// Start with A_1 = x^1 + (b-x)^1 = 2
 	mpz_set(A_j, b);
-	// and B_1 = (x - (b - x))/(2x+b) = (-2x-b)/(2x+b) = -1 which is congruent to n-1.
-	mpz_sub_ui(B_1, n, 1);
-	mpz_set(B_j, B_1);
+	// and B_1 = (x^1 - (b - x)^1)/(2x-b) = 1.
+	mpz_set_ui(B_j, 1);
 	// Obviously C_1 = c.
-#define C_1 c
 	mpz_set(C_j, c);
 
-	while (mpz_sgn(exponent) != 0) {
-		if (mpz_odd_p(exponent)){
+	mpz_add(bb4c, c, c);
+	mpz_add(bb4c, bb4c, bb4c);
+	mpz_addmul(bb4c, b, b);
+
+	// The following thre values are needed for the chain addition steps.
+	// A_1 = x + (b - x) = b
+#define A_1 b
+	// B_1 = (x - (b - x))/(2x - b) = (2x - b)/(2x - b) = 1
+	mpz_set_ui(B_1, 1);
+	// C_1 = c^1
+#define C_1 c
+
+	// Skip the leading 1 bit and convert convert to 0 based indexing
+	for (unsigned long k = mpz_sizeinbase(exponent, 2) - 1 - 1; k < (1lu<<63); k--) {
+		// Square
+
+		// Compute B_{2j}
+		mpz_mul(B_j, B_j, A_j);
+		mpz_mod(B_j, B_j, n);
+
+		// Compute A_{2j}
+		mpz_mul(A_j, A_j, A_j);
+		mpz_add(tmp0, C_j, C_j);
+		// TODO A conditional branch in a tight inner loop is a bad idea. Rewrite this!
+		if (j_even)
+			mpz_sub(A_j, A_j, tmp0);
+		else
+			mpz_add(A_j, A_j, tmp0);
+		mpz_mod(A_j, A_j, n);
+
+		// Compute C_{2j}
+		mpz_mul(C_j, C_j, C_j);
+		mpz_mod(C_j, C_j, n);
+
+		j_even = true;
+		multiplications += 3;
+
+		if (mpz_tstbit(exponent, k)) {
 			// Multiply
 
 			mpz_set(tmp0, A_j);
@@ -131,7 +163,7 @@ static void powm_x_lucas(POLY_ARGS(res), const mpz_t e, MODULUS_ARGS)
 			// Compute A_{j+1}
 			mpz_mul(A_j, bb4c, B_1);
 			mpz_mul(A_j, A_j, B_j);
-			mpz_addmul(A_j, A_j, A_1);
+			mpz_addmul(A_j, tmp0, A_1);
 			mpz_mul(A_j, A_j, inverse_of_2);
 			mpz_mod(A_j, A_j, n);
 
@@ -145,37 +177,15 @@ static void powm_x_lucas(POLY_ARGS(res), const mpz_t e, MODULUS_ARGS)
 			mpz_mul(C_j, C_j, C_1);
 			mpz_mod(C_j, C_j, n);
 
-			j_even = !j_even;
+			j_even = false;
 			multiplications += 8;
 		}
-		// Square
-
-		// Compute A_{2j}
-		mpz_mul(A_j, A_j, A_j);
-		mpz_add(tmp0, C_j, C_j);
-		if (j_even)
-			mpz_sub(A_j, A_j, tmp0);
-		else
-			mpz_add(A_j, A_j, tmp0);
-		mpz_mod(A_j, A_j, n);
-
-		// Compute B_{2j}
-		mpz_mul(B_j, B_j, A_j);
-		mpz_mod(B_j, B_j, n);
-
-		// Compute C_{2j}
-		mpz_mul(C_j, C_j, C_j);
-		mpz_mod(C_j, C_j, n);
-
-		j_even = true;
-		multiplications += 3;
-
-		mpz_fdiv_q_2exp(exponent, exponent, 1);
 	}
 
 	mpz_set(res_x, B_j);
-	mpz_set(res_1, A_j);
-	mpz_submul(res_1, b, B_j);
+
+	mpz_mul(res_1, b, B_j);
+	mpz_sub(res_1, A_j, res_1);
 	mpz_mul(res_1, res_1, inverse_of_2);
 	mpz_mod(res_1, res_1, n);
 
