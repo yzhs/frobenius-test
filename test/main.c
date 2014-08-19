@@ -44,7 +44,7 @@ int main()
 //	CU_ADD_TEST(suite, test_frobenius_problematic_primes_int);
 //	CU_ADD_TEST(suite, test_frobenius_larger_primes_int);
 
-	suite = CU_add_suite("Frobenius (GMP)", init, NULL);
+	suite = CU_add_suite("Frobenius (GMP)", init, cleanup);
 	CU_ADD_TEST(suite, test_frobenius_sigma);
 	CU_ADD_TEST(suite, test_frobenius_composites);
 	CU_ADD_TEST(suite, test_frobenius_power_x_lucas);
