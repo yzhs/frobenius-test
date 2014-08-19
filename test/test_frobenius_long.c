@@ -413,3 +413,18 @@ void test_frobenius_larger_primes(void)
 }
 
 
+void test_frobenius_composites(void)
+{
+	static mpz_t composites[1013];
+	FILE *fp = fopen(TEST_DATA_PATH "composites.txt", "r");
+	unsigned long i;
+
+	for (i = 0; i < len(composites); i++)
+		gmp_fscanf(fp, "%Zd\n", composites[i]);
+
+	fclose(fp);
+
+	for (i = 0; i < len(composites); i++)
+		CU_ASSERT_EQUAL(RQFT(composites[i], 10), composite);
+}
+

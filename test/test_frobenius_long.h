@@ -16,6 +16,7 @@ void test_frobenius_rqft_small_composites(void);
 void test_frobenius_problematic_primes(void);
 void test_frobenius_primelist(void);
 void test_frobenius_larger_primes(void);
+void test_frobenius_composites(void);
 
 
 #endif
