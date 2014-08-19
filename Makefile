@@ -81,7 +81,7 @@ test/test_miller_rabin_long.o: test/test_miller_rabin_long.c test/test_miller_ra
 test/test_frobenius_int.o: test/test_frobenius_int.c test/test_frobenius_int.h frobenius_int.c helpers_int.c helpers_int.h common.h small_primes.c small_primes.h
 	$(CC) $(CFLAGS) -c -o $@ test/test_frobenius_int.c
 
-test/test_frobenius_long.o: test/test_frobenius_long.c test/test_frobenius_long.h frobenius.c helpers.c helpers.h common.h small_primes.c small_primes.h test/powers_tester.h
+test/test_frobenius_long.o: test/test_frobenius_long.c test/test_frobenius_long.h frobenius.c helpers.c helpers.h common.h small_primes.c small_primes.h
 	$(CC) $(CFLAGS) -c -o $@ test/test_frobenius_long.c
 
 

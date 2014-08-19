@@ -9,42 +9,140 @@
 
 static int num_iterations = 10000;
 
-#define RUN_TEST \
-	mpz_nextprime(n, n); \
-	sigma(POLY(foo), POLY(f), MODULUS); \
-	sigma(POLY(foo), POLY(foo), MODULUS); \
-	CU_ASSERT_TRUE(mpz_cmp(foo_x, f_x) == 0); \
-	CU_ASSERT_TRUE(mpz_cmp(foo_1, f_1) == 0); \
-	sigma(POLY(foo), POLY(f), MODULUS); \
-	powm(POLY(bar), POLY(f), n, MODULUS); \
-	if (mpz_cmp(foo_x, bar_x) != 0 || mpz_cmp(foo_1, bar_1) != 0) { \
-		gmp_printf("\nError: sigma(f) = %Zd x + %Zd, but\n" \
-			     "            f^n = %Zd x + %Zd\n",\
-				foo_x, foo_1, bar_x, bar_1); \
-		CU_ASSERT_FATAL(false); \
-	}
-
 void test_frobenius_sigma(void)
 {
-#include "powers_tester.h"
-}
+	unsigned long n_, b_, c_, p, q;
+	mpz_t MODULUS, POLY(f), POLY(foo), POLY(bar), POLY(x), baz;
+	mpz_inits(MODULUS, POLY(foo), POLY(f), POLY(bar), POLY(x), baz, NULL);
 
-#define RUN_TEST \
-	for (unsigned long k = 1; k < 1000; k++) { \
-		mpz_set_ui(baz, k); \
-		powm(POLY(foo), POLY(x), baz, MODULUS); \
-		powm_x_lucas(POLY(bar), baz, MODULUS); \
-		if (mpz_cmp(foo_x, bar_x) != 0 || mpz_cmp(foo_1, bar_1) != 0) { \
-			gmp_printf("\nError: x^%lu = %Zd x + %Zd mod (%Zd, x^2 - %Zd x - %Zd) according to powm, but\n" \
-				   "       x^%lu = %Zd x + %Zd mod (%Zd, x^2 - %Zd x - %Zd) according to powm_x_lucas\n",\
-					k, foo_x, foo_1, n, b, c, k, bar_x, bar_1, n, b, c); \
-			CU_ASSERT_FATAL(false); \
-		} \
+	// Initialize POLY(x)
+	n_ = 0x7ffffff;
+	mpz_set_ui(n, n_);
+	mpz_urandomm(n, r_state, n);
+	mpz_add(n, n, n);
+	mpz_add_ui(n, n, 0x70000001);
+	n_ = mpz_get_ui(n);
+	mpz_set_ui(x_x, 1);
+
+	mpz_nextprime(n, n);
+	CU_ASSERT_FATAL(mpz_probab_prime_p(n, 50));
+	n_ = mpz_get_ui(n);
+
+	for (c_ = 1; c_ < 50; c_++) {
+		if (jacobi(n_ - c_, n_) != 1)
+			continue;
+		mpz_set_ui(c, c_);
+
+		for (b_ = 1; b_ < 20; b_++) {
+			if (jacobi(b_*b_+4*c_, n_) != -1)
+				continue;
+			mpz_set_ui(b, b_);
+		}
+
+		for (p = 0; p < 20; p++) {
+			mpz_set_ui(f_x, 0);
+			mpz_set_ui(f_1, p);
+			powm(POLY(foo), POLY(f), n, MODULUS);
+			CU_ASSERT(mpz_cmp_ui(foo_x, 0) == 0);
+			CU_ASSERT(mpz_cmp_ui(foo_1, p) == 0);
+		}
 	}
+
+	CU_ASSERT_FATAL(mpz_probab_prime_p(n, 50));
+
+	for (unsigned long c_ = 1; c_ < 1000; c_++) {
+		if (jacobi(n_ - c_, n_) != 1)
+			continue;
+		mpz_set_ui(c, c_);
+
+		for (unsigned long b_ = 1; b_ < 100; b_++) {
+			b_ %= n_;
+			if (jacobi(b_*b_+4*c_, n_) != -1)
+				continue;
+			mpz_set_ui(b, b_);
+
+			mpz_urandomm(f_x, r_state, n);
+			mpz_urandomm(f_1, r_state, n);
+
+			// Make sure σ is indeed an involution
+			sigma(POLY(foo), POLY(f), MODULUS);
+			sigma(POLY(foo), POLY(foo), MODULUS);
+			CU_ASSERT_FATAL(mpz_cmp(foo_x, f_x) == 0);
+			CU_ASSERT_FATAL(mpz_cmp(foo_1, f_1) == 0);
+
+			sigma(POLY(foo), POLY(x), MODULUS);
+			mpz_sub_ui(baz, n, 1);
+			CU_ASSERT_FATAL(mpz_cmp(foo_x, baz) == 0);
+			CU_ASSERT_FATAL(mpz_cmp(foo_1, b) == 0);
+
+			powm(POLY(foo), POLY(x), n, MODULUS);
+			CU_ASSERT_FATAL(mpz_cmp(foo_x, baz) == 0);
+			CU_ASSERT_FATAL(mpz_cmp(foo_1, b) == 0);
+
+			power_of_x(POLY(foo), n, MODULUS);
+			CU_ASSERT_FATAL(mpz_cmp(foo_x, baz) == 0);
+			CU_ASSERT_FATAL(mpz_cmp(foo_1, b) == 0);
+
+			// Check whether x^n is the same as σ(x)
+			sigma(POLY(foo), POLY(x), MODULUS);
+			powm(POLY(bar), POLY(x), n, MODULUS);
+			if (mpz_cmp(foo_x, bar_x) != 0 || mpz_cmp(foo_1, bar_1) != 0) {
+				gmp_printf("\nError: σ(f) = %Zd x + %Zd, but\n"
+						"        f^n = %Zd x + %Zd\n",\
+						foo_x, foo_1, bar_x, bar_1);
+				gmp_printf("n = %Zd = %d mod 4, b = %Zd, c = %Zd\n", n, mpz_fdiv_ui(n, 4), b, c);
+				CU_ASSERT_FATAL(false);
+			} else CU_ASSERT(true);
+		}
+	}
+
+	mpz_clears(MODULUS, POLY(f), POLY(foo), POLY(bar), POLY(x), baz, NULL);
+}
 
 void test_frobenius_power_x_lucas(void)
 {
-#include "powers_tester.h"
+	unsigned long n_;
+	mpz_t MODULUS, POLY(f), POLY(foo), POLY(bar), POLY(x), baz;
+	mpz_inits(MODULUS, POLY(foo), POLY(f), POLY(bar), POLY(x), baz, NULL);
+
+	// Initialize POLY(x)
+	n_ = 0x7ffffffff;
+	mpz_set_ui(n, n_);
+	mpz_urandomm(n, r_state, n);
+	mpz_add(n, n, n);
+	mpz_add_ui(n, n, 0x70000001);
+	n_ = mpz_get_ui(n);
+	mpz_set_ui(x_x, 1);
+
+	mpz_nextprime(n, n);
+	CU_ASSERT_FATAL(mpz_probab_prime_p(n, 50));
+
+	for (unsigned long c_ = 1; c_ < 50; c_++) {
+		if (jacobi(n_ - c_, n_) != 1)
+			continue;
+		mpz_set_ui(c, c_);
+
+		for (unsigned long b_ = 1; b_ < 20; b_++) {
+			if (jacobi(b_*b_+4*c_, n_) != -1)
+				continue;
+			mpz_set_ui(b, b_);
+
+			mpz_urandomm(f_x, r_state, n);
+			mpz_urandomm(f_1, r_state, n);
+
+			for (unsigned long k = 1; k < 1000; k++) {
+				mpz_set_ui(baz, k);
+				power_of_x(POLY(bar), baz, MODULUS);
+				powm(POLY(foo), POLY(x), baz, MODULUS);
+				CU_ASSERT(mpz_cmp(foo_x, bar_x) == 0);
+				CU_ASSERT(mpz_cmp(foo_1, bar_1) == 0);
+			}
+
+
+		}
+	}
+
+	mpz_clears(MODULUS, POLY(f), POLY(foo), POLY(bar), POLY(x), baz, NULL);
 }
 
 void test_frobenius_power(void)
