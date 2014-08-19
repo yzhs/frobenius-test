@@ -252,10 +252,14 @@ int main(int argc, char *argv[])
 	if (NULL == output)
 		die("failed to open output file");
 
-	load_numbers(bits_primes, primes, "primes.txt", NUM_PRIMES) || die("failed to load primes\n");
-	load_numbers(bits_composites, composites, "composites.txt", NUM_COMPOSITES) || die("failed to load composites\n");
-	load_numbers(bits_mersenne_numbers, mersenne_numbers, "mersenne_numbers.txt", NUM_MERSENNE_NUMBERS) || die("failed to load Mersenne numbers\n");
-	load_numbers(bits_mersenne_primes, mersenne_primes, "mersenne_primes.txt", NUM_MERSENNE_PRIMES) || die("failed to load Mersenne primes\n");
+	load_numbers(bits_primes, primes, "primes.txt", NUM_PRIMES) \
+		|| die("failed to load primes\n");
+	load_numbers(bits_composites, composites, "composites.txt", NUM_COMPOSITES) \
+		|| die("failed to load composites\n");
+	load_numbers(bits_mersenne_numbers, mersenne_numbers, "mersenne_numbers.txt", NUM_MERSENNE_NUMBERS) \
+		|| die("failed to load Mersenne numbers\n");
+	load_numbers(bits_mersenne_primes, mersenne_primes, "mersenne_primes.txt", NUM_MERSENNE_PRIMES) \
+		|| die("failed to load Mersenne primes\n");
 
 	// Which tests to run
 	static bool measure_full, measure_prep;
@@ -286,7 +290,9 @@ int main(int argc, char *argv[])
 	first_mersenne_prime = 0;
 	last_mersenne_prime = 20;
 
-	// Figure out how long the precomputation takes, so we can compute how long a single iteration really takes.
+	/*
+	 * Precomputation
+	 */
 
 	// Apply the different tests to primes
 	TIME_IT_PRECOMP(GMP, prime);
@@ -308,7 +314,9 @@ int main(int argc, char *argv[])
 	TIME_IT_PRECOMP(MillerRabin, mersenne_prime);
 	TIME_IT_PRECOMP(Frobenius, mersenne_prime);
 
-	// Measure the full algorithm
+	/*
+	 * Full test
+	 */
 
 	// Apply the different tests to primes
 	TIME_IT(GMP, prime);
@@ -330,6 +338,7 @@ int main(int argc, char *argv[])
 	TIME_IT(MillerRabin, mersenne_prime);
 	TIME_IT(Frobenius, mersenne_prime);
 
+	cleanup();
 	// Make sure phantom is not removed by the optimizer.  This might yield
 	// a bogus return value which can, however, easily be ignored.
 	return phantom % 314159265 != 0;
