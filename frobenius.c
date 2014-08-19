@@ -100,7 +100,7 @@ static void powm(POLY_ARGS(res), CONST_POLY_ARGS(b), const mpz_t exponent, MODUL
 	}
 }
 
-static void powm_x_lucas(POLY_ARGS(res), const mpz_t e, MODULUS_ARGS)
+static void power_of_x(POLY_ARGS(res), const mpz_t exponent, MODULUS_ARGS)
 {
 	bool j_even = false; // We only need j to compute (-1)^j, so all we care about is whether j is odd or even.
 	mpz_t B_1, A_j, B_j, C_j;
@@ -301,7 +301,7 @@ static Primality steps_3_4_5(MODULUS_ARGS)
 	mpz_fdiv_q_2exp(t, s, 1);  // t = (s-1)/2
 
 	// Calculate x_t_x and x_t_1, such that (x_t_x*x+x_t_1) = x^t mod (n, x^2-bx-c).
-	powm(POLY(x_t), POLY(x), t, MODULUS);
+	power_of_x(POLY(x_t), t, MODULUS);
 
 	// Calculate (x^t)^2 = x^(s-1)
 	square_mod(POLY(foo), POLY(x_t), MODULUS);
@@ -354,18 +354,7 @@ static Primality steps_3_4_5(MODULUS_ARGS)
 	} else {
 		sigma(POLY(foo), POLY(x_t), MODULUS);
 		mult_mod(POLY(foo), POLY(foo), POLY(x_t), MODULUS);
-		//sigma(POLY(foo), POLY(x_t), MODULUS);
-		//mpz_set(tmp, n);
-		//powm(POLY(foo), POLY(x), tmp, MODULUS);
-		//mult_mod(POLY(foo), POLY(foo), POLY(x_t), MODULUS);
-
-		//powm(POLY(x), POLY(x), s, MODULUS);
-		//mpz_sub(x_x, x_x, foo_x);
-		//mpz_sub(x_1, x_1, foo_1);
-		//gmp_printf("\n%Zd*x + %Zd, n == 3 mod 4\n", x_x, x_1);
-		//assert(mpz_sgn(x_x) == 0 && mpz_sgn(x_1) == 0);
-
-		//powm(POLY(foo), POLY(x), s, MODULUS);
+		//power_of_x(POLY(foo), s, MODULUS);
 	}
 	mpz_sub_ui(tmp, n, 1);
 
