@@ -8,12 +8,12 @@
 #include "small_primes.h"
 #include "frobenius_int.h"
 
-static unsigned long bb4c, multiplications;
+static uint64_t bb4c, multiplications;
 
-#define POLY_ARGS(f) unsigned long *f##_x, unsigned long *f##_1
-#define CONST_POLY_ARGS(f) const unsigned long f##_x, const unsigned long f##_1
+#define POLY_ARGS(f) uint64_t *f##_x, uint64_t *f##_1
+#define CONST_POLY_ARGS(f) const uint64_t f##_x, const uint64_t f##_1
 #define MODULUS n, b, c
-#define MODULUS_ARGS const unsigned long n, const unsigned long b, const unsigned long c
+#define MODULUS_ARGS const uint64_t n, const uint64_t b, const uint64_t c
 
 
 /*
@@ -22,7 +22,7 @@ static unsigned long bb4c, multiplications;
  */
 static void mult_mod_int(POLY_ARGS(res), CONST_POLY_ARGS(f), CONST_POLY_ARGS(g), MODULUS_ARGS)
 {
-	unsigned long df, ef = (f_x * g_x) % n, eg = (f_1 * g_x) % n;
+	uint64_t df, ef = (f_x * g_x) % n, eg = (f_1 * g_x) % n;
 	multiplications += 2;
 
 	// If deg f = 1, the whole thing amounts to multiplying the
@@ -47,8 +47,8 @@ static void mult_mod_int(POLY_ARGS(res), CONST_POLY_ARGS(f), CONST_POLY_ARGS(g),
  */
 static void square_mod_int(POLY_ARGS(res), CONST_POLY_ARGS(f), MODULUS_ARGS)
 {
-	unsigned long ee = (f_1 * f_1) % n;
-	unsigned long dd;
+	uint64_t ee = (f_1 * f_1) % n;
+	uint64_t dd;
 
 	multiplications++;
 
@@ -73,9 +73,9 @@ static void square_mod_int(POLY_ARGS(res), CONST_POLY_ARGS(f), MODULUS_ARGS)
  * (*res_x) * x + (*res_1).  The computation is done using exponentiation by
  * squaring.
  */
-static void powm_int(POLY_ARGS(res), CONST_POLY_ARGS(b), unsigned long exp, MODULUS_ARGS)
+static void powm_int(POLY_ARGS(res), CONST_POLY_ARGS(b), uint64_t exp, MODULUS_ARGS)
 {
-	unsigned long POLY(base);
+	uint64_t POLY(base);
 	base_x = b_x;
 	base_1 = b_1;
 
@@ -93,25 +93,25 @@ static void powm_int(POLY_ARGS(res), CONST_POLY_ARGS(b), unsigned long exp, MODU
 /*
  * Compute x^exponent mod (n, x² - bx + c) using Lucas sequences.
  */
-static void power_of_x(POLY_ARGS(res), const unsigned long exponent, MODULUS_ARGS)
+static void power_of_x_int(POLY_ARGS(res), const uint64_t exponent, MODULUS_ARGS)
 {
 	int j_even = false; // We only need j to compute (-1)^j, so all we care about is whether j is odd or even.
-	unsigned long A_j = b, B_j = 1, C_j = c, tmp0;
+	uint64_t A_j = b, B_j = 1, C_j = c, tmp0;
 
 	// Compute the inverse of two.
 	// NOTE This can't be precomputed, because it depends on n.
-	unsigned long inverse_of_2 = invert(2, n);
+	uint64_t inverse_of_2 = invert(2, n);
 
 	// The following thre values are needed for the chain addition steps.
 	// Values that are already stored in variables available locally, are
 	// #defined, the remaining values is stored in a global temporary
 	// variable.
 #define A_1 b
-	unsigned long B_1 = 1;
+	uint64_t B_1 = 1;
 #define C_1 c
 
 	// Skip the leading 1 bit and convert convert to 0 based indexing
-	for (unsigned long k = mpz_sizeinbase(exponent, 2) - 1 - 1; k < (1lu << 63); k--) {
+	for (int k = 8*sizeof(uint64_t) - 1; k >= 0; k--) {
 		/*
 		 * Doubling
 		 */
@@ -124,7 +124,7 @@ static void power_of_x(POLY_ARGS(res), const unsigned long exponent, MODULUS_ARG
 		// TODO A conditional branch in a tight inner loop is a bad idea. Rewrite this!
 		if (j_even)
 			tmp0 = -tmp0;
-		A_j = ((A_j * A_j) % n + tmp) % n;
+		A_j = ((A_j * A_j) % n + tmp0) % n;
 
 		// Compute C_{2j}
 		C_j = (C_j * C_j) % n;
@@ -132,7 +132,7 @@ static void power_of_x(POLY_ARGS(res), const unsigned long exponent, MODULUS_ARG
 		j_even = true;
 		multiplications += 3;
 
-		if (tstbit(exponent, k)) {
+		if (exponent & (1lu << k)) {
 			/*
 			 * Chain addition
 			 */
@@ -174,9 +174,9 @@ static void power_of_x(POLY_ARGS(res), const unsigned long exponent, MODULUS_ARG
  * Like QFT, return 'probably_prime' if n might be prime, 'prime' if n is
  * certainly prime and 'composite' if a proof for n's compositeness was found.
  */
-static Primality steps_1_2_int(const unsigned long n)
+static Primality steps_1_2_int(const uint64_t n)
 {
-	unsigned long sqrt = int_sqrt(n);
+	uint64_t sqrt = int_sqrt(n);
 
 	/*
 	 * Step (2) If n is a square, it can obviously not be prime.
@@ -188,7 +188,7 @@ static Primality steps_1_2_int(const unsigned long n)
 	 * Step (1)
 	 */
 	// Start from prime_list[1] == 3 stead of prime_list[0] == 2.
-	for (unsigned long i = 1; i < len(prime_list) && prime_list[i] <= sqrt; i++)
+	for (uint64_t i = 1; i < len(prime_list) && prime_list[i] <= sqrt; i++)
 		if (n % prime_list[i] == 0)
 			return composite;
 
@@ -202,8 +202,8 @@ static Primality steps_1_2_int(const unsigned long n)
  */
 static Primality steps_3_4_5_int(MODULUS_ARGS)
 {
-	unsigned long POLY(x), POLY(foo), s, tmp;
-	unsigned long r, i;
+	uint64_t POLY(x), POLY(foo), s, tmp;
+	uint64_t r, i;
 
 	x_x = 1;
 	x_1 = s = tmp = foo_x = foo_1 = 0;
@@ -255,7 +255,7 @@ static Primality steps_3_4_5_int(MODULUS_ARGS)
  */
 Primality QFT_int(const unsigned n_, const unsigned b_, const unsigned c_)
 {
-	const unsigned long n = n_, b = b_, c = c_;
+	const uint64_t n = n_, b = b_, c = c_;
 	Primality result = steps_1_2_int(n);
 
 	if (result != probably_prime)
@@ -281,10 +281,10 @@ Primality QFT_int(const unsigned n_, const unsigned b_, const unsigned c_)
  */
 Primality RQFT_int(const unsigned n_, const unsigned k)
 {
-	unsigned long n = n_;
+	uint64_t n = n_;
 	Primality result;
-	unsigned long b = 0, c = 0;
-	unsigned long tmp; // This is used to store the greatest commond divisors we calculate.
+	uint64_t b = 0, c = 0;
+	uint64_t tmp; // This is used to store the greatest commond divisors we calculate.
 
 	// These variables store the values of the Jacobi symbols (b²+4c/n) and
 	// (-c/n) respectivelyg

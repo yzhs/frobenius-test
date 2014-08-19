@@ -9,8 +9,8 @@
 
 static void *run(void *worker_id_cast_to_void_star)
 {
-	unsigned long upper_bound = /*1lu << 32*/50000lu*50000+(1lu<<27), dots_every = 1lu << 25;
-	unsigned long counter = 0;
+	uint64_t upper_bound = /*1lu << 32*/50000lu*50000+(1lu<<27), dots_every = 1lu << 25;
+	uint64_t counter = 0;
 	unsigned worker_id = (unsigned)(long)worker_id_cast_to_void_star;
 
 #ifdef WRITE_PRIMES
@@ -49,11 +49,11 @@ int main()
 	init_int();
 
 	for (i = 0; i < N; i++)
-		if (0 != pthread_create(&threads[i], NULL, run, (void *)(unsigned long)i))
+		if (0 != pthread_create(&threads[i], NULL, run, (void *)(uint64_t)i))
 			die("failed to create thread %u, exiting\n", i);
 
 	for (i = 0; i < N; i++) {
-		unsigned long tmp;
+		uint64_t tmp;
 		(void)pthread_join(threads[i], (void **)&tmp);
 		counter += tmp;
 	}

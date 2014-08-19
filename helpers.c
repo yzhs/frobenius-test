@@ -42,7 +42,7 @@ int cleanup(void)
 /*
  * Calculate [s], [d] such that [n-1=2^s*d] where [d] is odd.
  */
-void split(unsigned long *s, mpz_t d, const mpz_t n)
+void split(uint64_t *s, mpz_t d, const mpz_t n)
 {
 	// Find the least significant bit that is set, except for the 2^0 bit.
 	*s = mpz_scan1(n, 1);

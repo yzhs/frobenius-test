@@ -18,30 +18,30 @@ void init_int(void);
  * Calculate the greatest common divisor of a and b using the Euclidean
  * algorithm.
  */
-unsigned long gcd(unsigned long a, unsigned long b);
+uint64_t gcd(uint64_t a, uint64_t b);
 
 /* Compute the jacobi symbol (x/y) of x over y. */
-int jacobi(unsigned long x, unsigned long y);
+int jacobi(uint64_t x, uint64_t y);
 
 
 /*
  * Given an integer 0 ≤ n < 2³², find the largest integer r such that r² ≤ n.
  */
-unsigned long int_sqrt(const unsigned long n);
+uint64_t int_sqrt(const uint64_t n);
 
 /*
  * Use the integer square root function to figure out whether a number is a
  * perfect square.
  */
-bool is_square(const unsigned long n);
+bool is_square(const uint64_t n);
 
 
 /* This function generates a random integer between low and high. Both low and
  * high are included. */
-unsigned long get_random_int(unsigned long low, unsigned long high);
+uint64_t get_random_int(uint64_t low, uint64_t high);
 
 
 /* Calculate [s], [d] such that [n-1=2^s*d] where [d] is odd. */
-void split_int(unsigned long *s, unsigned long *d, const unsigned long n);
+void split_int(uint64_t *s, uint64_t *d, const uint64_t n);
 
 #endif

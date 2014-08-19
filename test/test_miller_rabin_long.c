@@ -6,7 +6,7 @@
 static unsigned large_primes[3069262];
 static mpz_t composites[1013];
 
-static const unsigned long n = 1000;
+static const uint64_t n = 1000;
 
 void test_miller_rabin_some_numbers(void)
 {
@@ -14,9 +14,9 @@ void test_miller_rabin_some_numbers(void)
 
 	mpz_init(tmp);
 
-	unsigned long primes[] = { 5, 7, 11, 13, 17, 19, 23, 29, 31 };
+	uint64_t primes[] = { 5, 7, 11, 13, 17, 19, 23, 29, 31 };
 
-	for (unsigned long i = 0; i < len(primes); i++) {
+	for (uint64_t i = 0; i < len(primes); i++) {
 		mpz_set_ui(tmp, primes[i]);
 		CU_ASSERT_NOT_EQUAL(miller_rabin(tmp, 1), composite);
 	}
@@ -36,7 +36,7 @@ void test_miller_rabin_primes(void)
 {
 	FILE *fp = fopen(TEST_DATA_PATH "primelist.txt", "r");
 	unsigned p;
-	unsigned long i = 0;
+	uint64_t i = 0;
 	mpz_t prime;
 
 	if (NULL == fp)
@@ -49,7 +49,7 @@ void test_miller_rabin_primes(void)
 
 	mpz_init(prime);
 	for (int k = 0; k < 10000; k++) {
-		i = (unsigned long)rand() % len(large_primes);
+		i = (uint64_t)rand() % len(large_primes);
 		mpz_set_ui(prime, large_primes[i]);
 		CU_ASSERT_NOT_EQUAL_FATAL(miller_rabin(prime, 1), composite);
 		if (i % 1000 == 999)
@@ -61,7 +61,7 @@ void test_miller_rabin_primes(void)
 void test_miller_rabin_composites(void)
 {
 	FILE *fp = fopen(TEST_DATA_PATH "composites.txt", "r");
-	unsigned long i;
+	uint64_t i;
 
 	for (i = 0; i < len(composites); i++)
 		gmp_fscanf(fp, "%Zd\n", composites[i]);

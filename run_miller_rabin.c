@@ -7,8 +7,8 @@
 int main()
 {
 	mpz_t foo, tmp;
-	unsigned long upper_bound = (1lu << 32) - 1, dots_every = 1lu << 25;
-	unsigned long counter = 0, i;
+	uint64_t upper_bound = (1lu << 32) - 1, dots_every = 1lu << 25;
+	uint64_t counter = 0, i;
 
 	mpz_inits(foo, tmp, NULL);
 	init();

@@ -33,7 +33,7 @@ extern "C" {
 	if (measure_prep && measure_##set##s && measure_##alg) \
 		time_it<alg##_precomputation>(bits_##set##s, set##s, first_##set, last_##set, set##s_name)
 
-extern unsigned long multiplications;
+extern uint64_t multiplications;
 
 /*
  * How long to run the tests to figure out how many iterations to run to get to
@@ -198,9 +198,9 @@ static unsigned get_number_of_iterations(const mpz_t num)
  * times.  The results are written to output.
  */
 template <class T>
-static void time_it(const unsigned *bits, const mpz_t *numbers,
-	       	const unsigned long first, const unsigned long last,
-	       	const char *num_name)
+static void time_it(const unsigned *bits, const mpz_t * numbers,
+                    const uint64_t first, const uint64_t last,
+                    const char *num_name)
 {
 	unsigned its = 10000;
 	double duration;
@@ -229,8 +229,9 @@ static void time_it(const unsigned *bits, const mpz_t *numbers,
 
 int main(int argc, char *argv[])
 {
-	unsigned long first_prime, last_prime, first_composite, last_composite,
-		      first_mersenne_number, last_mersenne_number, first_mersenne_prime, last_mersenne_prime;
+	uint64_t first_prime, last_prime, first_composite, last_composite,
+	    first_mersenne_number, last_mersenne_number, first_mersenne_prime,
+	    last_mersenne_prime;
 
 	static const char *primes_name = "primes";
 	static const char *composites_name = "composites";

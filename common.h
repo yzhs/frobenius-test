@@ -2,6 +2,7 @@
 #define COMMON_H
 
 #include <stdarg.h>
+#include <stdint.h>
 
 #define LIKELY(x) __builtin_expect(!!(x), 1)
 

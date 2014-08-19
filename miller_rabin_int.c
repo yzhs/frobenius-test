@@ -13,9 +13,9 @@
  * results of the multipliations.  Therefore, the results will be wrong if m is
  * greater than 2^32-1
  */
-static unsigned long powm(unsigned long b, unsigned long e, unsigned m)
+static uint64_t powm(uint64_t b, uint64_t e, unsigned m)
 {
-	unsigned long result = 1;
+	uint64_t result = 1;
 
 	while (LIKELY(e != 0)) {
 		if (odd(e))
@@ -42,8 +42,8 @@ static unsigned long powm(unsigned long b, unsigned long e, unsigned m)
  */
 Primality miller_rabin_int(const unsigned n, const unsigned k)
 {
-	unsigned long s;
-	unsigned long a, d, x, nm1;
+	uint64_t s;
+	uint64_t a, d, x, nm1;
 
 	/* We need an odd integer greater than 3 */
 	if (even(n))
@@ -68,7 +68,7 @@ Primality miller_rabin_int(const unsigned n, const unsigned k)
 		if (x == 1 || x == nm1)
 			continue;
 
-		for (unsigned long r = 1; r <= s; r++) {
+		for (uint64_t r = 1; r <= s; r++) {
 			//x = powm(x, 2, n);
 			x = (x * x) % n;
 			if (x == 1)

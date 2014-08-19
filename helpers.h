@@ -20,7 +20,7 @@ int cleanup(void);
 
 
 // Compute s, d such that 2^s * d == num - 1.
-void split(unsigned long *s, mpz_t d, const mpz_t num);
+void split(uint64_t *s, mpz_t d, const mpz_t num);
 
 // Randomly select an integer`result` in the interval [2, n-2].
 void get_random(mpz_t result, const mpz_t n);

@@ -37,7 +37,7 @@ int main()
 		mpz_ui_pow_ui(n, 2, ints[i]);
 		mpz_add_ui(n, n, 1);
 
-		while (mpz_cmp_ui(n, B*(unsigned long)B) < 0 || has_small_prime_factor(n) || mpz_probab_prime_p(n, 20)) {
+		while (mpz_cmp_ui(n, B*(uint64_t)B) < 0 || has_small_prime_factor(n) || mpz_probab_prime_p(n, 20)) {
 			mpz_add_ui(n, n, 2);
 			counter++;
 			if (counter >= 10) {

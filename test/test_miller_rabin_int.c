@@ -24,7 +24,7 @@ void test_miller_rabin_powm_int(void)
 		mpz_set_ui(mod, m);
 		for (unsigned e = 0; e < 10000; e++) {
 			mpz_powm_ui(result, base, e, mod);
-			unsigned long r = mpz_get_ui(result);
+			uint64_t r = mpz_get_ui(result);
 			CU_ASSERT_EQUAL(powm(b, e, m), r);
 		}
 	}
@@ -35,7 +35,7 @@ void test_miller_rabin_primes_int(void)
 {
 	FILE *fp = fopen(TEST_DATA_PATH "primelist.txt", "r");
 	unsigned p;
-	unsigned long i = 0;
+	uint64_t i = 0;
 
 	if (NULL == fp)
 		die("data/primelist.txt: %s\n", strerror(errno));

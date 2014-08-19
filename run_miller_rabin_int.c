@@ -9,9 +9,9 @@
 
 static void *run(void *worker_id_cast_to_void_star)
 {
-	unsigned long i;
-	unsigned long worker_id = (unsigned long)worker_id_cast_to_void_star;
-	unsigned long counter = 0;
+	uint64_t i;
+	uint64_t worker_id = (uint64_t)worker_id_cast_to_void_star;
+	uint64_t counter = 0;
 
 #ifdef WRITE_PRIMES
 	char str[32];
@@ -40,8 +40,8 @@ static void *run(void *worker_id_cast_to_void_star)
 
 int main()
 {
-	unsigned long i;
-	unsigned long counter = 0;
+	uint64_t i;
+	uint64_t counter = 0;
 	pthread_t threads[N];
 
 	init_int();
@@ -51,7 +51,7 @@ int main()
 			die("failed to create thread %lu, exiting\n", i);
 
 	for (i = 0; i < N; i++) {
-		unsigned long tmp;
+		uint64_t tmp;
 		(void)pthread_join(threads[i], (void **)&tmp);
 		counter += tmp;
 	}

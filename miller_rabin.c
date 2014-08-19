@@ -22,7 +22,7 @@
 Primality miller_rabin(const mpz_t n, const unsigned k)
 {
 	Primality result = probably_prime;
-	unsigned long s;
+	uint64_t s;
 	int foo;
 	mpz_t a, d, x, nm1;
 
@@ -53,7 +53,7 @@ Primality miller_rabin(const mpz_t n, const unsigned k)
 		if (mpz_cmp_ui(x, 1) == 0 || mpz_cmp(x, nm1) == 0)
 			continue;
 
-		for (unsigned long r = 1; r <= s; r++) {
+		for (uint64_t r = 1; r <= s; r++) {
 			mpz_powm_ui(x, x, 2, n);
 			if (mpz_cmp_ui(x, 1) == 0) {
 				result = composite;

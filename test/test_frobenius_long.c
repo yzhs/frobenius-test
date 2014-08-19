@@ -11,7 +11,7 @@ static int num_iterations = 10000;
 
 void test_frobenius_sigma(void)
 {
-	unsigned long n_, b_, c_, p;
+	uint64_t n_, b_, c_, p;
 	mpz_t MODULUS, POLY(f), POLY(foo), POLY(bar), POLY(x), baz;
 	mpz_inits(MODULUS, POLY(foo), POLY(f), POLY(bar), POLY(x), baz, NULL);
 
@@ -51,12 +51,12 @@ void test_frobenius_sigma(void)
 
 	CU_ASSERT_FATAL(mpz_probab_prime_p(n, 50));
 
-	for (unsigned long c_ = 1; c_ < 1000; c_++) {
+	for (uint64_t c_ = 1; c_ < 1000; c_++) {
 		if (jacobi(n_ - c_, n_) != 1)
 			continue;
 		mpz_set_ui(c, c_);
 
-		for (unsigned long b_ = 1; b_ < 100; b_++) {
+		for (uint64_t b_ = 1; b_ < 100; b_++) {
 			b_ %= n_;
 			if (jacobi(b_*b_+4*c_, n_) != -1)
 				continue;
@@ -102,7 +102,7 @@ void test_frobenius_sigma(void)
 
 void test_frobenius_power_x_lucas(void)
 {
-	unsigned long n_;
+	uint64_t n_;
 	mpz_t MODULUS, POLY(f), POLY(foo), POLY(bar), POLY(x), baz;
 	mpz_inits(MODULUS, POLY(foo), POLY(f), POLY(bar), POLY(x), baz, NULL);
 
@@ -118,12 +118,12 @@ void test_frobenius_power_x_lucas(void)
 	mpz_nextprime(n, n);
 	CU_ASSERT_FATAL(mpz_probab_prime_p(n, 50));
 
-	for (unsigned long c_ = 1; c_ < 50; c_++) {
+	for (uint64_t c_ = 1; c_ < 50; c_++) {
 		if (jacobi(n_ - c_, n_) != 1)
 			continue;
 		mpz_set_ui(c, c_);
 
-		for (unsigned long b_ = 1; b_ < 20; b_++) {
+		for (uint64_t b_ = 1; b_ < 20; b_++) {
 			if (jacobi(b_*b_+4*c_, n_) != -1)
 				continue;
 			mpz_set_ui(b, b_);
@@ -131,7 +131,7 @@ void test_frobenius_power_x_lucas(void)
 			mpz_urandomm(f_x, r_state, n);
 			mpz_urandomm(f_1, r_state, n);
 
-			for (unsigned long k = 1; k < 1000; k++) {
+			for (uint64_t k = 1; k < 1000; k++) {
 				mpz_set_ui(baz, k);
 				power_of_x(POLY(bar), baz, MODULUS);
 				powm(POLY(foo), POLY(x), baz, MODULUS);
@@ -148,7 +148,7 @@ void test_frobenius_power_x_lucas(void)
 
 void test_frobenius_power(void)
 {
-	unsigned long r, n_;
+	uint64_t r, n_;
 	mpz_t MODULUS, s, t, POLY(foo), POLY(bar), POLY(x), tmp1, tmp2;
 	mpz_inits(MODULUS, s, t, POLY(foo), POLY(bar), POLY(x), tmp1, tmp2, NULL);
 
@@ -163,12 +163,12 @@ void test_frobenius_power(void)
 	CU_ASSERT_FATAL(mpz_cmp(foo_x, b) == 0);
 	CU_ASSERT_FATAL(mpz_cmp(foo_1, c) == 0);
 
-	for (unsigned long c_ = 1; c_ < 100; c_++) {
+	for (uint64_t c_ = 1; c_ < 100; c_++) {
 		if (jacobi(n_ - c_, n_) != 1)
 			continue;
 		mpz_set_ui(c, c_);
 
-		for (unsigned long b_ = 1; b_ < 100; b_++) {
+		for (uint64_t b_ = 1; b_ < 100; b_++) {
 			if (jacobi(b_*b_+4*c_, n_) != -1)
 				continue;
 			mpz_set_ui(b, b_);
@@ -195,7 +195,7 @@ void test_frobenius_power(void)
 			powm(POLY(foo), POLY(x), tmp1, MODULUS);
 
 			// Given x^s, comput x^((n-1)/2) = (x^s')^(2^r'-1)
-			for (unsigned long i = 0; i < r-1; i++)
+			for (uint64_t i = 0; i < r-1; i++)
 				square_mod(POLY(bar), POLY(bar), MODULUS);
 			// Now x^((n+1)/2) = x^((n-1)/2) * x
 			mult_x_mod(POLY(bar), POLY(bar), MODULUS);
@@ -216,16 +216,16 @@ void test_frobenius_power(void)
 
 void test_frobenius_split(void)
 {
-	unsigned long max = 1000*1000*1000;
+	uint64_t max = 1000*1000*1000;
 
-	unsigned long n, s, d;
+	uint64_t n, s, d;
 
-	unsigned long s_gmp;
+	uint64_t s_gmp;
 	mpz_t n_gmp, d_gmp;
 	mpz_inits(n_gmp, d_gmp, NULL);
 
 	for (int i = 0; i < num_iterations; i++) {
-		n = 2 * ((unsigned long)rand() % max) + 1;
+		n = 2 * ((uint64_t)rand() % max) + 1;
 		mpz_set_ui(n_gmp, n);
 
 		split_int(&s, &d, n);
@@ -238,9 +238,9 @@ void test_frobenius_split(void)
 
 void test_frobenius_mult_mod(void)
 {
-	unsigned long b, c, n;
-	unsigned long d, e, f, g;
-	unsigned long res0, res1;
+	uint64_t b, c, n;
+	uint64_t d, e, f, g;
+	uint64_t res0, res1;
 
 	mpz_t b_, c_, n_;
 	mpz_t d_, e_, f_, g_;
@@ -254,13 +254,13 @@ void test_frobenius_mult_mod(void)
 	b = c = 0;
 	for (int i = 0; i < num_iterations; i++) {
 		while (jacobi(n-c, n) != 1)
-			c = (unsigned long)rand() % n;
+			c = (uint64_t)rand() % n;
 		while (jacobi(b*b+4*c, n) != -1)
-			b = (unsigned long)rand() % n;
-		d = (unsigned long)rand() % n;
-		e = (unsigned long)rand() % n;
-		f = (unsigned long)rand() % n;
-		g = (unsigned long)rand() % n;
+			b = (uint64_t)rand() % n;
+		d = (uint64_t)rand() % n;
+		e = (uint64_t)rand() % n;
+		f = (uint64_t)rand() % n;
+		g = (uint64_t)rand() % n;
 
 		mpz_set_ui(b_, b);
 		mpz_set_ui(c_, c);
@@ -286,9 +286,9 @@ void test_frobenius_mult_mod(void)
 
 void test_frobenius_powm_mod(void)
 {
-	unsigned long b, c, n;
-	unsigned long d, e, k;
-	unsigned long res0, res1;
+	uint64_t b, c, n;
+	uint64_t d, e, k;
+	uint64_t res0, res1;
 
 	mpz_t b_, c_, n_;
 	mpz_t d_, e_, k_;
@@ -301,14 +301,14 @@ void test_frobenius_powm_mod(void)
 
 	for (int i = 0; i < num_iterations; i++) {
 		do
-			c = (unsigned long)rand() % n;
+			c = (uint64_t)rand() % n;
 		while (jacobi(n-c, n) != 1);
 		do
-			b = (unsigned long)rand() % n;
+			b = (uint64_t)rand() % n;
 		while (jacobi(b*b+4*c, n) != -1);
-		d = (unsigned long)rand() % n;
-		e = (unsigned long)rand() % n;
-		k = (unsigned long)rand() % n;
+		d = (uint64_t)rand() % n;
+		e = (uint64_t)rand() % n;
+		k = (uint64_t)rand() % n;
 
 		mpz_set_ui(b_, b);
 		mpz_set_ui(c_, c);
@@ -328,7 +328,7 @@ void test_frobenius_powm_mod(void)
 void test_frobenius_squares(void)
 {
 	for (int i = 0; i < num_iterations; i++) {
-		unsigned long n = 2 + (unsigned long)rand() % ((1<<15) - 2);
+		uint64_t n = 2 + (uint64_t)rand() % ((1<<15) - 2);
 		mpz_t n_;
 		n = n * n;
 		mpz_init_set_ui(n_, n);
@@ -342,7 +342,7 @@ void test_frobenius_squares(void)
 void test_frobenius_trial_division(void)
 {
 	for (int i = 0; i < num_iterations; i++) {
-		unsigned long n = 2 + (unsigned long)rand() % ((1lu<<31) - 2);
+		uint64_t n = 2 + (uint64_t)rand() % ((1lu<<31) - 2);
 		mpz_t n_;
 		mpz_init_set_ui(n_, n);
 
@@ -354,7 +354,7 @@ void test_frobenius_trial_division(void)
 void test_frobenius_rqft_small_primes(void)
 {
 	for (int i = 0; i < num_iterations; i++) {
-		unsigned long n = 2 + (unsigned long)rand() % ((1lu<<30) - 2);
+		uint64_t n = 2 + (uint64_t)rand() % ((1lu<<30) - 2);
 		mpz_t n_;
 		mpz_init_set_ui(n_, n);
 
@@ -368,7 +368,7 @@ void test_frobenius_primelist(void)
 {
 	FILE *fp = fopen(TEST_DATA_PATH "primelist.txt", "r");
 	unsigned p;
-	unsigned long i = 0;
+	uint64_t i = 0;
 	static unsigned large_primes[23006166];
 	mpz_t n;
 
@@ -418,7 +418,7 @@ void test_frobenius_composites(void)
 {
 	static mpz_t composites[1013];
 	FILE *fp = fopen(TEST_DATA_PATH "composites.txt", "r");
-	unsigned long i;
+	uint64_t i;
 
 	for (i = 0; i < len(composites); i++)
 		gmp_fscanf(fp, "%Zd\n", composites[i]);

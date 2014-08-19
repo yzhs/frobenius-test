@@ -18,8 +18,8 @@ void test_frobenius_int_int_sqrt(void)
 	CU_ASSERT_EQUAL(int_sqrt(1lu << 62), 1lu << 31);
 
 	for (int i = 0; i < 1000000; i++) {
-		unsigned long n = get_random_int(2, (1lu << 32) - 2);
-		unsigned long sqrt = int_sqrt(n);
+		uint64_t n = get_random_int(2, (1lu << 32) - 2);
+		uint64_t sqrt = int_sqrt(n);
 		CU_ASSERT_TRUE(sqrt * sqrt <= n);
 		CU_ASSERT_TRUE((sqrt + 1) * (sqrt + 1) > n);
 	}
@@ -34,8 +34,8 @@ void test_frobenius_int_gcd(void)
 	CU_ASSERT_EQUAL(gcd(4, 6), 2);
 	CU_ASSERT_EQUAL(gcd(12, 18), 6);
 
-	for (unsigned long i = 1; i < 100; i++)
-		for (unsigned long j = 1; j < 100; j++) {
+	for (uint64_t i = 1; i < 100; i++)
+		for (uint64_t j = 1; j < 100; j++) {
 			CU_ASSERT_EQUAL(i % gcd(i, j), 0);
 			CU_ASSERT_EQUAL(j % gcd(i, j), 0);
 		}
@@ -63,7 +63,7 @@ void test_frobenius_int_jacobi(void)
 
 void test_frobenius_int_split(void)
 {
-	unsigned long s, d, n;
+	uint64_t s, d, n;
 
 	for (n = 5; n < 1000; n += 2) {
 		split_int(&s, &d, n * n);
@@ -74,12 +74,12 @@ void test_frobenius_int_split(void)
 void test_frobenius_int_get_random_int(void)
 {
 	for (int i = 0; i < 10000; i++) {
-		unsigned long rand = get_random_int(2, 1234 - 2);
+		uint64_t rand = get_random_int(2, 1234 - 2);
 		CU_ASSERT_TRUE(2 <= rand);
 		CU_ASSERT_TRUE(rand <= 1234 - 2);
 	}
 	for (int i = 0; i < 10000; i++) {
-		unsigned long rand = get_random_int(2, 7 - 2);
+		uint64_t rand = get_random_int(2, 7 - 2);
 		CU_ASSERT_TRUE(2 <= rand);
 		CU_ASSERT_TRUE(rand <= 7 - 2);
 	}
@@ -90,10 +90,10 @@ void test_frobenius_int_get_random_int(void)
  */
 void test_frobenius_mult_mod_int(void)
 {
-	unsigned long b, c, n;
-	unsigned long d, e, f, g;
-	unsigned long res0, res1;
-	unsigned long tmp0, tmp1;
+	uint64_t b, c, n;
+	uint64_t d, e, f, g;
+	uint64_t res0, res1;
+	uint64_t tmp0, tmp1;
 
 	b = 55516;
 	c = 108625;
@@ -118,9 +118,9 @@ void test_frobenius_mult_mod_int(void)
 	CU_ASSERT_EQUAL(res1, (e*g + c*d*f) % n);
 }
 
-static unsigned long powm_const(unsigned long base, unsigned long exponent, unsigned long modulus)
+static uint64_t powm_const(uint64_t base, uint64_t exponent, uint64_t modulus)
 {
-	unsigned long result = 1;
+	uint64_t result = 1;
 	base = base % modulus;
 
 	while (exponent > 0) {
@@ -135,11 +135,11 @@ static unsigned long powm_const(unsigned long base, unsigned long exponent, unsi
 
 void test_frobenius_powm_mod_int(void)
 {
-	unsigned long b, c, n;
-	unsigned long res0, res1;
-	unsigned long d, e;
-	unsigned long tmp0, tmp1;
-	unsigned long foo;
+	uint64_t b, c, n;
+	uint64_t res0, res1;
+	uint64_t d, e;
+	uint64_t tmp0, tmp1;
+	uint64_t foo;
 
 	// Example taken from https://en.wikipedia.org/wiki/Modular_exponentiation
 	CU_ASSERT_EQUAL_FATAL(powm_const(4, 13, 497), 445);
@@ -157,7 +157,7 @@ void test_frobenius_powm_mod_int(void)
 
 		if (i == 0) {
 			for (e = 1; e < n/10; e++) {
-				for (unsigned long k = 0; k < 1000; k++) {
+				for (uint64_t k = 0; k < 1000; k++) {
 					powm_int(&res0, &res1, 0, e, k, n, b, c);
 					CU_ASSERT_EQUAL_FATAL(res0, 0);
 					foo = powm_const(e, k, n);
@@ -187,8 +187,8 @@ void test_frobenius_powm_mod_int(void)
 
 void test_frobenius_squares_int(void)
 {
-	for (unsigned long i = 1; i < len(prime_list); i++) {
-		unsigned long n = prime_list[i];
+	for (uint64_t i = 1; i < len(prime_list); i++) {
+		uint64_t n = prime_list[i];
 		n = n * n;
 		CU_ASSERT_FALSE(steps_1_2_int(n));
 		CU_ASSERT_FALSE(RQFT_int(n, 1));
@@ -203,7 +203,7 @@ void test_frobenius_squares_int(void)
 void test_frobenius_trial_division_int(void)
 {
 	for (int i = 1; i < 1000; i++)
-		for (unsigned long j = prime_list[i] * prime_list[i]; j < 50000; j += prime_list[i])
+		for (uint64_t j = prime_list[i] * prime_list[i]; j < 50000; j += prime_list[i])
 			CU_ASSERT_EQUAL(steps_1_2_int(j), composite);
 }
 
@@ -212,13 +212,13 @@ void test_frobenius_trial_division_int(void)
  */
 void test_frobenius_int_rqft_small_primes(void)
 {
-	for (unsigned long i = 2; i < len(prime_list); i++)
+	for (uint64_t i = 2; i < len(prime_list); i++)
 		CU_ASSERT_TRUE(RQFT_int(prime_list[i], 1));
 }
 
 void test_frobenius_int_rqft_small_composites(void)
 {
-	unsigned long i = 2, n = prime_list[i]; /* n = 5 */
+	uint64_t i = 2, n = prime_list[i]; /* n = 5 */
 
 	for (; n < B; n += 2) {
 		Primality foo;
@@ -242,7 +242,7 @@ void test_frobenius_problematic_primes_int(void)
 	CU_ASSERT_EQUAL(steps_1_2_int(131071), prime);
 	CU_ASSERT_NOT_EQUAL(QFT_int(131071, 55516, 108625), composite);
 
-	for (unsigned long i = 0; i < len(primes); i++) {
+	for (uint64_t i = 0; i < len(primes); i++) {
 		Primality foo = RQFT_int(primes[i], 100);
 		CU_ASSERT_EQUAL(steps_1_2_int(primes[i]), prime);
 		CU_ASSERT_NOT_EQUAL(foo, composite);
@@ -253,7 +253,7 @@ void test_frobenius_primelist_int(void)
 {
 	FILE *fp = fopen(TEST_DATA_PATH "primelist.txt", "r");
 	unsigned p;
-	unsigned long i = 0;
+	uint64_t i = 0;
 	static unsigned large_primes[3069262];
 
 	if (NULL == fp)

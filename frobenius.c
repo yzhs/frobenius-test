@@ -10,7 +10,7 @@
 #include "small_primes.h"
 #include "frobenius.h"
 
-unsigned long multiplications;
+uint64_t multiplications;
 
 /*
  * Return f(x) * g(x) mod (n, x² - b*x - c) where f(x) = f_x*x + f_1 and
@@ -92,7 +92,7 @@ static void powm(POLY_ARGS(res), CONST_POLY_ARGS(b), const mpz_t exponent, MODUL
 	mpz_set_ui(res_x, 0);
 	mpz_set_ui(res_1, 1);
 
-	for (unsigned long k = mpz_sizeinbase(exponent, 2) - 1; k < (1lu << 63); k--) {
+	for (uint64_t k = mpz_sizeinbase(exponent, 2) - 1; k < (1lu << 63); k--) {
 		square_mod(POLY(res), POLY(res), MODULUS);
 		if (mpz_tstbit(exponent, k))
 			mult_mod(POLY(res), POLY(base), POLY(res), MODULUS);
@@ -131,7 +131,7 @@ static void power_of_x(POLY_ARGS(res), const mpz_t exponent, MODULUS_ARGS)
 #define C_1 c
 
 	// Skip the leading 1 bit and convert convert to 0 based indexing
-	for (unsigned long k = mpz_sizeinbase(exponent, 2) - 1 - 1; k < (1lu << 63); k--) {
+	for (uint64_t k = mpz_sizeinbase(exponent, 2) - 1 - 1; k < (1lu << 63); k--) {
 		/*
 		 * Doubling
 		 */
@@ -220,12 +220,12 @@ static Primality steps_1_2(const mpz_t n)
 	// Every number larger than 2^31 is certainly larger than B, whence the
 	// full list of small primes has to be used in trial division.
 	if (mpz_fits_sint_p(n)) {
-		unsigned long sqrt;
+		uint64_t sqrt;
 		mpz_sqrt(tmp, n);
 		sqrt = mpz_get_ui(tmp);
 
 		// Start from prime_list[1] == 3 stead of prime_list[0] == 2.
-		for (unsigned long i = 1; i < len(prime_list) && prime_list[i] <= sqrt; i++)
+		for (uint64_t i = 1; i < len(prime_list) && prime_list[i] <= sqrt; i++)
 			if (mpz_divisible_ui_p(n, prime_list[i]))
 				return composite;
 
@@ -235,7 +235,7 @@ static Primality steps_1_2(const mpz_t n)
 			return prime;
 	} else {
 		// Start from prime_list[1] == 3 instead of prime_list[0] == 2.
-		for (unsigned long i = 1; i < len(prime_list); i++)
+		for (uint64_t i = 1; i < len(prime_list); i++)
 			if (mpz_divisible_ui_p(n, prime_list[i]))
 				return composite;
 	}
@@ -298,7 +298,7 @@ static Primality steps_3_4_5(MODULUS_ARGS)
 	// mentioned in the thesis.
 	// Later, 2^r*s = n² - 1, at which point the r and s correspond to the
 	// variables $r$ and $s$.
-	unsigned long r;
+	uint64_t r;
 	mpz_t s;
 
 	// If 2^r*s = n ± 1, t = (s-1)/2.
@@ -352,7 +352,7 @@ static Primality steps_3_4_5(MODULUS_ARGS)
 	// We now have foo_x * x + foo_1 = x^s.  All we have to do, to
 	// calculate x^(n-1)/2 or x^(n+1)/2, is to square this polynomial r-1
 	// times.
-	for (unsigned long i = 0; i < r - 1; i++)
+	for (uint64_t i = 0; i < r - 1; i++)
 		square_mod(POLY(foo), POLY(foo), MODULUS);
 
 	if (n_is_1_mod_4) {
@@ -400,7 +400,7 @@ static Primality steps_3_4_5(MODULUS_ARGS)
 	if (mpz_sgn(foo_x) == 0 && mpz_cmp_ui(foo_1, 1) == 0)
 		ret(probably_prime);
 
-	for (unsigned long i = 0; i < r - 1; i++) {
+	for (uint64_t i = 0; i < r - 1; i++) {
 		if (mpz_sgn(foo_x) == 0 && mpz_cmp(foo_1, tmp0) == 0)
 			ret(probably_prime);
 		square_mod(POLY(foo), POLY(foo), MODULUS);

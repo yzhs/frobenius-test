@@ -6,9 +6,9 @@
 /*
  * Given an integer 0 ≤ n < 2³², find the largest integer r such that r² ≤ n.
  */
-unsigned long int_sqrt(const unsigned long n)
+uint64_t int_sqrt(const uint64_t n)
 {
-	unsigned long root = (unsigned long)(sqrt((double)n));
+	uint64_t root = (uint64_t)(sqrt((double)n));
 
 	if (n == 0)
 		return 0;
@@ -23,9 +23,9 @@ unsigned long int_sqrt(const unsigned long n)
  * Calculate the greatest common divisor of a and b using the Euclidean
  * algorithm.
  */
-unsigned long gcd(unsigned long a, unsigned long b)
+uint64_t gcd(uint64_t a, uint64_t b)
 {
-	unsigned long t;
+	uint64_t t;
 
 	while (b != 0) {
 		t = b;
@@ -39,9 +39,9 @@ unsigned long gcd(unsigned long a, unsigned long b)
  * Use the integer square root function to figure out whether a number is a
  * perfect square.
  */
-bool is_square(const unsigned long n)
+bool is_square(const uint64_t n)
 {
-	unsigned long sqrt = int_sqrt(n);
+	uint64_t sqrt = int_sqrt(n);
 
 	return sqrt * sqrt == n;
 }
@@ -49,7 +49,7 @@ bool is_square(const unsigned long n)
 /*
  * Calculate [s], [d] such that [n-1=2^s*d] where [d] is odd.
  */
-void split_int(unsigned long *s, unsigned long *d, const unsigned long n)
+void split_int(uint64_t *s, uint64_t *d, const uint64_t n)
 {
 	*s = 0;
 	*d = n - 1;
@@ -64,18 +64,18 @@ void split_int(unsigned long *s, unsigned long *d, const unsigned long n)
  * This function generates a random integer between 2 and n-2.  This function
  * will fail if n is equal to 3 and produce weird results for smaller ns.
  */
-unsigned long get_random_int(const unsigned long low, const unsigned long high)
+uint64_t get_random_int(const uint64_t low, const uint64_t high)
 {
-	return (unsigned long)rand() % (high - low + 1) + low;
+	return (uint64_t)rand() % (high - low + 1) + low;
 }
 
 /*
  * Compute the jacobi symbol (x/y) of x over y.  This is a direct translation
  * of the algorithm given in Otto Forster: Algorithmische Zahlentheorie.
  */
-int jacobi(unsigned long x, unsigned long y)
+int jacobi(uint64_t x, uint64_t y)
 {
-	unsigned long t;
+	uint64_t t;
 	int res = 1, m8;
 
 	for (;; ) {
