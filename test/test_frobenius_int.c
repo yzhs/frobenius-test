@@ -95,14 +95,17 @@ void test_frobenius_mult_mod_int(void)
 	uint64_t res0, res1;
 	uint64_t tmp0, tmp1;
 
-	b = 55516;
-	c = 108625;
+	b = 1;
+	c = 3;
 	n = 131071;
 
 	for (d = 1; d < 100; d++) {
 		for (e = 1; e < 100; e++) {
 			mult_mod_int(&res0, &res1, d, e, d, e, n, b, c);
 			square_mod_int(&tmp0, &tmp1, d, e, n, b, c);
+			if (tmp0 != res0 || tmp1 != res1)
+				printf("\n%lux + %lu != %lux + %lu, (d, e) = (%lu, %lu), %lux + %lu\n",
+				       tmp0, tmp1, res0, res1, d, e, 2*e+b, e*e+c);
 			CU_ASSERT_EQUAL_FATAL(tmp0, res0);
 			CU_ASSERT_EQUAL_FATAL(tmp1, res1);
 		}
@@ -162,7 +165,8 @@ void test_frobenius_powm_mod_int(void)
 					CU_ASSERT_EQUAL_FATAL(res0, 0);
 					foo = powm_const(e, k, n);
 					if (foo != res1)
-						printf("powm_const(%lu, %lu, %lu) = %lu does not match powm_int(0, %lu, %lu, %lu, %lu, %lu) = %lu",
+						printf("\npowm_const(%lu, %lu, %lu) = %lu does not match "\
+								"powm_int(0, %lu, %lu, %lu, %lu, %lu) = %lu\n",
 								e, k, n, foo, e, k, n, b, c, res1);
 					CU_ASSERT_EQUAL_FATAL(res1, powm_const(e, k, n));
 				}
