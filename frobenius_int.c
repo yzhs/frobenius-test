@@ -10,11 +10,6 @@
 
 static uint64_t bb4c, multiplications;
 
-#define POLY_ARGS(f) uint64_t *f##_x, uint64_t *f##_1
-#define CONST_POLY_ARGS(f) const uint64_t f##_x, const uint64_t f##_1
-#define MODULUS n, b, c
-#define MODULUS_ARGS const uint64_t n, const uint64_t b, const uint64_t c
-
 
 /*
  * Return f(x)*g(x) mod (n, x^2 - b*x - c) where f(x) = f_x*x + f_1 and g(x) = g_x*x + g_1 in the return arguments res_x and

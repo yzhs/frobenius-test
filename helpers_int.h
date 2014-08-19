@@ -5,7 +5,12 @@
 
 #include "common.h"
 
-#define POLY(f) f##_x, f##_1
+#define POLY_int(f) f##_x, f##_1
+#define POLY_ARGS_int(f) uint64_t *f##_x, uint64_t *f##_1
+#define CONST_POLY_ARGS_int(f) const uint64_t f##_x, const uint64_t f##_1
+#define MODULUS_int n, b, c
+#define MODULUS_ARGS_int const uint64_t n, const uint64_t b, const uint64_t c
+
 
 /* Initialises the random number generator using a (static) seed. */
 void init_int(void);
