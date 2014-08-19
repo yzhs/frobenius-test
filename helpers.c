@@ -60,7 +60,8 @@ void get_random(mpz_t result, const mpz_t n)
 	mpz_init(tmp);
 	mpz_sub_ui(tmp, n, 3);
 
-	/* generate a random number between 0 and tmp-1 */
+	// Generate a random number between 0 and tmp-1.  The results of
+	// mpz_urandomm are uniformly distributed.
 	mpz_urandomm(result, r_state, tmp);
 
 	mpz_add_ui(result, result, 2);
