@@ -10,10 +10,6 @@
 #include "small_primes.h"
 #include "frobenius.h"
 
-static mpz_t tmp0, tmp1, tmp2;
-
-static mpz_t POLY(base), exponent;
-
 unsigned long multiplications;
 
 /*
@@ -402,11 +398,10 @@ Primality QFT(MODULUS_ARGS)
  */
 Primality RQFT(const mpz_t n, const unsigned k)
 {
-	mpz_t b, c, nm1;
-	mpz_t bb4c, neg_c, tmp;
-	int j1 = 0, j2 = 0;
 	Primality result;
 
+	int j_bb4c = 0;
+	mpz_t b, c;
 	if (mpz_even_p(n)) {
 		/*  2 is the only odd prime... */
 		if (mpz_cmp_ui(n, 2) == 0)
@@ -417,8 +412,7 @@ Primality RQFT(const mpz_t n, const unsigned k)
 
 	assert(mpz_cmp_ui(n, 1) > 0);
 
-	mpz_inits(b, c, nm1, bb4c, neg_c, tmp, NULL);
-	mpz_sub_ui(nm1, n, 1);
+	mpz_inits(b, c, NULL);
 
 	result = steps_1_2(n);
 	/* If the number is found to be either composite or certainly prime, we can
@@ -434,23 +428,20 @@ Primality RQFT(const mpz_t n, const unsigned k)
 			mpz_sub(c, n, c);
 		} while (mpz_cmp_ui(c, 3) < 0);
 		check_non_trivial_divisor(c);
-		j2 = 1;
 
 		for (unsigned i = 0; i < B; i++) {
 			get_random(b, n);
 
 			mpz_mul(bb4c, b, b);
 			mpz_addmul_ui(bb4c, c, 4);
-			j1 = mpz_jacobi(bb4c, n);
-			//mpz_sub(neg_c, n, c);
-			//j2 = mpz_jacobi(neg_c, n);
-			if (j1 == -1 && j2 == 1) {
+			j_bb4c = mpz_jacobi(bb4c, n);
+			if (j_bb4c == -1) {
 				check_non_trivial_divisor(bb4c);
 				check_non_trivial_divisor(b);
 				break;
 			}
 		}
-		if (j1 != -1 || j2 != 1) {
+		if (j_bb4c != -1) {
 			gmp_printf("Found no suitable pair (b,c) modulo n=%Zd.  This is highly " \
 					"unlikely unless the programme is wrong.  Assuming n is a prime...\n", n);
 		} else {
@@ -461,7 +452,7 @@ Primality RQFT(const mpz_t n, const unsigned k)
 	}
 
 exit:
-	mpz_clears(b, c, nm1, bb4c, neg_c, tmp, NULL);
+	mpz_clears(b, c, NULL);
 	return result;
 }
 

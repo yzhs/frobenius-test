@@ -5,7 +5,7 @@
 
 gmp_randstate_t r_state;
 
-
+mpz_t bb4c, base_x, base_1, tmp0, tmp1, tmp2;
 
 /*
  * Seed random number generators.
@@ -23,6 +23,7 @@ int init(void)
 	gmp_randseed_ui(r_state, seed);
 
 	srand((unsigned int)seed);
+	mpz_inits(bb4c, base_x, base_1, tmp0, tmp1, tmp2, NULL);
 
 	return 0;
 }
@@ -32,6 +33,7 @@ int init(void)
  */
 int cleanup(void)
 {
+	mpz_clears(bb4c, base_x, base_1, tmp0, tmp1, tmp2, NULL);
 	gmp_randclear(r_state);
 	return 0;
 }

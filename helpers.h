@@ -5,6 +5,9 @@
 
 #include "common.h"
 
+// Some temporary variables.
+extern mpz_t bb4c, base_x, base_1, tmp0, tmp1, tmp2;
+
 // State of GMPs random number generator
 extern gmp_randstate_t r_state;
 

@@ -11,18 +11,19 @@ static int num_iterations = 10000;
 
 void test_frobenius_sigma(void)
 {
-	unsigned long n_, b_, c_, p, q;
+	unsigned long n_, b_, c_, p;
 	mpz_t MODULUS, POLY(f), POLY(foo), POLY(bar), POLY(x), baz;
 	mpz_inits(MODULUS, POLY(foo), POLY(f), POLY(bar), POLY(x), baz, NULL);
 
 	// Initialize POLY(x)
+	mpz_set_ui(x_x, 1);
+
 	n_ = 0x7ffffff;
 	mpz_set_ui(n, n_);
 	mpz_urandomm(n, r_state, n);
 	mpz_add(n, n, n);
 	mpz_add_ui(n, n, 0x70000001);
 	n_ = mpz_get_ui(n);
-	mpz_set_ui(x_x, 1);
 
 	mpz_nextprime(n, n);
 	CU_ASSERT_FATAL(mpz_probab_prime_p(n, 50));
