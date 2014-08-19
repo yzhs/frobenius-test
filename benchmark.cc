@@ -97,7 +97,8 @@ static unsigned load_numbers(unsigned num_bits[], mpz_t nums[], const char file[
  */
 static double get_duration(struct timespec start, struct timespec stop, unsigned its)
 {
-	return (stop.tv_sec - start.tv_sec + (stop.tv_nsec - start.tv_nsec) * 1e-9) / its;
+	return (stop.tv_sec - start.tv_sec +
+		(stop.tv_nsec - start.tv_nsec) * 1e-9) / its;
 }
 
 /*
@@ -107,7 +108,7 @@ struct GMP {
 	static const char name[];
 	static const char mode[];
 	static Primality check(const mpz_t n) {
-		return (Primality)mpz_probab_prime_p(n, 1);
+		return (Primality) mpz_probab_prime_p(n, 1);
 	}
 };
 const char GMP::name[] = "mpz_probab_prime_p";
@@ -137,7 +138,7 @@ struct GMP_precomputation {
 	static const char name[];
 	static const char mode[];
 	static Primality check(const mpz_t n) {
-		return (Primality)mpz_probab_prime_p(n, 0);
+		return (Primality) mpz_probab_prime_p(n, 0);
 	}
 };
 const char GMP_precomputation::name[] = "mpz_probab_prime_p";
@@ -163,14 +164,13 @@ struct Frobenius_precomputation {
 const char Frobenius_precomputation::name[] = "Frobenius";
 const char Frobenius_precomputation::mode[] = "prep";
 
-
 /*
  * Figure out how often to repeat each test so that the overall runtime for
  * that particular test is about one second.  This minimizes error in
  * measurement.  For tests where each iteration takes longer than one second, a
  * single iteration will be measured.
  */
-template <class T>
+template<class T>
 static unsigned get_number_of_iterations(const mpz_t num)
 {
 	unsigned its = 1;
@@ -186,7 +186,7 @@ static unsigned get_number_of_iterations(const mpz_t num)
 		clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &stop);
 		duration = get_duration(start, stop, 1);
 
-		if (its > (1<<30))
+		if (its > (1 << 30))
 			die("Too many iterations needed, causing integer overflow\n");
 	}
 	return 1 + (unsigned)(its / duration);
@@ -197,7 +197,7 @@ static unsigned get_number_of_iterations(const mpz_t num)
  * iterations took on average.  Each measurement is repeated NUM_MEASUREMENTS
  * times.  The results are written to output.
  */
-template <class T>
+template<class T>
 static void time_it(const unsigned *bits, const mpz_t * numbers,
                     const uint64_t first, const uint64_t last,
                     const char *num_name)
@@ -220,8 +220,10 @@ static void time_it(const unsigned *bits, const mpz_t * numbers,
 			clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &stop);
 			duration = get_duration(start, stop, its);
 
-			fprintf(output, "%d,%lu,%lu,%E,%s,%s,%s,%u,%u\n", bits[i], mpz_popcount(numbers[i]),
-					multiplications, duration, T::name, num_name, T::mode, its, l);
+			fprintf(output, "%d,%lu,%lu,%E,%s,%s,%s,%u,%u\n",
+				bits[i], mpz_popcount(numbers[i]),
+				multiplications, duration, T::name, num_name,
+				T::mode, its, l);
 			fflush(output);
 		}
 	}
@@ -253,18 +255,22 @@ int main(int argc, char *argv[])
 	if (NULL == output)
 		die("failed to open output file");
 
-	load_numbers(bits_primes, primes, "primes.txt", NUM_PRIMES) \
-		|| die("failed to load primes\n");
-	load_numbers(bits_composites, composites, "composites.txt", NUM_COMPOSITES) \
-		|| die("failed to load composites\n");
-	load_numbers(bits_mersenne_numbers, mersenne_numbers, "mersenne_numbers.txt", NUM_MERSENNE_NUMBERS) \
-		|| die("failed to load Mersenne numbers\n");
-	load_numbers(bits_mersenne_primes, mersenne_primes, "mersenne_primes.txt", NUM_MERSENNE_PRIMES) \
-		|| die("failed to load Mersenne primes\n");
+	load_numbers(bits_primes, primes, "primes.txt", NUM_PRIMES)
+	    || die("failed to load primes\n");
+	load_numbers(bits_composites, composites, "composites.txt",
+		     NUM_COMPOSITES)
+	    || die("failed to load composites\n");
+	load_numbers(bits_mersenne_numbers, mersenne_numbers,
+		     "mersenne_numbers.txt", NUM_MERSENNE_NUMBERS)
+	    || die("failed to load Mersenne numbers\n");
+	load_numbers(bits_mersenne_primes, mersenne_primes,
+		     "mersenne_primes.txt", NUM_MERSENNE_PRIMES)
+	    || die("failed to load Mersenne primes\n");
 
 	// Which tests to run
 	static bool measure_full, measure_prep;
-	static bool measure_primes, measure_composites, measure_mersenne_numbers, measure_mersenne_primes;
+	static bool measure_primes, measure_composites,
+	    measure_mersenne_numbers, measure_mersenne_primes;
 	static bool measure_GMP, measure_MillerRabin, measure_Frobenius;
 
 	measure_full = true;
