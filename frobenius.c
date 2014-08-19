@@ -82,23 +82,21 @@ static void square_mod(POLY_ARGS(res), CONST_POLY_ARGS(f), MODULUS_ARGS)
 	multiplications += 5;
 }
 
-static void powm(POLY_ARGS(res), CONST_POLY_ARGS(b), const mpz_t e, MODULUS_ARGS)
+static void powm(POLY_ARGS(res), CONST_POLY_ARGS(b), const mpz_t exponent, MODULUS_ARGS)
 {
 
 	// Copy all input parameters that will be changed in this function.
 	mpz_set(base_x, b_x);
 	mpz_set(base_1, b_1);
-	mpz_set(exponent, e);
 
 	// Initialize the return value.
 	mpz_set_ui(res_x, 0);
 	mpz_set_ui(res_1, 1);
 
-	while (mpz_sgn(exponent) != 0) {
-		if (mpz_odd_p(exponent))
+	for (unsigned long k = mpz_sizeinbase(exponent, 2) - 1; k < (1lu<<63); k--) {
+		square_mod(POLY(res), POLY(res), MODULUS);
+		if (mpz_tstbit(exponent, k))
 			mult_mod(POLY(res), POLY(base), POLY(res), MODULUS);
-		square_mod(POLY(base), POLY(base), MODULUS);
-		mpz_fdiv_q_2exp(exponent, exponent, 1);
 	}
 }
 
