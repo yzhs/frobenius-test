@@ -69,10 +69,9 @@ unsigned long get_random_int(const unsigned long low, const unsigned long high)
 	return (unsigned long)rand() % (high - low + 1) + low;
 }
 
-#if 1
 /*
- * Compute the jacobi symbol (x/y) of x over y.  This algorithm is taken from
- * Otto Forster: Algorithmische Zahlentheorie.
+ * Compute the jacobi symbol (x/y) of x over y.  This is a direct translation
+ * of the algorithm given in Otto Forster: Algorithmische Zahlentheorie.
  */
 int jacobi(unsigned long x, unsigned long y)
 {
@@ -98,56 +97,6 @@ int jacobi(unsigned long x, unsigned long y)
 			res = -res;
 	}
 }
-
-#else
-
-/*
- * The following implementation of the jacobi function was compied straight
- * from the soucre code of PARI.
- */
-
-/*  Compute the 2-adic valuation of z. */
-long vals(unsigned long z)
-{
-	static char tab[64] = { -1, 0, 1, 12, 2, 6, -1, 13, 3, -1, 7, -1, -1, -1, -1, 14, 10, 4, -1, -1, 8, -1, -1, 25, -1, -1, -1, -1, -1, 21, 27, 15, 31, 11, 5, -1, -1, -1, -1, -1, 9, -1, -1, 24, -1, -1, 20, 26, 30, -1, -1, -1, -1, 23, -1, 19, 29, -1, 22, 18, 28, 17, 16, -1 };
-	long s;
-
-	if (!z) return -1;
-	if (!(z & 0xffffffff)) {
-		s = 32; z >>= 32;
-	} else { s = 0; }
-	z |= ~z + 1;
-	z += z << 4;
-	z += z << 6;
-	z ^= z << 16; /* or  z -= z<<16 */
-	return s + tab[(z & 0xffffffff) >> 26];
-}
-
-/* Figure out whether t is 3 or 5 modulo 8 */
-#define  ome(t) (labs(((t) & 7) - 4) == 1)
-
-int jacobi(unsigned long x, unsigned long y)
-{
-	unsigned long z;
-	int s = 1;
-
-	while (x) {
-		long r = vals(x);
-		if (r) {
-			if (odd(r) && ome(y))
-				s = -s;
-			x >>= r;
-		}
-		if (x & y & 2)
-			s = -s;
-		z = y % x;
-		y = x;
-		x = z;
-	}
-
-	return (y == 1) ? s : 0;
-}
-#endif
 
 /*
  * Initialises the random number generator using a (static) seed.
