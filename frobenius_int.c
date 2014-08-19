@@ -8,59 +8,59 @@
 #include "small_primes.h"
 #include "frobenius_int.h"
 
-static uint64_t bb4c, multiplications;
+static uint64_t bb4c_int, multiplications_int;
 
 
 /*
  * Return f(x)*g(x) mod (n, x^2 - b*x - c) where f(x) = f_x*x + f_1 and g(x) = g_x*x + g_1 in the return arguments res_x and
  * res_1, representing the polynomial res_x*x + res_1.
  */
-static void mult_mod_int(POLY_ARGS(res), CONST_POLY_ARGS(f), CONST_POLY_ARGS(g), MODULUS_ARGS)
+static void mult_mod_int(POLY_ARGS_int(res), CONST_POLY_ARGS_int(f), CONST_POLY_ARGS_int(g), MODULUS_ARGS_int)
 {
-	uint64_t df, ef = (f_x * g_x) % n, eg = (f_1 * g_x) % n;
-	multiplications += 2;
+	uint64_t fxgx, f1gx = (f_1 * g_x) % n, f1g1 = (f_1 * g_1) % n;
+	multiplications_int += 2;
 
 	// If deg f = 1, the whole thing amounts to multiplying the
 	// coefficients of f with a constant and reducing them modulo n.
 	if (f_x == 0) {
-		*res_x = ef;
-		*res_1 = eg;
+		*res_x = f1gx;
+		*res_1 = f1g1;
 
 		return;
 	}
-	df = (f_x * g_x) % n;
+	fxgx = (f_x * g_x) % n;
 
 	// All these modulo operations are pretty expensive...
-	*res_x = (((df * b) % n + (f_x * g_1) % n) % n + ef) % n;
-	*res_1 = ((df * c) % n + eg) % n;
+	*res_x = (((fxgx * b) % n + (f_x * g_1) % n) % n + f1gx) % n;
+	*res_1 = ((fxgx * c) % n + f1g1) % n;
 
-	multiplications += 4;
+	multiplications_int += 4;
 }
 
 /*
  * Calculate (dx + e)^2 mod (n, x^2-bx-c) returning the result as (*res_x) * x + (*res_1).
  */
-static void square_mod_int(POLY_ARGS(res), CONST_POLY_ARGS(f), MODULUS_ARGS)
+static void square_mod_int(POLY_ARGS_int(res), CONST_POLY_ARGS_int(f), MODULUS_ARGS_int)
 {
-	uint64_t ee = (f_1 * f_1) % n;
-	uint64_t dd;
+	uint64_t f1f1 = (f_1 * f_1) % n;
+	uint64_t fxfx;
 
-	multiplications++;
+	multiplications_int++;
 
 	if (f_x == 0) {
 		*res_x = 0;
-		*res_1 = ee;
+		*res_1 = f1f1;
 		return;
 	}
-	dd = (f_x * f_x) % n;
+	fxfx = (f_x * f_x) % n;
 
 	// compute res_x = f_x^2*b+2*f_x*f_1
-	*res_x = ((dd * b) % n + (2 * (f_x * f_1) % n) % n) % n;
+	*res_x = ((fxfx * b) % n + (2 * (f_x * f_1) % n) % n) % n;
 
 	// and res_1 = f_x^2*c+f_1^2
-	*res_1 = ((dd * c) % n + ee) % n;
+	*res_1 = ((fxfx * c) % n + f1f1) % n;
 
-	multiplications += 4;
+	multiplications_int += 4;
 }
 
 /*
@@ -68,9 +68,9 @@ static void square_mod_int(POLY_ARGS(res), CONST_POLY_ARGS(f), MODULUS_ARGS)
  * (*res_x) * x + (*res_1).  The computation is done using exponentiation by
  * squaring.
  */
-static void powm_int(POLY_ARGS(res), CONST_POLY_ARGS(b), uint64_t exp, MODULUS_ARGS)
+static void powm_int(POLY_ARGS_int(res), CONST_POLY_ARGS_int(b), uint64_t exp, MODULUS_ARGS_int)
 {
-	uint64_t POLY(base);
+	uint64_t POLY_int(base);
 	base_x = b_x;
 	base_1 = b_1;
 
@@ -79,16 +79,37 @@ static void powm_int(POLY_ARGS(res), CONST_POLY_ARGS(b), uint64_t exp, MODULUS_A
 
 	while (exp != 0) {
 		if (odd(exp))
-			mult_mod_int(POLY(res), POLY(base), *res_x, *res_1, MODULUS);
-		square_mod_int(&base_x, &base_1, POLY(base), MODULUS);
+			mult_mod_int(POLY_int(res), POLY_int(base), *res_x, *res_1, MODULUS_int);
+		square_mod_int(&base_x, &base_1, POLY_int(base), MODULUS_int);
 		exp /= 2;
 	}
+}
+
+static int64_t invert(int64_t a, int64_t n)
+{
+	int64_t t = 0, new_t = 1, r = n, new_r = a, q, tmp;
+
+	while (new_r != 0) {
+		q = r / new_r;
+		tmp = new_t;
+		new_t = t - q * new_t;
+		t = tmp;
+		tmp = new_r;
+		new_r = r - q * new_r;
+		r = new_r;
+	}
+	if (r > 1)
+		die("%lu is not invertible\n", a);
+	if (t < 0)
+		t += n;
+
+	return t;
 }
 
 /*
  * Compute x^exponent mod (n, x² - bx + c) using Lucas sequences.
  */
-static void power_of_x_int(POLY_ARGS(res), const uint64_t exponent, MODULUS_ARGS)
+static void power_of_x_int(POLY_ARGS_int(res), const uint64_t exponent, MODULUS_ARGS_int)
 {
 	int j_even = false; // We only need j to compute (-1)^j, so all we care about is whether j is odd or even.
 	uint64_t A_j = b, B_j = 1, C_j = c, tmp0;
@@ -111,21 +132,17 @@ static void power_of_x_int(POLY_ARGS(res), const uint64_t exponent, MODULUS_ARGS
 		 * Doubling
 		 */
 
-		// Compute B_{2j}
 		B_j = (A_j * B_j) % n;
 
-		// Compute A_{2j}
-		tmp0 = C_j + C_j;
-		// TODO A conditional branch in a tight inner loop is a bad idea. Rewrite this!
-		if (j_even)
+		tmp0 = (2 * C_j) % n;
+		if (j_even) // TODO A conditional branch in a tight inner loop is a bad idea. Rewrite this!
 			tmp0 = -tmp0;
 		A_j = ((A_j * A_j) % n + tmp0) % n;
 
-		// Compute C_{2j}
 		C_j = (C_j * C_j) % n;
 
 		j_even = true;
-		multiplications += 3;
+		multiplications_int += 3;
 
 		if (exponent & (1lu << k)) {
 			/*
@@ -133,7 +150,7 @@ static void power_of_x_int(POLY_ARGS(res), const uint64_t exponent, MODULUS_ARGS
 			 */
 
 			// Compute A_{j+1}
-			tmp0 = (((bb4c * B_1) % n) * B_j) % n + (A_1 * A_j) % n;
+			tmp0 = (((bb4c_int * B_1) % n) * B_j) % n + (A_1 * A_j) % n;
 			tmp0 = (tmp0 * inverse_of_2) % n;
 
 			// Compute B_{j+1}
@@ -147,7 +164,7 @@ static void power_of_x_int(POLY_ARGS(res), const uint64_t exponent, MODULUS_ARGS
 			C_j = (C_j * C_1) % n;
 
 			j_even = false;
-			multiplications += 8;
+			multiplications_int += 8;
 		}
 	}
 
@@ -195,13 +212,12 @@ static Primality steps_1_2_int(const uint64_t n)
 /*
  * Execute steps (3) through (5) of the Quadratic Frobenius Test.
  */
-static Primality steps_3_4_5_int(MODULUS_ARGS)
+static Primality steps_3_4_5_int(MODULUS_ARGS_int)
 {
-	uint64_t POLY(x), POLY(foo), s, tmp;
+	uint64_t POLY_int(foo), s, tmp;
 	uint64_t r, i;
 
-	x_x = 1;
-	x_1 = s = tmp = foo_x = foo_1 = 0;
+	s = tmp = foo_x = foo_1 = 0;
 
 	/*
 	 * Step (3) Check, whether -c is a square modulo n.
@@ -209,34 +225,33 @@ static Primality steps_3_4_5_int(MODULUS_ARGS)
 	split_int(&r, &s, n+1);
 	tmp = n + 1;
 	tmp = tmp / 2;
-	powm_int(&foo_x, &foo_1, x_x, x_1, tmp, MODULUS);
+	power_of_x_int(&foo_x, &foo_1, tmp, MODULUS_int);
 	if (foo_x != 0)  // Check, whether x^((n+1)/2) has degree 1.
 		return composite;
 
 	/*
 	 * Step (4) Check, whether x^(n+1) = -c mod (n, x^2-bx-c).
 	 */
-	foo_1 = foo_1 * foo_1;
+	foo_1 = (foo_1 * foo_1) % n;
 	tmp = n - c;
-	if (foo_1 % n != tmp)
+	if (foo_1 != tmp)
 		return composite;
 
 	/*
 	 * Step (5)
 	 */
-	tmp = n * n;
-	split_int(&r, &s, tmp); // Calculate r,s such that 2^r*s + 1 == n^2
-	powm_int(&foo_x, &foo_1, x_x, x_1, s, MODULUS);
+	split_int(&r, &s, n * n); // Calculate r,s such that 2^r*s + 1 == n^2
+	power_of_x_int(&foo_x, &foo_1, s, MODULUS_int);
 
-	tmp = n - 1;
 	if (foo_x == 0 && foo_1 == 1)
 		return probably_prime;
 
+	tmp = n - 1;
 	for (i = 0; i < r - 1; i++) {
 		if (foo_x == 0 && foo_1 % n == tmp)
 			return probably_prime;
 
-		square_mod_int(&foo_x, &foo_1, foo_x, foo_1, MODULUS);
+		square_mod_int(&foo_x, &foo_1, foo_x, foo_1, MODULUS_int);
 	}
 
 	return composite;
@@ -256,7 +271,7 @@ Primality QFT_int(const unsigned n_, const unsigned b_, const unsigned c_)
 	if (result != probably_prime)
 		return result;
 
-	return steps_3_4_5_int(MODULUS);
+	return steps_3_4_5_int(MODULUS_int);
 }
 
 /*
@@ -301,13 +316,13 @@ Primality RQFT_int(const unsigned n_, const unsigned k)
 			b = get_random_int(2, n - 2);
 			c = get_random_int(2, n - 2);
 
-			bb4c = ((b * b) % n + c * 4) % n;
+			bb4c_int = ((b * b) % n + c * 4) % n;
 
-			j_bb4c = jacobi(bb4c, n);
+			j_bb4c = jacobi(bb4c_int, n);
 			j_c = jacobi(n - c, n); // NOTE: n-c is not congruent to -c, since -c is interpreted as 2⁶⁴-c !!!
 
 			if (j_bb4c == -1 && j_c == 1) {
-				check_non_trivial_divisor(bb4c);
+				check_non_trivial_divisor(bb4c_int);
 				check_non_trivial_divisor(b);
 				check_non_trivial_divisor(c);
 				break;
@@ -321,7 +336,7 @@ Primality RQFT_int(const unsigned n_, const unsigned k)
 			return probably_prime;
 		}
 
-		result = steps_3_4_5_int(MODULUS);
+		result = steps_3_4_5_int(MODULUS_int);
 		if (result == composite)
 			return composite;
 	}
