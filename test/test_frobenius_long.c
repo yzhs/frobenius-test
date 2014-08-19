@@ -68,17 +68,17 @@ void test_frobenius_sigma(void)
 			// Make sure σ is indeed an involution
 			sigma(POLY(foo), POLY(f), MODULUS);
 			sigma(POLY(foo), POLY(foo), MODULUS);
-			CU_ASSERT_FATAL(mpz_cmp(foo_x, f_x) == 0);
-			CU_ASSERT_FATAL(mpz_cmp(foo_1, f_1) == 0);
+			CU_ASSERT(mpz_cmp(foo_x, f_x) == 0);
+			CU_ASSERT(mpz_cmp(foo_1, f_1) == 0);
 
 			sigma(POLY(foo), POLY(x), MODULUS);
 			mpz_sub_ui(baz, n, 1);
-			CU_ASSERT_FATAL(mpz_cmp(foo_x, baz) == 0);
-			CU_ASSERT_FATAL(mpz_cmp(foo_1, b) == 0);
+			CU_ASSERT(mpz_cmp(foo_x, baz) == 0);
+			CU_ASSERT(mpz_cmp(foo_1, b) == 0);
 
 			powm(POLY(foo), POLY(x), n, MODULUS);
-			CU_ASSERT_FATAL(mpz_cmp(foo_x, baz) == 0);
-			CU_ASSERT_FATAL(mpz_cmp(foo_1, b) == 0);
+			CU_ASSERT(mpz_cmp(foo_x, baz) == 0);
+			CU_ASSERT(mpz_cmp(foo_1, b) == 0);
 
 			power_of_x(POLY(foo), n, MODULUS);
 			CU_ASSERT_FATAL(mpz_cmp(foo_x, baz) == 0);
