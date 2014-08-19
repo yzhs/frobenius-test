@@ -8,79 +8,167 @@
 #include "small_primes.h"
 #include "frobenius_int.h"
 
-int enable_logging = 0;
+static unsigned long bb4c, multiplications;
+
+#define POLY_ARGS(f) unsigned long *f##_x, unsigned long *f##_1
+#define CONST_POLY_ARGS(f) const unsigned long f##_x, const unsigned long f##_1
+#define MODULUS n, b, c
+#define MODULUS_ARGS const unsigned long n, const unsigned long b, const unsigned long c
 
 
 /*
- * Return f(x)*g(x) mod (n, x^2 - b*x - c) where f(x) = d*x + e and g(x) = f*x + g in the return arguments res0 and
- * res1, representing the polynomial res0*x + res1.
+ * Return f(x)*g(x) mod (n, x^2 - b*x - c) where f(x) = f_x*x + f_1 and g(x) = g_x*x + g_1 in the return arguments res_x and
+ * res_1, representing the polynomial res_x*x + res_1.
  */
-static void mult_mod_int(unsigned long *res0, unsigned long *res1,
-                         const unsigned long d, const unsigned long e,
-                         const unsigned long f, const unsigned long g,
-                         const unsigned long n, const unsigned long b, unsigned long c)
+static void mult_mod_int(POLY_ARGS(res), CONST_POLY_ARGS(f), CONST_POLY_ARGS(g), MODULUS_ARGS)
 {
-	unsigned long df, ef = (e * f) % n, eg = (e * g) % n;
+	unsigned long df, ef = (f_x * g_x) % n, eg = (f_1 * g_x) % n;
+	multiplications += 2;
 
-	/*
-	 * If deg f = 1, the whole thing amounts to multiplying the coefficients of g with a constant and reducing them
-	 * modulo n.
-	 */
-	if (d == 0) {
-		*res0 = ef;
-		*res1 = eg;
+	// If deg f = 1, the whole thing amounts to multiplying the
+	// coefficients of f with a constant and reducing them modulo n.
+	if (f_x == 0) {
+		*res_x = ef;
+		*res_1 = eg;
+
 		return;
 	}
-	df = (d * f) % n;
+	df = (f_x * g_x) % n;
 
 	// All these modulo operations are pretty expensive...
-	*res0 = (((df * b) % n + (d * g) % n) % n + ef) % n;
-	*res1 = ((df * c) % n + eg) % n;
+	*res_x = (((df * b) % n + (f_x * g_1) % n) % n + ef) % n;
+	*res_1 = ((df * c) % n + eg) % n;
+
+	multiplications += 4;
 }
 
 /*
- * Calculate (dx + e)^2 mod (n, x^2-bx-c) returning the result as (*res0) * x + (*res1).
+ * Calculate (dx + e)^2 mod (n, x^2-bx-c) returning the result as (*res_x) * x + (*res_1).
  */
-static void square_mod_int(unsigned long *res0, unsigned long *res1, /* The resulting linear polynomial. */
-                           const unsigned long d, const unsigned long e,
-                           const unsigned long n, const unsigned long b, unsigned long c)
+static void square_mod_int(POLY_ARGS(res), CONST_POLY_ARGS(f), MODULUS_ARGS)
 {
-	unsigned long ee = (e * e) % n;
+	unsigned long ee = (f_1 * f_1) % n;
 	unsigned long dd;
 
-	if (d == 0) {
-		*res0 = 0;
-		*res1 = ee;
+	multiplications++;
+
+	if (f_x == 0) {
+		*res_x = 0;
+		*res_1 = ee;
 		return;
 	}
-	dd = (d * d) % n;
+	dd = (f_x * f_x) % n;
 
-	// compute res0 = d^2*b+2*d*e
-	*res0 = ((dd * b) % n + (2 * (d * e) % n) % n) % n;
+	// compute res_x = f_x^2*b+2*f_x*f_1
+	*res_x = ((dd * b) % n + (2 * (f_x * f_1) % n) % n) % n;
 
-	// and res1 = d^2*c+e^2
-	*res1 = ((dd * c) % n + ee) % n;
+	// and res_1 = f_x^2*c+f_1^2
+	*res_1 = ((dd * c) % n + ee) % n;
+
+	multiplications += 4;
 }
 
 /*
- * Calculate (base0 * x + base1)^exp mod (n, x^2-bx-c) returning the result as
- * (*res0) * x + (*res1).  The computation is done using exponentiation by
+ * Calculate (base_x * x + base_1)^exp mod (n, x^2-bx-c) returning the result as
+ * (*res_x) * x + (*res_1).  The computation is done using exponentiation by
  * squaring.
  */
-static void powm_int(unsigned long *res0, unsigned long *res1,
-                     unsigned long base0, unsigned long base1, unsigned long exp,
-                     const unsigned long n, const unsigned long b, const unsigned long c)
+static void powm_int(POLY_ARGS(res), CONST_POLY_ARGS(b), unsigned long exp, MODULUS_ARGS)
 {
-	*res0 = 0;
-	*res1 = 1;
+	unsigned long POLY(base);
+	base_x = b_x;
+	base_1 = b_1;
+
+	*res_x = 0;
+	*res_1 = 1;
 
 	while (exp != 0) {
 		if (odd(exp))
-			mult_mod_int(res0, res1, base0, base1, *res0, *res1, n, b, c);
-		square_mod_int(&base0, &base1, base0, base1, n, b, c);
+			mult_mod_int(POLY(res), POLY(base), *res_x, *res_1, MODULUS);
+		square_mod_int(&base_x, &base_1, POLY(base), MODULUS);
 		exp /= 2;
 	}
 }
+
+/*
+ * Compute x^exponent mod (n, x² - bx + c) using Lucas sequences.
+ */
+static void power_of_x(POLY_ARGS(res), const unsigned long exponent, MODULUS_ARGS)
+{
+	int j_even = false; // We only need j to compute (-1)^j, so all we care about is whether j is odd or even.
+	unsigned long A_j = b, B_j = 1, C_j = c, tmp0;
+
+	// Compute the inverse of two.
+	// NOTE This can't be precomputed, because it depends on n.
+	unsigned long inverse_of_2 = invert(2, n);
+
+	// The following thre values are needed for the chain addition steps.
+	// Values that are already stored in variables available locally, are
+	// #defined, the remaining values is stored in a global temporary
+	// variable.
+#define A_1 b
+	unsigned long B_1 = 1;
+#define C_1 c
+
+	// Skip the leading 1 bit and convert convert to 0 based indexing
+	for (unsigned long k = mpz_sizeinbase(exponent, 2) - 1 - 1; k < (1lu << 63); k--) {
+		/*
+		 * Doubling
+		 */
+
+		// Compute B_{2j}
+		B_j = (A_j * B_j) % n;
+
+		// Compute A_{2j}
+		tmp0 = C_j + C_j;
+		// TODO A conditional branch in a tight inner loop is a bad idea. Rewrite this!
+		if (j_even)
+			tmp0 = -tmp0;
+		A_j = ((A_j * A_j) % n + tmp) % n;
+
+		// Compute C_{2j}
+		C_j = (C_j * C_j) % n;
+
+		j_even = true;
+		multiplications += 3;
+
+		if (tstbit(exponent, k)) {
+			/*
+			 * Chain addition
+			 */
+
+			// Compute A_{j+1}
+			tmp0 = (((bb4c * B_1) % n) * B_j) % n + (A_1 * A_j) % n;
+			tmp0 = (tmp0 * inverse_of_2) % n;
+
+			// Compute B_{j+1}
+			B_j = ((A_1 * B_j) % n + (A_j * B_1) % n) % n;
+			B_j = (B_j * inverse_of_2) % n;
+
+			// Set the new A_j
+			A_j = tmp0;
+
+			// Compute C_{j+1}
+			C_j = (C_j * C_1) % n;
+
+			j_even = false;
+			multiplications += 8;
+		}
+	}
+
+	// Compute the polynomial x^j = res_x * x + res_1 from A_j and B_j.
+	*res_x = B_j;
+
+	*res_1 = (b * B_j) % n;
+	if (*res_1 < A_j)
+		*res_1 = A_j - *res_1;
+	else
+		*res_1 = n + A_j - *res_1;
+	*res_1 = (*res_1 * inverse_of_2) % n;
+#undef B_1
+}
+
+
 
 /*
  * Like QFT, return 'probably_prime' if n might be prime, 'prime' if n is
@@ -90,69 +178,70 @@ static Primality steps_1_2_int(const unsigned long n)
 {
 	unsigned long sqrt = int_sqrt(n);
 
-	/*  (2) If n is a square, it can obviously not be prime. */
+	/*
+	 * Step (2) If n is a square, it can obviously not be prime.
+	 */
 	if (sqrt * sqrt == n)
 		return composite;
 
+	/*
+	 * Step (1)
+	 */
 	// Start from prime_list[1] == 3 stead of prime_list[0] == 2.
 	for (unsigned long i = 1; i < len(prime_list) && prime_list[i] <= sqrt; i++)
 		if (n % prime_list[i] == 0)
 			return composite;
 
-	/* If the given number is small enough, there cannot be a non-trivial
-	 * divisor of n, whence n is prime. */
+	// If the given number is small enough, there cannot be a non-trivial
+	// divisor of n, whence n is prime.
 	return (sqrt < B) ? prime : probably_prime;
 }
 
 /*
  * Execute steps (3) through (5) of the Quadratic Frobenius Test.
  */
-static Primality steps_3_4_5_int(const unsigned long n, const unsigned long b, const unsigned long c)
+static Primality steps_3_4_5_int(MODULUS_ARGS)
 {
-	unsigned long x0, x1, s, tmp, foo0, foo1;
+	unsigned long POLY(x), POLY(foo), s, tmp;
 	unsigned long r, i;
 
-	x0 = 1;
-	x1 = s = tmp = foo0 = foo1 = 0;
+	x_x = 1;
+	x_1 = s = tmp = foo_x = foo_1 = 0;
 
 	/*
-	 * (3) Compute x^((n+1)/2) mod (n, x^2-bx-c).  If x^((n+1)/2) not in ℤ/nℤ,
-	 * declare n to be composite and stop.
+	 * Step (3) Check, whether -c is a square modulo n.
 	 */
+	split_int(&r, &s, n+1);
 	tmp = n + 1;
 	tmp = tmp / 2;
-	powm_int(&foo0, &foo1, x0, x1, tmp, n, b, c);
-	if (foo0 != 0)  // check whether x^((n+1)/2) has degree 1
+	powm_int(&foo_x, &foo_1, x_x, x_1, tmp, MODULUS);
+	if (foo_x != 0)  // Check, whether x^((n+1)/2) has degree 1.
 		return composite;
 
 	/*
-	 * (4) Compute x^(n+1) mod (n, x^2-bx-c).  If x^(n+1) not congruent -c,
-	 * declare n to be composite and stop.
+	 * Step (4) Check, whether x^(n+1) = -c mod (n, x^2-bx-c).
 	 */
-	foo1 = foo1 * foo1;
+	foo_1 = foo_1 * foo_1;
 	tmp = n - c;
-	if (foo1 % n != tmp)
+	if (foo_1 % n != tmp)
 		return composite;
 
 	/*
-	 * (5) Let n^2-1=2^r*s, where s is odd.  If x^s not congruent 1 mod (n,
-	 * x^2-bx-c), and x^(2^j*s) not congruent -1 mod (n, x^2-bx-c) for all
-	 * 0≤j≤r-2, declare n to be composite and stop.
-	 * If n is not declared composite in Steps 1—5, declare n to be a
-	 * probable prime.
+	 * Step (5)
 	 */
 	tmp = n * n;
-	split_int(&r, &s, tmp); // calculate r,s such that 2^r*s + 1 == n^2
-	powm_int(&foo0, &foo1, x0, x1, s, n, b, c);
+	split_int(&r, &s, tmp); // Calculate r,s such that 2^r*s + 1 == n^2
+	powm_int(&foo_x, &foo_1, x_x, x_1, s, MODULUS);
+
 	tmp = n - 1;
-	if (foo0 == 0 && foo1 == 1)
+	if (foo_x == 0 && foo_1 == 1)
 		return probably_prime;
 
 	for (i = 0; i < r - 1; i++) {
-		if (foo0 == 0 && foo1 % n == tmp)
+		if (foo_x == 0 && foo_1 % n == tmp)
 			return probably_prime;
 
-		square_mod_int(&foo0, &foo1, foo0, foo1, n, b, c);
+		square_mod_int(&foo_x, &foo_1, foo_x, foo_1, MODULUS);
 	}
 
 	return composite;
@@ -172,9 +261,13 @@ Primality QFT_int(const unsigned n_, const unsigned b_, const unsigned c_)
 	if (result != probably_prime)
 		return result;
 
-	return steps_3_4_5_int(n, b, c);
+	return steps_3_4_5_int(MODULUS);
 }
 
+/*
+ * Check whether gcd(n, num) is either n or 1.  Otherwise return composite from
+ * RQFT.
+ */
 #define check_non_trivial_divisor(num) do { \
 		tmp = gcd(num, n); \
 		if (tmp != 1 && tmp != n) \
@@ -191,8 +284,11 @@ Primality RQFT_int(const unsigned n_, const unsigned k)
 	unsigned long n = n_;
 	Primality result;
 	unsigned long b = 0, c = 0;
-	unsigned long bb4c, tmp;
-	int j1 = 0, j2 = 0;
+	unsigned long tmp; // This is used to store the greatest commond divisors we calculate.
+
+	// These variables store the values of the Jacobi symbols (b²+4c/n) and
+	// (-c/n) respectivelyg
+	int j_bb4c = 0, j_c = 0;
 
 	if (n < 3)
 		return n == 2 ? prime : composite;
@@ -200,8 +296,8 @@ Primality RQFT_int(const unsigned n_, const unsigned k)
 		return composite;
 
 	result = steps_1_2_int(n);
-	/* If the number is found to be either composite or certainly prime, we can
-	 * return that result immediately. */
+	// If the number is found to be either composite or certainly prime, we
+	// can return that result immediately.
 	if (result != probably_prime)
 		return result;
 
@@ -212,10 +308,10 @@ Primality RQFT_int(const unsigned n_, const unsigned k)
 
 			bb4c = ((b * b) % n + c * 4) % n;
 
-			j1 = jacobi(bb4c, n);
-			j2 = jacobi(n - c, n); /* Warning: n-c is not congruent to -c, since -c is interpreted as 2⁶⁴-c !!! */
+			j_bb4c = jacobi(bb4c, n);
+			j_c = jacobi(n - c, n); // NOTE: n-c is not congruent to -c, since -c is interpreted as 2⁶⁴-c !!!
 
-			if (j1 == -1 && j2 == 1) {
+			if (j_bb4c == -1 && j_c == 1) {
 				check_non_trivial_divisor(bb4c);
 				check_non_trivial_divisor(b);
 				check_non_trivial_divisor(c);
@@ -223,14 +319,14 @@ Primality RQFT_int(const unsigned n_, const unsigned k)
 			}
 		}
 
-		if (j1 != -1 || j2 != 1) {
+		if (j_bb4c != -1 || j_c != 1) {
 			printf("Found no suitable pair (b,c) modulo n=%lu. "
 			       "This is highly unlikely unless the programme is wrong. "
 			       "Assuming %lu is a prime...\n", n, n);
 			return probably_prime;
 		}
 
-		result = steps_3_4_5_int(n, b, c);
+		result = steps_3_4_5_int(MODULUS);
 		if (result == composite)
 			return composite;
 	}

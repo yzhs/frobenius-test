@@ -5,6 +5,8 @@
 
 #include "common.h"
 
+#define POLY(f) f##_x, f##_1
+
 /* Initialises the random number generator using a (static) seed. */
 void init_int(void);
 
