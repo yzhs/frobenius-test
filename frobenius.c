@@ -281,9 +281,6 @@ static void sigma(POLY_ARGS(res), CONST_POLY_ARGS(f), MODULUS_ARGS)
 	multiplications += 1;
 }
 
-// Return a certain value x after deallocating the local big integer variables.
-#define ret(x) do { result = (x); goto exit; } while (0)
-
 /*
  * Perform the non-deterministic steps of the Quadratic Frobenius Test.
  */
