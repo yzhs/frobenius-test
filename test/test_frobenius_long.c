@@ -40,6 +40,9 @@ void frob_mult_x(void)
 				mpz_urandomm(f_1, r_state, n);
 				mpz_set_ui(f_x, 0);
 
+				mpz_mul(bb4c, b, b);
+				mpz_addmul_ui(bb4c, c, 4);
+
 				// Ensure that (0x+a)*x = a*x for all a in ℤ_n
 				mult_x_mod(POLY(foo), POLY(f), MODULUS);
 				CU_ASSERT(mpz_cmp(foo_x, f_1) == 0);
@@ -84,6 +87,9 @@ void frob_sigma_basics(void)
 			if (jacobi(b_*b_+4*c_, n_) != -1)
 				continue;
 			mpz_set_ui(b, b_);
+
+			mpz_mul(bb4c, b, b);
+			mpz_addmul_ui(bb4c, c, 4);
 
 			mpz_urandomm(f_x, r_state, n);
 			mpz_urandomm(f_1, r_state, n);
@@ -139,6 +145,9 @@ void frob_sigma_short_integer(void)
 			mpz_set_ui(b, b_);
 		}
 
+		mpz_mul(bb4c, b, b);
+		mpz_addmul_ui(bb4c, c, 4);
+
 		for (p = 0; p < 20; p++) {
 			mpz_set_ui(f_x, 0);
 			mpz_set_ui(f_1, p);
@@ -182,6 +191,9 @@ void frob_sigma_power(void)
 				continue;
 			mpz_set_ui(b, b_);
 
+			mpz_mul(bb4c, b, b);
+			mpz_addmul_ui(bb4c, c, 4);
+
 			mpz_urandomm(f_x, r_state, n);
 			mpz_urandomm(f_1, r_state, n);
 
@@ -223,6 +235,9 @@ void frob_power_x_lucas(void)
 			if (jacobi(b_*b_+4*c_, n_) != -1)
 				continue;
 			mpz_set_ui(b, b_);
+
+			mpz_mul(bb4c, b, b);
+			mpz_addmul_ui(bb4c, c, 4);
 
 			mpz_urandomm(f_x, r_state, n);
 			mpz_urandomm(f_1, r_state, n);
@@ -305,6 +320,9 @@ void frob_power_basics(void)
 				continue;
 			mpz_set_ui(b, b_);
 
+			mpz_mul(bb4c, b, b);
+			mpz_addmul_ui(bb4c, c, 4);
+
 			mpz_urandomm(f_x, r_state, n);
 			mpz_urandomm(f_1, r_state, n);
 
@@ -340,6 +358,9 @@ void frob_fast_algorithm(void)
 			if (jacobi(b_*b_+4*c_, n_) != -1)
 				continue;
 			mpz_set_ui(b, b_);
+
+			mpz_mul(bb4c, b, b);
+			mpz_addmul_ui(bb4c, c, 4);
 
 			// Compute r' and s' such that 2^r' s' = n-1 (as n is 1 mod 4)
 			mpz_sub_ui(tmp1, n, 1);
