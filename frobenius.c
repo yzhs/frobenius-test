@@ -109,7 +109,7 @@ static void power_of_x(POLY_ARGS(res), const mpz_t exponent, MODULUS_ARGS)
 	mpz_t A_j, B_j, C_j;
 	mpz_inits(A_j, B_j, C_j, tmp0, NULL);
 
-	// Start with A_1 = x^1 + (b-x)^1 = 2
+	// Start with A_1 = x^1 + (b-x)^1 = b
 	mpz_set(A_j, b);
 	// and B_1 = (x^1 - (b - x)^1)/(2x-b) = 1.
 	mpz_set_ui(B_j, 1);
