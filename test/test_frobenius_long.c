@@ -10,6 +10,55 @@
 
 static int num_iterations = 10000;
 
+void frob_mult_x(void)
+{
+	uint64_t n_;
+	mpz_t MODULUS, POLY(f), POLY(foo), POLY(bar), POLY(x), baz;
+	mpz_inits(MODULUS, POLY(f), POLY(foo), POLY(bar), POLY(x), baz, NULL);
+
+	// Initialize POLY(x)
+	mpz_set_ui(x_x, 1);
+
+	n_ = 0x7ffffff;
+	mpz_set_ui(n, n_);
+	mpz_urandomm(n, r_state, n);
+	mpz_add(n, n, n);
+	mpz_add_ui(n, n, 0x70000001);
+	n_ = mpz_get_ui(n);
+
+	for (uint64_t c_ = 1; c_ < 1000; c_++) {
+		if (jacobi(n_ - c_, n_) != 1)
+			continue;
+		mpz_set_ui(c, c_);
+
+		for (uint64_t b_ = 1; b_ < 100; b_++) {
+			b_ %= n_;
+			if (jacobi(b_*b_+4*c_, n_) != -1)
+				continue;
+			mpz_set_ui(b, b_);
+
+			for (int i = 0; i < 100; i++) {
+				mpz_urandomm(f_1, r_state, n);
+				mpz_set_ui(f_x, 0);
+
+				// Ensure that (0x+a)*x = a*x for all a in ℤ_n
+				mult_x_mod(POLY(foo), POLY(f), MODULUS);
+				CU_ASSERT(mpz_cmp(foo_x, f_1) == 0);
+				CU_ASSERT(mpz_sgn(foo_1) == 0);
+
+				mpz_urandomm(f_x, r_state, n);
+
+				mult_x_mod(POLY(foo), POLY(f), MODULUS);
+				mult_mod(POLY(bar), POLY(f), POLY(x), MODULUS);
+				CU_ASSERT(mpz_cmp(foo_x, bar_x) == 0);
+				CU_ASSERT(mpz_cmp(foo_1, bar_1) == 0);
+			}
+		}
+	}
+
+	mpz_clears(MODULUS, POLY(f), POLY(foo), POLY(bar), POLY(x), baz, NULL);
+}
+
 void frob_sigma_basics(void)
 {
 	uint64_t n_;

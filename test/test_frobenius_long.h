@@ -2,6 +2,7 @@
 #define TEST_FROBENIUS_LONG_H
 #include <CUnit/CUnit.h>
 
+void frob_mult_x(void);
 void frob_sigma_basics(void);
 void frob_sigma_short_integer(void);
 void frob_sigma_power(void);
