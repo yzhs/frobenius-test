@@ -178,7 +178,7 @@ static void power_of_x(POLY_ARGS(res), const mpz_t exponent, MODULUS_ARGS)
 			mpz_mod(C_j, C_j, n);
 
 			j_even = false;
-			multiplications += 8;
+			multiplications += 4;
 		}
 	}
 
@@ -191,6 +191,8 @@ static void power_of_x(POLY_ARGS(res), const mpz_t exponent, MODULUS_ARGS)
 		mpz_add(res_1, res_1, n);
 	mpz_fdiv_q_2exp(res_1, res_1, 1);
 	mpz_mod(res_1, res_1, n);
+
+	multiplications++;
 
 	mpz_clears(A_j, B_j, C_j, NULL);
 }
