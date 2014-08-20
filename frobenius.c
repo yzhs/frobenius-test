@@ -382,9 +382,9 @@ static Primality steps_3_4_5(MODULUS_ARGS)
 		mult_mod(POLY(foo), POLY(foo), POLY(x_t), MODULUS);
 		mult_mod(POLY(foo), POLY(foo), POLY(x_n_1_2), MODULUS);
 	} else {
-		//sigma(POLY(foo), POLY(x_t), MODULUS);
-		//mult_mod(POLY(foo), POLY(foo), POLY(x_t), MODULUS);
-		powm(POLY(foo), POLY(x), s, MODULUS);
+		sigma(POLY(foo), POLY(x_t), MODULUS);
+		mult_mod(POLY(foo), POLY(foo), POLY(x_t), MODULUS);
+		//power_of_x(POLY(foo), s, MODULUS);
 	}
 
 	mpz_sub_ui(tmp0, n, 1);
