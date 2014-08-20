@@ -3,6 +3,7 @@
 #include <gmp.h>
 
 #include "test_frobenius_long.h"
+#define FAST_ALGORITHM
 
 #include "../frobenius.c"
 #include "../frobenius_int.c"
@@ -29,6 +30,11 @@ void test_frobenius_sigma(void)
 	CU_ASSERT_FATAL(mpz_probab_prime_p(n, 50));
 	n_ = mpz_get_ui(n);
 
+	/*
+	n_ = 5;
+	mpz_set_ui(n, 5);
+	//*/
+
 	for (c_ = 1; c_ < 50; c_++) {
 		if (jacobi(n_ - c_, n_) != 1)
 			continue;
@@ -45,11 +51,9 @@ void test_frobenius_sigma(void)
 			mpz_set_ui(f_1, p);
 			powm(POLY(foo), POLY(f), n, MODULUS);
 			CU_ASSERT(mpz_cmp_ui(foo_x, 0) == 0);
-			CU_ASSERT(mpz_cmp_ui(foo_1, p) == 0);
+			CU_ASSERT(mpz_cmp_ui(foo_1, p%n_) == 0);
 		}
 	}
-
-	CU_ASSERT_FATAL(mpz_probab_prime_p(n, 50));
 
 	for (uint64_t c_ = 1; c_ < 1000; c_++) {
 		if (jacobi(n_ - c_, n_) != 1)
@@ -81,6 +85,11 @@ void test_frobenius_sigma(void)
 			CU_ASSERT(mpz_cmp(foo_1, b) == 0);
 
 			power_of_x(POLY(foo), n, MODULUS);
+			if (mpz_cmp(foo_x, baz) != 0 || mpz_cmp(foo_1, b) != 0) {
+				gmp_printf("\nError: f^n = %Zd x + %Zd != %Zd x+%Zd\n",
+						foo_x, foo_1, baz, b);
+				gmp_printf("n = %Zd = %d mod 4, b = %Zd, c = %Zd\n", n, mpz_fdiv_ui(n, 4), b, c);
+			}
 			CU_ASSERT_FATAL(mpz_cmp(foo_x, baz) == 0);
 			CU_ASSERT_FATAL(mpz_cmp(foo_1, b) == 0);
 
@@ -135,8 +144,14 @@ void test_frobenius_power_x_lucas(void)
 				mpz_set_ui(baz, k);
 				power_of_x(POLY(bar), baz, MODULUS);
 				powm(POLY(foo), POLY(x), baz, MODULUS);
-				CU_ASSERT(mpz_cmp(foo_x, bar_x) == 0);
-				CU_ASSERT(mpz_cmp(foo_1, bar_1) == 0);
+				if (mpz_cmp(foo_x, bar_x) != 0 || mpz_cmp(foo_1, bar_1) != 0) {
+					gmp_printf("\nError: f^%lu = %Zd x + %Zd according to powm, but\n"
+							"        f^%lu = %Zd x + %Zd according to power_of_x\n",\
+							k, foo_x, foo_1, k, bar_x, bar_1);
+					gmp_printf("n = %Zd = %d mod 4, b = %Zd, c = %Zd\n", n, mpz_fdiv_ui(n, 4), b, c);
+				}
+				CU_ASSERT_FATAL(mpz_cmp(foo_x, bar_x) == 0);
+				CU_ASSERT_FATAL(mpz_cmp(foo_1, bar_1) == 0);
 			}
 
 
@@ -149,8 +164,8 @@ void test_frobenius_power_x_lucas(void)
 void test_frobenius_power(void)
 {
 	uint64_t r, n_;
-	mpz_t MODULUS, s, t, POLY(foo), POLY(bar), POLY(x), tmp1, tmp2;
-	mpz_inits(MODULUS, s, t, POLY(foo), POLY(bar), POLY(x), tmp1, tmp2, NULL);
+	mpz_t MODULUS, s, t, POLY(foo), POLY(bar), POLY(baz), POLY(x), tmp1, tmp2;
+	mpz_inits(MODULUS, s, t, POLY(foo), POLY(bar), POLY(baz), POLY(x), tmp1, tmp2, NULL);
 
 	// Initialize POLY(x)
 	mpz_set_ui(x_x, 1);
@@ -183,6 +198,10 @@ void test_frobenius_power(void)
 			// And compute it via x^t
 			mpz_fdiv_q_2exp(t, s, 1);
 			powm(POLY(bar), POLY(x), t, MODULUS);
+			power_of_x(POLY(baz), t, MODULUS);
+			CU_ASSERT(mpz_cmp(bar_x, baz_x) == 0);
+			CU_ASSERT(mpz_cmp(bar_1, baz_1) == 0);
+
 			square_mod(POLY(bar), POLY(bar), MODULUS);
 			mult_x_mod(POLY(bar), POLY(bar), MODULUS);
 
@@ -193,6 +212,9 @@ void test_frobenius_power(void)
 			// Calculate x^(n+1) directly
 			mpz_add_ui(tmp1, n, 1);
 			powm(POLY(foo), POLY(x), tmp1, MODULUS);
+			power_of_x(POLY(baz), tmp1, MODULUS);
+			CU_ASSERT(mpz_cmp(foo_x, baz_x) == 0);
+			CU_ASSERT(mpz_cmp(foo_1, baz_1) == 0);
 
 			// Given x^s, comput x^((n-1)/2) = (x^s')^(2^r'-1)
 			for (uint64_t i = 0; i < r-1; i++)
@@ -211,7 +233,7 @@ void test_frobenius_power(void)
 		}
 	}
 
-	mpz_clears(MODULUS, s, t, POLY(foo), POLY(bar), POLY(x), tmp1, tmp2, NULL);
+	mpz_clears(MODULUS, s, t, POLY(foo), POLY(bar), POLY(baz), POLY(x), tmp1, tmp2, NULL);
 }
 
 void test_frobenius_split(void)
@@ -369,13 +391,13 @@ void test_frobenius_primelist(void)
 	FILE *fp = fopen(TEST_DATA_PATH "primelist.txt", "r");
 	unsigned p;
 	uint64_t i = 0;
-	static unsigned large_primes[23006166];
+	static unsigned large_primes[23006167];
 	mpz_t n;
 
 	if (NULL == fp)
 		die(TEST_DATA_PATH "primelist.txt: %s\n", strerror(errno));
 
-	while (EOF != fscanf(fp, "%u\n", &p))
+	while (EOF != fscanf(fp, "%u\n", &p) && i < len(large_primes))
 		large_primes[i++] = p;
 
 	fclose(fp);

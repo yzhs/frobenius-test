@@ -99,6 +99,7 @@ static void powm(POLY_ARGS(res), CONST_POLY_ARGS(b), const mpz_t exponent, MODUL
 	}
 }
 
+#ifdef FAST_ALGORITHM
 /*
  * Compute x^exponent mod (n, x² - bx + c) using Lucas sequences.
  */
@@ -182,8 +183,8 @@ static void power_of_x(POLY_ARGS(res), const mpz_t exponent, MODULUS_ARGS)
 	// Compute the polynomial x^j = res_x * x + res_1 from A_j and B_j.
 	mpz_set(res_x, B_j);
 
-	mpz_mul(res_1, b, B_j);
-	mpz_sub(res_1, A_j, res_1);
+	mpz_set(res_1, A_j);
+	mpz_submul(res_1, b, B_j);
 	if (mpz_odd_p(res_1))
 		mpz_add(res_1, res_1, n);
 	mpz_fdiv_q_2exp(res_1, res_1, 1);
@@ -191,6 +192,7 @@ static void power_of_x(POLY_ARGS(res), const mpz_t exponent, MODULUS_ARGS)
 
 	mpz_clears(A_j, B_j, C_j, NULL);
 }
+#endif
 
 /*
  * Perform the deterministic steps of the QFT, that is trial division and the
@@ -237,6 +239,7 @@ Primality steps_1_2(const mpz_t n)
 	return probably_prime;
 }
 
+#ifdef FAST_ALGORITHM
 /*
  * Compute f*x = f_x * x² + f_1 * x = (b * f_x + f_1) * x + c * f_x for a
  * given polynomial f. Thus res_x = b * f_x + f_1 and res_1 = c * f_x.
@@ -271,6 +274,7 @@ static void sigma(POLY_ARGS(res), CONST_POLY_ARGS(f), MODULUS_ARGS)
 
 	multiplications += 1;
 }
+#endif
 
 /*
  * Perform the non-deterministic steps of the Quadratic Frobenius Test.
@@ -279,7 +283,9 @@ static Primality steps_3_4_5(MODULUS_ARGS)
 {
 	Primality result = composite;
 
+#ifdef FAST_ALGORITHM
 	bool n_is_1_mod_4;
+#endif
 
 	// At first, 2^r*s = n ± 1 (sign depending on whether n is 1 mod 4).
 	// At that time, r and s correspond to the variables $r'$ and $s'$ as
@@ -316,10 +322,11 @@ static Primality steps_3_4_5(MODULUS_ARGS)
 	* if n is 1 mod 4).                                                    *
 	\**********************************************************************/
 
+#ifdef FAST_ALGORITHM
 	// According to Grantham, Theorem 3.4, we have to differentiate the
 	// cases where n=1 mod 4 and n=3 mod 4
 	// So we check whether n = 1 mod 2² (x_x is 1 at this point anyway).
-	n_is_1_mod_4 = mpz_congruent_2exp_p(n, x_x, 2);
+	n_is_1_mod_4 = mpz_fdiv_ui(n, 4) == 1;
 	if (n_is_1_mod_4)
 		mpz_sub_ui(tmp0, n, 1);
 	else
@@ -337,6 +344,8 @@ static Primality steps_3_4_5(MODULUS_ARGS)
 	// Now compute x * x^(s-1) = x^s
 	mult_x_mod(POLY(foo), POLY(foo), MODULUS);
 
+	powm(POLY(foo), POLY(x), s, MODULUS);
+
 	// We now have foo_x * x + foo_1 = x^s.  All we have to do, to
 	// calculate x^(n-1)/2 or x^(n+1)/2, is to square this polynomial r-1
 	// times.
@@ -352,6 +361,10 @@ static Primality steps_3_4_5(MODULUS_ARGS)
 		mpz_set(x_n_1_2_x, foo_x);
 		mpz_set(x_n_1_2_1, foo_1);
 	}
+#else
+	mpz_cdiv_q_2exp(tmp0, n, 1);  // tmp0 = ceil(n/2) = (n+1)/2
+	powm(POLY(foo), POLY(x), tmp0, MODULUS);
+#endif
 
 	// Check whether x^((n+1)/2) has degree 1
 	if (mpz_sgn(foo_x) != 0)
@@ -374,6 +387,7 @@ static Primality steps_3_4_5(MODULUS_ARGS)
 
 	// Calculate r,s such that 2^r*s == n² - 1.
 	split(&r, s, tmp0);
+#ifdef FAST_ALGORITHM
 	if (n_is_1_mod_4) {
 		sigma(POLY(foo), POLY(x_t), MODULUS);
 		mult_mod(POLY(foo), POLY(foo), POLY(x_t), MODULUS);
@@ -381,8 +395,10 @@ static Primality steps_3_4_5(MODULUS_ARGS)
 	} else {
 		//sigma(POLY(foo), POLY(x_t), MODULUS);
 		//mult_mod(POLY(foo), POLY(foo), POLY(x_t), MODULUS);
-		power_of_x(POLY(foo), s, MODULUS);
 	}
+#else
+	powm(POLY(foo), POLY(x), s, MODULUS);
+#endif
 	mpz_sub_ui(tmp0, n, 1);
 
 	if (mpz_sgn(foo_x) == 0 && mpz_cmp_ui(foo_1, 1) == 0)

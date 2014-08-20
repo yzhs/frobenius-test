@@ -60,7 +60,7 @@ miller_rabin_int: run_miller_rabin_int.o miller_rabin_int.o helpers_int.o common
 
 
 run_tests: helpers.o helpers_int.o small_primes.o common.o test/main.o \
-	test/test_miller_rabin_long.o test/test_miller_rabin_int.o test/test_frobenius_int.o
+	test/test_miller_rabin_long.o test/test_miller_rabin_int.o test/test_frobenius_long.o
 	$(CC) $(CFLAGS) -o $@ $^ -lm -lcunit -lgmp
 
 find_non_smooth_numbers: find_non_smooth_numbers.o small_primes.o

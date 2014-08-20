@@ -274,7 +274,7 @@ int main(int argc, char *argv[])
 	static bool measure_GMP, measure_MillerRabin, measure_Frobenius;
 
 	measure_full = true;
-	measure_prep = true;
+	measure_prep = false;
 
 	measure_primes = true;
 	measure_composites = true;
