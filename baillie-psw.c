@@ -6,6 +6,7 @@
 
 #include <gmp.h>
 
+#include "helpers.h"
 #include "baillie-psw.h"
 #include "frobenius.h"
 #include "miller_rabin.h"
