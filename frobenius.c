@@ -365,6 +365,7 @@ static Primality steps_3_4_5(MODULUS_ARGS)
 	* Step (4). Check, whether x^n is -c mod (n, x² - bx - c).             *
 	\**********************************************************************/
 	mpz_mul(foo_1, foo_1, foo_1);
+	multiplications += 1;
 	mpz_sub(tmp0, n, c);
 	if (!mpz_congruent_p(foo_1, tmp0, n))
 		ret(composite);
@@ -374,6 +375,7 @@ static Primality steps_3_4_5(MODULUS_ARGS)
 	* run time.                                                            *
 	\**********************************************************************/
 	mpz_mul(tmp0, n, n);
+	multiplications += 1;
 	mpz_sub_ui(tmp0, tmp0, 1);
 
 	// Calculate r,s such that 2^r*s == n² - 1.
@@ -467,6 +469,7 @@ Primality RQFT(const mpz_t n, const unsigned k)
 		do {
 			get_random(c, n);
 			mpz_mul(c, c, c);
+			multiplications += 1;
 			mpz_mod(c, c, n);
 			mpz_sub(c, n, c);
 		} while (mpz_cmp_ui(c, 3) < 0);
@@ -481,6 +484,7 @@ Primality RQFT(const mpz_t n, const unsigned k)
 
 			mpz_mul(bb4c, b, b);
 			mpz_addmul_ui(bb4c, c, 4);
+			multiplications += 2;
 			j_bb4c = mpz_jacobi(bb4c, n);
 			if (j_bb4c == -1) {
 				check_non_trivial_divisor(bb4c);
