@@ -88,6 +88,8 @@ static Primality lucas_test(const mpz_t n, const mpz_t D, const mpz_t Q)
 		if (mpz_tstbit(delta, k))
 			chain_addition(U_k, V_k, Q_k, U_k, V_k, Q_k, n, D, Q);
 	}
+	if (mpz_sgn(U_k) != 0)
+		result = composite;
 
 exit:
 	mpz_clears(VARIABLES, NULL);
