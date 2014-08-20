@@ -203,7 +203,7 @@ static void power_of_x(POLY_ARGS(res), const mpz_t exponent, MODULUS_ARGS)
  * Perform the deterministic steps of the QFT, that is trial division and the
  * test whether n is a perfect square.
  */
-static Primality steps_1_2(const mpz_t n)
+Primality steps_1_2(const mpz_t n)
 {
 #define tmp tmp0
 	/**********************************************************************\
