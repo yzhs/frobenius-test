@@ -8,6 +8,38 @@
 #include "miller_rabin.h"
 
 /*
+ * Perform one iteration of the strong probable prime test with a given base a.
+ */
+Primality miller_rabin_base(const mpz_t n, const mpz_t a)
+{
+	Primality result = probably_prime;
+	uint64_t s;
+	mpz_t d, x, nm1;
+
+	mpz_inits(d, x, nm1, NULL);
+	mpz_sub_ui(nm1, n, 1);
+	split(&s, d, n);
+
+	/* compute a^d mod n */
+	mpz_powm(x, a, d, n);
+
+	if (mpz_cmp_ui(x, 1) == 0 || mpz_cmp(x, nm1) == 0)
+		goto exit;
+
+	for (uint64_t r = 1; r <= s; r++) {
+		mpz_powm_ui(x, x, 2, n);
+		if (mpz_cmp_ui(x, 1) == 0 || mpz_cmp(x, nm1) == 0) {
+			result = composite;
+			break;
+		}
+	}
+
+exit:
+	mpz_clears(d, x, nm1, NULL);
+	return result;
+}
+
+/*
  * This function checks whether a given number n is a prime or not, using the
  * Miller-Rabin primality test.  This is a probabilistic test which randomly
  * chooses an integer a as a base and checks whether n satisfies a certain
