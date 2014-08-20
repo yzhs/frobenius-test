@@ -3,7 +3,6 @@
 #include <gmp.h>
 
 #include "test_frobenius_long.h"
-#define FAST_ALGORITHM
 
 #include "../frobenius.c"
 #include "../frobenius_int.c"

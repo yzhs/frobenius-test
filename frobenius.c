@@ -99,7 +99,6 @@ static void powm(POLY_ARGS(res), CONST_POLY_ARGS(b), const mpz_t exponent, MODUL
 	}
 }
 
-#ifdef FAST_ALGORITHM
 /*
  * Compute x^exponent mod (n, x² - bx + c) using Lucas sequences.
  */
@@ -196,7 +195,6 @@ static void power_of_x(POLY_ARGS(res), const mpz_t exponent, MODULUS_ARGS)
 
 	mpz_clears(A_j, B_j, C_j, NULL);
 }
-#endif
 
 /*
  * Perform the deterministic steps of the QFT, that is trial division and the
@@ -243,7 +241,6 @@ Primality steps_1_2(const mpz_t n)
 	return probably_prime;
 }
 
-#ifdef FAST_ALGORITHM
 /*
  * Compute f*x = f_x * x² + f_1 * x = (b * f_x + f_1) * x + c * f_x for a
  * given polynomial f. Thus res_x = b * f_x + f_1 and res_1 = c * f_x.
@@ -278,7 +275,6 @@ static void sigma(POLY_ARGS(res), CONST_POLY_ARGS(f), MODULUS_ARGS)
 
 	multiplications += 1;
 }
-#endif
 
 /*
  * Perform the non-deterministic steps of the Quadratic Frobenius Test.
@@ -287,9 +283,7 @@ static Primality steps_3_4_5(MODULUS_ARGS)
 {
 	Primality result = composite;
 
-#ifdef FAST_ALGORITHM
 	bool n_is_1_mod_4;
-#endif
 
 	// At first, 2^r*s = n ± 1 (sign depending on whether n is 1 mod 4).
 	// At that time, r and s correspond to the variables $r'$ and $s'$ as
@@ -326,7 +320,6 @@ static Primality steps_3_4_5(MODULUS_ARGS)
 	* if n is 1 mod 4).                                                    *
 	\**********************************************************************/
 
-#ifdef FAST_ALGORITHM
 	// According to Grantham, Theorem 3.4, we have to differentiate the
 	// cases where n=1 mod 4 and n=3 mod 4
 	// So we check whether n = 1 mod 2² (x_x is 1 at this point anyway).
@@ -363,10 +356,6 @@ static Primality steps_3_4_5(MODULUS_ARGS)
 		mpz_set(x_n_1_2_x, foo_x);
 		mpz_set(x_n_1_2_1, foo_1);
 	}
-#else
-	mpz_cdiv_q_2exp(tmp0, n, 1);  // tmp0 = ceil(n/2) = (n+1)/2
-	power_of_x(POLY(foo), tmp0, MODULUS);
-#endif
 
 	// Check whether x^((n+1)/2) has degree 1
 	if (mpz_sgn(foo_x) != 0)
@@ -389,7 +378,6 @@ static Primality steps_3_4_5(MODULUS_ARGS)
 
 	// Calculate r,s such that 2^r*s == n² - 1.
 	split(&r, s, tmp0);
-#ifdef FAST_ALGORITHM
 	if (n_is_1_mod_4) {
 		sigma(POLY(foo), POLY(x_t), MODULUS);
 		mult_mod(POLY(foo), POLY(foo), POLY(x_t), MODULUS);
@@ -397,10 +385,9 @@ static Primality steps_3_4_5(MODULUS_ARGS)
 	} else {
 		//sigma(POLY(foo), POLY(x_t), MODULUS);
 		//mult_mod(POLY(foo), POLY(foo), POLY(x_t), MODULUS);
+		powm(POLY(foo), POLY(x), s, MODULUS);
 	}
-#else
-	powm(POLY(foo), POLY(x), s, MODULUS);
-#endif
+
 	mpz_sub_ui(tmp0, n, 1);
 
 	if (mpz_sgn(foo_x) == 0 && mpz_cmp_ui(foo_1, 1) == 0)
