@@ -107,7 +107,7 @@ static void power_of_x(POLY_ARGS(res), const mpz_t exponent, MODULUS_ARGS)
 {
 	bool j_even = false; // We only need j to compute (-1)^j, so all we care about is whether j is odd or even.
 	mpz_t A_j, B_j, C_j;
-	mpz_inits(A_j, B_j, C_j, tmp0, NULL);
+	mpz_inits(A_j, B_j, C_j, NULL);
 
 	// Start with A_1 = x^1 + (b-x)^1 = b
 	mpz_set(A_j, b);
@@ -131,12 +131,12 @@ static void power_of_x(POLY_ARGS(res), const mpz_t exponent, MODULUS_ARGS)
 
 		// Compute A_{2j}
 		mpz_mul(A_j, A_j, A_j);
-		mpz_add(tmp0, C_j, C_j);
+		mpz_add(tmp1, C_j, C_j);
 		// TODO A conditional branch in a tight inner loop is a bad idea. Rewrite this!
 		if (j_even)
-			mpz_sub(A_j, A_j, tmp0);
+			mpz_sub(A_j, A_j, tmp1);
 		else
-			mpz_add(A_j, A_j, tmp0);
+			mpz_add(A_j, A_j, tmp1);
 		mpz_mod(A_j, A_j, n);
 
 		// Compute C_{2j}
@@ -152,15 +152,15 @@ static void power_of_x(POLY_ARGS(res), const mpz_t exponent, MODULUS_ARGS)
 			 */
 
 			// Compute A_{j+1}
-			mpz_mul(tmp0, bb4c, B_j); // B_1 is 1, so we can just ignore it.
-			mpz_addmul(tmp0, b, A_j); // A_1 = b
-			mpz_mod(tmp0, tmp0, n);
-			// If tmp0 is odd, tmp0+n is even.
-			if (mpz_odd_p(tmp0))
-				mpz_add(tmp0, tmp0, n);
-			// Now tmp0 is even, so we can just do a right shift to
+			mpz_mul(tmp1, bb4c, B_j); // B_1 is 1, so we can just ignore it.
+			mpz_addmul(tmp1, b, A_j); // A_1 = b
+			mpz_mod(tmp1, tmp1, n);
+			// If tmp1 is odd, tmp1+n is even.
+			if (mpz_odd_p(tmp1))
+				mpz_add(tmp1, tmp1, n);
+			// Now tmp1 is even, so we can just do a right shift to
 			// divide by 2.
-			mpz_fdiv_q_2exp(tmp0, tmp0, 1);
+			mpz_fdiv_q_2exp(tmp1, tmp1, 1);
 
 			// Compute B_{j+1}
 			mpz_mul(B_j, b, B_j);    // A_1 = b
@@ -171,7 +171,7 @@ static void power_of_x(POLY_ARGS(res), const mpz_t exponent, MODULUS_ARGS)
 			mpz_fdiv_q_2exp(B_j, B_j, 1);
 
 			// Set the new A_j
-			mpz_set(A_j, tmp0);
+			mpz_set(A_j, tmp1);
 
 			// Compute C_{j+1}
 			mpz_mul(C_j, C_j, c);
@@ -348,8 +348,6 @@ static Primality steps_3_4_5(MODULUS_ARGS)
 	// Now compute x * x^(s-1) = x^s
 	mult_x_mod(POLY(foo), POLY(foo), MODULUS);
 
-	powm(POLY(foo), POLY(x), s, MODULUS);
-
 	// We now have foo_x * x + foo_1 = x^s.  All we have to do, to
 	// calculate x^(n-1)/2 or x^(n+1)/2, is to square this polynomial r-1
 	// times.
@@ -367,7 +365,7 @@ static Primality steps_3_4_5(MODULUS_ARGS)
 	}
 #else
 	mpz_cdiv_q_2exp(tmp0, n, 1);  // tmp0 = ceil(n/2) = (n+1)/2
-	powm(POLY(foo), POLY(x), tmp0, MODULUS);
+	power_of_x(POLY(foo), tmp0, MODULUS);
 #endif
 
 	// Check whether x^((n+1)/2) has degree 1
