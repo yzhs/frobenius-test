@@ -6,7 +6,7 @@
 
 static unsigned large_primes[3069262];
 
-void test_miller_rabin_powm_int(void)
+void mr_powm_int(void)
 {
 	mpz_t base, mod, result;
 
@@ -31,7 +31,7 @@ void test_miller_rabin_powm_int(void)
 	mpz_clears(base, mod, result, NULL);
 }
 
-void test_miller_rabin_primes_int(void)
+void mr_primes_int(void)
 {
 	FILE *fp = fopen(TEST_DATA_PATH "primelist.txt", "r");
 	unsigned p;

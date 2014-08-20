@@ -2,24 +2,24 @@
 #define TEST_FROBENIUS_LONG_H
 #include <CUnit/CUnit.h>
 
-void test_frobenius_sigma_basics(void);
-void test_frobenius_sigma_short_integer(void);
-void test_frobenius_sigma_power(void);
-void test_frobenius_power_basics(void);
-void test_frobenius_power(void);
-void test_frobenius_power_x_lucas(void);
-void test_frobenius_split(void);
-void test_frobenius_get_random(void);
-void test_frobenius_mult_mod(void);
-void test_frobenius_powm_mod(void);
-void test_frobenius_squares(void);
-void test_frobenius_trial_division(void);
-void test_frobenius_rqft_small_primes(void);
-void test_frobenius_rqft_small_composites(void);
-void test_frobenius_problematic_primes(void);
-void test_frobenius_primelist(void);
-void test_frobenius_larger_primes(void);
-void test_frobenius_composites(void);
+void frob_sigma_basics(void);
+void frob_sigma_short_integer(void);
+void frob_sigma_power(void);
+void frob_power_basics(void);
+void frob_power_x_lucas(void);
+void frob_fast_algorithm(void);
+void frob_split(void);
+void frob_get_random(void);
+void frob_mult_mod(void);
+void frob_powm_mod(void);
+void frob_squares(void);
+void frob_trial_division(void);
+void frob_rqft_small_primes(void);
+void frob_rqft_small_composites(void);
+void frob_problematic_primes(void);
+void frob_primelist(void);
+void frob_larger_primes(void);
+void frob_composites(void);
 
 
 #endif

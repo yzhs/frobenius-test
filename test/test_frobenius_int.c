@@ -1,13 +1,13 @@
 #include <CUnit/CUnit.h>
 
-#include "test_frobenius_int.h"
+#include "frob_int.h"
 
 #include "../frobenius_int.c"
 
 /*
  * Helper functions
  */
-void test_frobenius_int_int_sqrt(void)
+void frob_int_int_sqrt(void)
 {
 	CU_ASSERT_EQUAL(int_sqrt(0), 0);
 	CU_ASSERT_EQUAL(int_sqrt(1), 1);
@@ -25,7 +25,7 @@ void test_frobenius_int_int_sqrt(void)
 	}
 }
 
-void test_frobenius_int_gcd(void)
+void frob_int_gcd(void)
 {
 	CU_ASSERT_EQUAL(gcd(0, 1), 1);
 	CU_ASSERT_EQUAL(gcd(1, 4), 1);
@@ -41,7 +41,7 @@ void test_frobenius_int_gcd(void)
 		}
 }
 
-void test_frobenius_int_is_square(void)
+void frob_int_is_square(void)
 {
 	CU_ASSERT_TRUE(is_square(0));
 	CU_ASSERT_TRUE(is_square(1));
@@ -50,7 +50,7 @@ void test_frobenius_int_is_square(void)
 	CU_ASSERT_FALSE(is_square(27));
 }
 
-void test_frobenius_int_jacobi(void)
+void frob_int_jacobi(void)
 {
 	CU_ASSERT_EQUAL(jacobi(1, 2), 1);
 	CU_ASSERT_EQUAL(jacobi(1, 3), 1);
@@ -61,7 +61,7 @@ void test_frobenius_int_jacobi(void)
 	CU_ASSERT_EQUAL(jacobi(21, 7), 0);
 }
 
-void test_frobenius_int_split(void)
+void frob_int_split(void)
 {
 	uint64_t s, d, n;
 
@@ -71,7 +71,7 @@ void test_frobenius_int_split(void)
 	}
 }
 
-void test_frobenius_int_get_random_int(void)
+void frob_int_get_random_int(void)
 {
 	for (int i = 0; i < 10000; i++) {
 		uint64_t rand = get_random_int(2, 1234 - 2);
@@ -88,7 +88,7 @@ void test_frobenius_int_get_random_int(void)
 /*
  * The main arithmetic functions
  */
-void test_frobenius_mult_mod_int(void)
+void frob_mult_mod_int(void)
 {
 	uint64_t b, c, n;
 	uint64_t d, e, f, g;
@@ -136,7 +136,7 @@ static uint64_t powm_const(uint64_t base, uint64_t exponent, uint64_t modulus)
 	return result;
 }
 
-void test_frobenius_powm_mod_int(void)
+void frob_powm_mod_int(void)
 {
 	uint64_t b, c, n;
 	uint64_t res0, res1;
@@ -189,7 +189,7 @@ void test_frobenius_powm_mod_int(void)
 
 
 
-void test_frobenius_squares_int(void)
+void frob_squares_int(void)
 {
 	for (uint64_t i = 1; i < len(prime_list); i++) {
 		uint64_t n = prime_list[i];
@@ -204,7 +204,7 @@ void test_frobenius_squares_int(void)
 /*
  * The various parts of the frobenius test
  */
-void test_frobenius_trial_division_int(void)
+void frob_trial_division_int(void)
 {
 	for (int i = 1; i < 1000; i++)
 		for (uint64_t j = prime_list[i] * prime_list[i]; j < 50000; j += prime_list[i])
@@ -214,13 +214,13 @@ void test_frobenius_trial_division_int(void)
 /*
  * Full RQFT tests
  */
-void test_frobenius_int_rqft_small_primes(void)
+void frob_int_rqft_small_primes(void)
 {
 	for (uint64_t i = 2; i < len(prime_list); i++)
 		CU_ASSERT_TRUE(RQFT_int(prime_list[i], 1));
 }
 
-void test_frobenius_int_rqft_small_composites(void)
+void frob_int_rqft_small_composites(void)
 {
 	uint64_t i = 2, n = prime_list[i]; /* n = 5 */
 
@@ -237,7 +237,7 @@ void test_frobenius_int_rqft_small_composites(void)
 	}
 }
 
-void test_frobenius_problematic_primes_int(void)
+void frob_problematic_primes_int(void)
 {
 	static unsigned primes[] = { 94207, 106367, 131071, 195071, 342191, 524287, 917503, 6561791 };
 
@@ -253,7 +253,7 @@ void test_frobenius_problematic_primes_int(void)
 	}
 }
 
-void test_frobenius_primelist_int(void)
+void frob_primelist_int(void)
 {
 	FILE *fp = fopen(TEST_DATA_PATH "primelist.txt", "r");
 	unsigned p;
@@ -278,7 +278,7 @@ void test_frobenius_primelist_int(void)
 
 // Test the first few primes larger than B^2.
 // These are the smallest primes that
-void test_frobenius_larger_primes_int(void)
+void frob_larger_primes_int(void)
 {
 	CU_ASSERT_EQUAL(RQFT_int(2500000001, 1), probably_prime);
 	CU_ASSERT_EQUAL(RQFT_int(2500000033, 1), probably_prime);

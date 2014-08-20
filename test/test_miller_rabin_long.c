@@ -8,7 +8,7 @@ static mpz_t composites[1013];
 
 static const uint64_t n = 1000;
 
-void test_miller_rabin_some_numbers(void)
+void mr_some_numbers(void)
 {
 	mpz_t tmp;
 
@@ -32,7 +32,7 @@ void test_miller_rabin_some_numbers(void)
 	CU_ASSERT_EQUAL(miller_rabin(tmp, 1), composite);
 }
 
-void test_miller_rabin_primes(void)
+void mr_primes(void)
 {
 	FILE *fp = fopen(TEST_DATA_PATH "primelist.txt", "r");
 	unsigned p;
@@ -58,7 +58,7 @@ void test_miller_rabin_primes(void)
 	mpz_clear(prime);
 }
 
-void test_miller_rabin_composites(void)
+void mr_composites(void)
 {
 	FILE *fp = fopen(TEST_DATA_PATH "composites.txt", "r");
 	uint64_t i;
@@ -72,7 +72,7 @@ void test_miller_rabin_composites(void)
 		CU_ASSERT_EQUAL(miller_rabin(composites[i], 10), composite);
 }
 
-void test_miller_rabin_composites2(void)
+void mr_composites2(void)
 {
 	unsigned i, c, k;
 	mpz_t tmp;
@@ -97,7 +97,7 @@ void test_miller_rabin_composites2(void)
 
 extern Primality miller_rabin_int(unsigned n, int k);
 
-void test_miller_rabin_both(void)
+void mr_both(void)
 {
 	mpz_t tmp;
 

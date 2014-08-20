@@ -10,7 +10,7 @@
 
 static int num_iterations = 10000;
 
-void test_frobenius_sigma_basics(void)
+void frob_sigma_basics(void)
 {
 	uint64_t n_;
 	mpz_t MODULUS, POLY(f), POLY(foo), POLY(bar), POLY(x), baz;
@@ -60,7 +60,7 @@ void test_frobenius_sigma_basics(void)
 	mpz_clears(MODULUS, POLY(f), POLY(foo), POLY(bar), POLY(x), baz, NULL);
 }
 
-void test_frobenius_sigma_short_integer(void)
+void frob_sigma_short_integer(void)
 {
 	uint64_t n_, b_, c_, p;
 	mpz_t MODULUS, POLY(f), POLY(foo), POLY(bar), POLY(x);
@@ -103,7 +103,7 @@ void test_frobenius_sigma_short_integer(void)
 	mpz_clears(MODULUS, POLY(f), POLY(foo), POLY(bar), POLY(x), NULL);
 }
 
-void test_frobenius_sigma_power(void)
+void frob_sigma_power(void)
 {
 	uint64_t n_;
 	mpz_t MODULUS, POLY(f), POLY(foo), POLY(bar), POLY(x), baz;
@@ -148,7 +148,7 @@ void test_frobenius_sigma_power(void)
 	mpz_clears(MODULUS, POLY(f), POLY(foo), POLY(bar), POLY(x), baz, NULL);
 }
 
-void test_frobenius_power_x_lucas(void)
+void frob_power_x_lucas(void)
 {
 	uint64_t n_;
 	mpz_t MODULUS, POLY(f), POLY(foo), POLY(bar), POLY(x), baz;
@@ -178,7 +178,7 @@ void test_frobenius_power_x_lucas(void)
 
 			mpz_urandomm(f_x, r_state, n);
 			mpz_urandomm(f_1, r_state, n);
-			for (uint64_t k = 1; k < 100; k++) {
+			for (uint64_t k = 1; k < 1000; k++) {
 				// Compare x*x^k and x^(k+1), both computed
 				// using power_of_x.
 				mpz_set_ui(baz, k);
@@ -212,7 +212,7 @@ void test_frobenius_power_x_lucas(void)
 	mpz_clears(MODULUS, POLY(f), POLY(foo), POLY(bar), POLY(x), baz, NULL);
 }
 
-void test_frobenius_power_basics(void)
+void frob_power_basics(void)
 {
 	uint64_t n_;
 	mpz_t MODULUS, POLY(f), POLY(foo), POLY(bar), POLY(x), baz;
@@ -265,7 +265,7 @@ void test_frobenius_power_basics(void)
 	mpz_clears(MODULUS, POLY(f), POLY(foo), POLY(bar), POLY(x), baz, NULL);
 }
 
-void test_frobenius_power(void)
+void frob_fast_algorithm(void)
 {
 	uint64_t r, n_;
 	mpz_t MODULUS, s, t, POLY(foo), POLY(bar), POLY(baz), POLY(x), tmp1, tmp2;
@@ -335,7 +335,7 @@ void test_frobenius_power(void)
 	mpz_clears(MODULUS, s, t, POLY(foo), POLY(bar), POLY(baz), POLY(x), tmp1, tmp2, NULL);
 }
 
-void test_frobenius_split(void)
+void frob_split(void)
 {
 	uint64_t max = 1000*1000*1000;
 
@@ -357,7 +357,7 @@ void test_frobenius_split(void)
 	}
 }
 
-void test_frobenius_mult_mod(void)
+void frob_mult_mod(void)
 {
 	uint64_t b, c, n;
 	uint64_t d, e, f, g;
@@ -405,7 +405,7 @@ void test_frobenius_mult_mod(void)
 }
 
 
-void test_frobenius_powm_mod(void)
+void frob_powm_mod(void)
 {
 	uint64_t b, c, n;
 	uint64_t d, e, k;
@@ -446,7 +446,7 @@ void test_frobenius_powm_mod(void)
 }
 
 
-void test_frobenius_squares(void)
+void frob_squares(void)
 {
 	for (int i = 0; i < num_iterations; i++) {
 		uint64_t n = 2 + (uint64_t)rand() % ((1<<15) - 2);
@@ -460,7 +460,7 @@ void test_frobenius_squares(void)
 }
 
 
-void test_frobenius_trial_division(void)
+void frob_trial_division(void)
 {
 	for (int i = 0; i < num_iterations; i++) {
 		uint64_t n = 2 + (uint64_t)rand() % ((1lu<<31) - 2);
@@ -472,7 +472,7 @@ void test_frobenius_trial_division(void)
 }
 
 
-void test_frobenius_rqft_small_primes(void)
+void frob_rqft_small_primes(void)
 {
 	for (int i = 0; i < num_iterations; i++) {
 		uint64_t n = 2 + (uint64_t)rand() % ((1lu<<30) - 2);
@@ -485,7 +485,7 @@ void test_frobenius_rqft_small_primes(void)
 
 
 
-void test_frobenius_primelist(void)
+void frob_primelist(void)
 {
 	FILE *fp = fopen(TEST_DATA_PATH "primelist.txt", "r");
 	unsigned p;
@@ -515,7 +515,7 @@ void test_frobenius_primelist(void)
 }
 
 
-void test_frobenius_larger_primes(void)
+void frob_larger_primes(void)
 {
 	mpz_t n;
 //	mpz_init_set_ui(n, 2500000001);
@@ -535,7 +535,7 @@ void test_frobenius_larger_primes(void)
 }
 
 
-void test_frobenius_composites(void)
+void frob_composites(void)
 {
 	static mpz_t composites[1013];
 	FILE *fp = fopen(TEST_DATA_PATH "composites.txt", "r");
