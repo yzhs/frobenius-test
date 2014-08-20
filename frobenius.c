@@ -106,13 +106,7 @@ static void power_of_x(POLY_ARGS(res), const mpz_t exponent, MODULUS_ARGS)
 {
 	bool j_even = false; // We only need j to compute (-1)^j, so all we care about is whether j is odd or even.
 	mpz_t A_j, B_j, C_j;
-	mpz_t inverse_of_2;
-	mpz_inits(A_j, B_j, C_j, inverse_of_2, tmp0, NULL);
-
-	// Compute the inverse of two.
-	// NOTE This can't be precomputed, because it depends on n.
-	mpz_set_ui(tmp0, 2);
-	mpz_invert(inverse_of_2, tmp0, n);
+	mpz_inits(A_j, B_j, C_j, tmp0, NULL);
 
 	// Start with A_1 = x^1 + (b-x)^1 = 2
 	mpz_set(A_j, b);
@@ -120,15 +114,6 @@ static void power_of_x(POLY_ARGS(res), const mpz_t exponent, MODULUS_ARGS)
 	mpz_set_ui(B_j, 1);
 	// Obviously C_1 = c.
 	mpz_set(C_j, c);
-
-	// The following thre values are needed for the chain addition steps.
-	// Values that are already stored in variables available locally, are
-	// #defined, the remaining values is stored in a global temporary
-	// variable.
-#define A_1 b
-#define B_1 tmp0
-	mpz_set_ui(B_1, 1);
-#define C_1 c
 
 	// Skip the leading 1 bit and convert convert to 0 based indexing
 	for (uint64_t k = mpz_sizeinbase(exponent, 2) - 1 - 1; k < (1lu << 63); k--) {
@@ -163,23 +148,30 @@ static void power_of_x(POLY_ARGS(res), const mpz_t exponent, MODULUS_ARGS)
 			 */
 
 			// Compute A_{j+1}
-			mpz_mul(tmp0, bb4c, B_1);
-			mpz_mul(tmp0, tmp0, B_j);
-			mpz_addmul(tmp0, A_1, A_j);
-			mpz_mul(tmp0, tmp0, inverse_of_2);
+			// B_1 is 1, so we can just ignore it.
+			mpz_mul(tmp0, bb4c, B_j);
+			mpz_addmul(tmp0, b, A_j);
 			mpz_mod(tmp0, tmp0, n);
+			// If tmp0 is odd, tmp0+n is even.
+			if (mpz_odd_p(tmp0))
+				mpz_add(tmp0, tmp0, n);
+			// Now tmp0 is even, so we can just do a right shift to
+			// divide by 2.
+			mpz_fdiv_q_2exp(tmp0, tmp0, 1);
 
 			// Compute B_{j+1}
-			mpz_mul(B_j, A_1, B_j);
-			mpz_addmul(B_j, A_j, B_1);  // Use the old A_j, not A_{j+1}
-			mpz_mul(B_j, B_j, inverse_of_2);
+			mpz_mul(B_j, b, B_j);
+			mpz_add(B_j, B_j, A_j);  // Use the old A_j, not A_{j+1}
 			mpz_mod(B_j, B_j, n);
+			if (mpz_odd_p(B_j))
+				mpz_add(B_j, B_j, n);
+			mpz_fdiv_q_2exp(B_j, B_j, 1);
 
 			// Set the new A_j
 			mpz_set(A_j, tmp0);
 
 			// Compute C_{j+1}
-			mpz_mul(C_j, C_j, C_1);
+			mpz_mul(C_j, C_j, c);
 			mpz_mod(C_j, C_j, n);
 
 			j_even = false;
@@ -192,11 +184,12 @@ static void power_of_x(POLY_ARGS(res), const mpz_t exponent, MODULUS_ARGS)
 
 	mpz_mul(res_1, b, B_j);
 	mpz_sub(res_1, A_j, res_1);
-	mpz_mul(res_1, res_1, inverse_of_2);
+	if (mpz_odd_p(res_1))
+		mpz_add(res_1, res_1, n);
+	mpz_fdiv_q_2exp(res_1, res_1, 1);
 	mpz_mod(res_1, res_1, n);
 
-	mpz_clears(A_j, B_j, C_j, inverse_of_2, NULL);
-#undef B_1
+	mpz_clears(A_j, B_j, C_j, NULL);
 }
 
 /*
@@ -205,7 +198,6 @@ static void power_of_x(POLY_ARGS(res), const mpz_t exponent, MODULUS_ARGS)
  */
 Primality steps_1_2(const mpz_t n)
 {
-#define tmp tmp0
 	/**********************************************************************\
 	* Step (2)                                                             *
 	\**********************************************************************/
@@ -221,8 +213,8 @@ Primality steps_1_2(const mpz_t n)
 	// full list of small primes has to be used in trial division.
 	if (mpz_fits_sint_p(n)) {
 		uint64_t sqrt;
-		mpz_sqrt(tmp, n);
-		sqrt = mpz_get_ui(tmp);
+		mpz_sqrt(tmp0, n);
+		sqrt = mpz_get_ui(tmp0);
 
 		// Start from prime_list[1] == 3 stead of prime_list[0] == 2.
 		for (uint64_t i = 1; i < len(prime_list) && prime_list[i] <= sqrt; i++)
@@ -243,7 +235,6 @@ Primality steps_1_2(const mpz_t n)
 	// No factors found and n is large enougth that it might still factor
 	// into multiple primes larger B.
 	return probably_prime;
-#undef tmp
 }
 
 /*
