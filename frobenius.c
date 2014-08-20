@@ -152,9 +152,8 @@ static void power_of_x(POLY_ARGS(res), const mpz_t exponent, MODULUS_ARGS)
 			 */
 
 			// Compute A_{j+1}
-			// B_1 is 1, so we can just ignore it.
-			mpz_mul(tmp0, bb4c, B_j);
-			mpz_addmul(tmp0, b, A_j);
+			mpz_mul(tmp0, bb4c, B_j); // B_1 is 1, so we can just ignore it.
+			mpz_addmul(tmp0, b, A_j); // A_1 = b
 			mpz_mod(tmp0, tmp0, n);
 			// If tmp0 is odd, tmp0+n is even.
 			if (mpz_odd_p(tmp0))
@@ -164,8 +163,8 @@ static void power_of_x(POLY_ARGS(res), const mpz_t exponent, MODULUS_ARGS)
 			mpz_fdiv_q_2exp(tmp0, tmp0, 1);
 
 			// Compute B_{j+1}
-			mpz_mul(B_j, b, B_j);
-			mpz_add(B_j, B_j, A_j);  // Use the old A_j, not A_{j+1}
+			mpz_mul(B_j, b, B_j);    // A_1 = b
+			mpz_add(B_j, B_j, A_j);  // Use the old A_j, not A_{j+1}; B_1 = 1
 			mpz_mod(B_j, B_j, n);
 			if (mpz_odd_p(B_j))
 				mpz_add(B_j, B_j, n);
