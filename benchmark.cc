@@ -247,7 +247,7 @@ int main(int argc, char *argv[])
 	else
 		output = fopen(argv[1], "a");
 
-	if (output == stdout || ftell(output) != 0)
+	if (output == stdout || ftell(output) == 0)
 		fprintf(output, "Bits,Epsilon,HammingWeight,Multiplications,Time,Algorithm,Set,Mode,Iterations,IsPrime,nMod4\n");
 	fflush(output);
 
