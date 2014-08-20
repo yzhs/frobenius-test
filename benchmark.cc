@@ -220,10 +220,10 @@ static void time_it(const unsigned *bits, const mpz_t * numbers,
 			clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &stop);
 			duration = get_duration(start, stop, its);
 
-			fprintf(output, "%d,%lu,%lu,%E,%s,%s,%s,%u,%u\n",
+			fprintf(output, "%d,%lu,%lu,%E,%s,%s,%s,%u,%u,%lu\n",
 				bits[i], mpz_popcount(numbers[i]),
 				multiplications, duration, T::name, num_name,
-				T::mode, its, l);
+				T::mode, its, l, mpz_fdiv_ui(numbers[i], 4));
 			fflush(output);
 		}
 	}
