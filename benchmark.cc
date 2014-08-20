@@ -35,12 +35,6 @@ extern "C" {
 
 extern uint64_t multiplications;
 
-/*
- * How long to run the tests to figure out how many iterations to run to get to
- * at least about one second of runtime.
- */
-static const double epsilon = 1e-1;
-
 // Test inputs
 static unsigned bits_primes[NUM_PRIMES];
 static unsigned bits_composites[NUM_COMPOSITES];
@@ -178,7 +172,7 @@ static unsigned get_number_of_iterations(const mpz_t num)
 	struct timespec start, stop;
 
 	// Figure out how many iterations to perform
-	for (; duration < epsilon; its *= 2) {
+	for (; duration < 1e-1 /* seconds */; its *= 2) {
 		clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
 		for (unsigned j = 0; j < its; j++) {
 			phantom += T::check(num);
@@ -203,6 +197,7 @@ static void time_it(const unsigned *bits, const mpz_t * numbers,
                     const char *num_name)
 {
 	unsigned its = 10000;
+	int64_t epsilon;
 	double duration;
 	struct timespec start, stop;
 
@@ -220,8 +215,12 @@ static void time_it(const unsigned *bits, const mpz_t * numbers,
 			clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &stop);
 			duration = get_duration(start, stop, its);
 
-			fprintf(output, "%d,%lu,%lu,%E,%s,%s,%s,%u,%u,%lu\n",
-				bits[i], mpz_popcount(numbers[i]),
+			mpz_ui_pow_ui(tmp0, 2, bits[i]);
+			mpz_sub(tmp0, numbers[i], tmp0);
+			epsilon = mpz_get_si(tmp0);
+
+			fprintf(output, "%d,%lu,%lu,%lu,%E,%s,%s,%s,%u,%u,%lu\n",
+				bits[i], epsilon, mpz_popcount(numbers[i]),
 				multiplications, duration, T::name, num_name,
 				T::mode, its, l, mpz_fdiv_ui(numbers[i], 4));
 			fflush(output);
@@ -248,8 +247,8 @@ int main(int argc, char *argv[])
 	else
 		output = fopen(argv[1], "a");
 
-	if (output != stdout && ftell(output) == 0)
-		fprintf(output, "Bits,HammingWeight,Multiplications,Time,Algorithm,Set,Mode,Iterations,IsPrime\n");
+	if (output == stdout || ftell(output) != 0)
+		fprintf(output, "Bits,Epsilon,HammingWeight,Multiplications,Time,Algorithm,Set,Mode,Iterations,IsPrime,nMod4\n");
 	fflush(output);
 
 	if (NULL == output)
