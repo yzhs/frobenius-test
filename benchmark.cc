@@ -219,7 +219,7 @@ static void time_it(const unsigned *bits, const mpz_t * numbers,
 			mpz_sub(tmp0, numbers[i], tmp0);
 			epsilon = mpz_get_si(tmp0);
 
-			fprintf(output, "%d,%lu,%lu,%lu,%E,%s,%s,%s,%u,%u,%lu\n",
+			fprintf(output, "%d,%li,%lu,%lu,%E,%s,%s,%s,%u,%u,%lu\n",
 				bits[i], epsilon, mpz_popcount(numbers[i]),
 				multiplications, duration, T::name, num_name,
 				T::mode, its, l, mpz_fdiv_ui(numbers[i], 4));
