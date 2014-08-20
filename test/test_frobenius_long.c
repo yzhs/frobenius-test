@@ -236,6 +236,12 @@ void frob_power_x_lucas(void)
 
 				mpz_set_ui(baz, k+1);
 				power_of_x(POLY(bar), baz, MODULUS);
+				if (mpz_cmp(foo_x, bar_x) != 0 || mpz_cmp(foo_1, bar_1) != 0) {
+					gmp_printf("\nError: x*x^%lu = %Zd x + %Zd\n"
+					           "       x^%lu = %Zd x + %Zd\n",\
+						   k, foo_x, foo_1, k+1, bar_x, bar_1);
+					gmp_printf("n = %Zd = %d mod 4, b = %Zd, c = %Zd\n", n, mpz_fdiv_ui(n, 4), b, c);
+				}
 				CU_ASSERT_FATAL(mpz_cmp(foo_x, bar_x) == 0);
 				CU_ASSERT_FATAL(mpz_cmp(foo_1, bar_1) == 0);
 			}
