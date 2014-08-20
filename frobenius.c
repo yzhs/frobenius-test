@@ -116,7 +116,7 @@ static void power_of_x(POLY_ARGS(res), const mpz_t exponent, MODULUS_ARGS)
 	// Obviously C_1 = c.
 	mpz_set(C_j, c);
 
-	// Skip the leading 1 bit and convert convert to 0 based indexing
+	// Skip the leading 1 bit and convert to 0 based indexing
 	for (uint64_t k = mpz_sizeinbase(exponent, 2) - 1 - 1; k < (1lu << 63); k--) {
 		/*
 		 * Doubling
