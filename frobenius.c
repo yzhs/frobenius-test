@@ -396,6 +396,8 @@ static Primality steps_3_4_5(MODULUS_ARGS)
 		if (mpz_sgn(foo_x) == 0 && mpz_cmp(foo_1, tmp0) == 0)
 			ret(probably_prime);
 		square_mod(POLY(foo), POLY(foo), MODULUS);
+		// NOTE square_mod currently overwrites tmp0
+		mpz_sub_ui(tmp0, n, 1);
 	}
 
 exit:
