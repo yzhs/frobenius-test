@@ -2,9 +2,12 @@
 #define TEST_FROBENIUS_LONG_H
 #include <CUnit/CUnit.h>
 
-void test_frobenius_sigma(void);
-void test_frobenius_power_x_lucas(void);
+void test_frobenius_sigma_basics(void);
+void test_frobenius_sigma_short_integer(void);
+void test_frobenius_sigma_power(void);
+void test_frobenius_power_basics(void);
 void test_frobenius_power(void);
+void test_frobenius_power_x_lucas(void);
 void test_frobenius_split(void);
 void test_frobenius_get_random(void);
 void test_frobenius_mult_mod(void);
