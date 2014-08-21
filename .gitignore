@@ -5,6 +5,7 @@ miller_rabin
 miller_rabin_int
 nextprime
 find_non_smooth_numbers
+add_epsilon_mod_4
 run_tests
 pic/
 pictures/

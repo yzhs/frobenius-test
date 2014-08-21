@@ -69,6 +69,9 @@ find_non_smooth_numbers: find_non_smooth_numbers.o small_primes.o
 nextprime: nextprime.o common.o
 	$(CC) $(CFLAGS) -o $@ $^ -lgmp
 
+add_epsilon_mod_4: add_epsilon_mod_4.o common.o
+	$(CC) $(CFLAGS) -o $@ $^ -lgmp
+
 test/main.o: test/main.c
 	$(CC) $(CFLAGS) -c -o $@ $^
 
