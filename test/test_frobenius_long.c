@@ -444,6 +444,44 @@ void frob_fast_algorithm2(void)
 		CU_ASSERT_FATAL(mpz_cmp(tmp1, s) == 0);
 	}
 
+	for (n_ = 11; n_ < 200; n_+=4) {
+		// n
+		mpz_set_ui(n, n_);
+		if (!mpz_probab_prime_p(n, 100))
+			continue;
+
+		for (uint64_t c_ = 1; c_ < 100; c_++) {
+			if (jacobi(n_ - c_, n_) != 1)
+				continue;
+			mpz_set_ui(c, c_);
+
+			for (uint64_t b_ = 1; b_ < 100; b_++) {
+				if (jacobi(b_*b_+4*c_, n_) != -1)
+					continue;
+				mpz_set_ui(b, b_);
+
+				mpz_mul(bb4c, b, b);
+				mpz_addmul_ui(bb4c, c, 4);
+
+				power_of_x(POLY(foo), s, MODULUS);
+
+				power_of_x(POLY(bar), n, MODULUS);
+				powm(POLY(bar), POLY(bar), t, MODULUS);
+				mpz_cdiv_q_2exp(tmp1, n, 1);
+				power_of_x(POLY(baz), tmp1, MODULUS);
+				mult_mod(POLY(bar), POLY(bar), POLY(baz), MODULUS);
+
+				power_of_x(POLY(baz), t, MODULUS);
+				mult_x_mod(POLY(baz), POLY(baz), MODULUS);
+				invert(POLY(baz), POLY(baz), MODULUS);
+				mult_mod(POLY(bar), POLY(bar), POLY(baz), MODULUS);
+
+				CU_ASSERT_FATAL(mpz_cmp(foo_x, bar_x) == 0);
+				CU_ASSERT_FATAL(mpz_cmp(foo_1, bar_1) == 0);
+			}
+		}
+	}
+
 	mpz_clears(VARIABLES, NULL);
 }
 
