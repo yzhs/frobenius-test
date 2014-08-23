@@ -85,7 +85,7 @@ static void powm_int(POLY_ARGS_int(res), CONST_POLY_ARGS_int(b), uint64_t exp, M
 	}
 }
 
-static int64_t invert(int64_t a, int64_t n)
+static int64_t invert_int(int64_t a, int64_t n)
 {
 	int64_t t = 0, new_t = 1, r = n, new_r = a, q, tmp;
 
@@ -116,7 +116,7 @@ static void power_of_x_int(POLY_ARGS_int(res), const uint64_t exponent, MODULUS_
 
 	// Compute the inverse of two.
 	// NOTE This can't be precomputed, because it depends on n.
-	uint64_t inverse_of_2 = invert(2, n);
+	uint64_t inverse_of_2 = invert_int(2, n);
 
 	// The following thre values are needed for the chain addition steps.
 	// Values that are already stored in variables available locally, are

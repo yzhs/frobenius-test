@@ -274,6 +274,68 @@ static void sigma(POLY_ARGS(res), CONST_POLY_ARGS(f), MODULUS_ARGS)
 }
 
 /*
+ * Compute the inverse of the polynomial f = αx + β modulo (n, x²-bx-c).
+ *
+ * Return false if no such inverse could be found because a number being
+ * inverted shared a prime factor with n.
+ */
+static bool invert(POLY_ARGS(res), CONST_POLY_ARGS(f), MODULUS_ARGS)
+{
+	if (mpz_sgn(f_1) == 0) {
+		mpz_mul(tmp0, f_x, c);
+		mpz_invert(res_x, tmp0, n);
+
+		mpz_mul(res_1, res_x, b);
+		mpz_mod(res_1, res_1, n);
+		mpz_sub(res_1, n, res_1);
+
+		multiplications += 2;
+
+		return true;
+	}
+
+	// β^(-1)
+	if (!mpz_invert(tmp2, f_1, n))
+		// If β≠0 is not invertible, gcd(β,n) has to be non-trivial.
+		// In that case, n has to be composite, because 0≤β<n.
+		return false;
+
+	// α²c
+	mpz_mul(tmp0, f_x, f_x);
+	mpz_mul(tmp0, tmp0, c);
+	mpz_mod(tmp0, tmp0, n);
+
+	// αβb+β²-α²c
+	mpz_mul(tmp1, f_x, f_1);
+	mpz_mod(tmp1, tmp1, n);
+	mpz_mul(tmp1, tmp1, b);
+	mpz_addmul(tmp1, f_1, f_1);
+	mpz_sub(tmp1, tmp1, tmp0);
+
+	multiplications += 5;
+
+	// (αβb+β²-α²c)^(-1)
+	if (!mpz_invert(tmp1, tmp1, n))
+		// αβb+β²-α²c ≠ 0 for all α,β.  If it is not invertible, n has
+		// to be composite.
+		return false;
+
+	// -α/(αβb+β²-α²c)
+	mpz_mul(res_x, f_x, tmp1);
+	mpz_sub(res_x, n, res_1);
+
+	// (1 + α²c/(αβb+β²-α²c))/β
+	mpz_mul(res_1, tmp0, tmp1);
+	mpz_add_ui(res_1, res_1, 1);
+	mpz_mul(res_1, res_1, tmp2);
+	mpz_mod(res_1, res_1, n);
+
+	multiplications += 3;
+
+	return true;
+}
+
+/*
  * Perform the non-deterministic steps of the Quadratic Frobenius Test.
  */
 static Primality steps_3_4_5(MODULUS_ARGS)
