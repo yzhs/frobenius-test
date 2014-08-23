@@ -8,6 +8,7 @@ void frob_sigma_short_integer(void);
 void frob_sigma_power(void);
 void frob_power_basics(void);
 void frob_power_x_lucas(void);
+void frob_inverse(void);
 void frob_fast_algorithm1(void);
 void frob_fast_algorithm2(void);
 void frob_split(void);

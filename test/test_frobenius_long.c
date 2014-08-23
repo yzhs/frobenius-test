@@ -241,6 +241,7 @@ void frob_power_x_lucas(void)
 
 			mpz_urandomm(f_x, r_state, n);
 			mpz_urandomm(f_1, r_state, n);
+
 			for (uint64_t k = 1; k < 1000; k++) {
 				// Compare x*x^k and x^(k+1), both computed
 				// using power_of_x.
@@ -335,6 +336,53 @@ void frob_power_basics(void)
 	}
 
 	mpz_clears(MODULUS, POLY(f), POLY(foo), POLY(bar), POLY(x), baz, NULL);
+}
+
+void frob_inverse(void)
+{
+	uint64_t n_;
+#define VARIABLES MODULUS, POLY(foo), POLY(bar), POLY(baz), POLY(x), tmp1, tmp2
+	mpz_t VARIABLES;
+	mpz_inits(VARIABLES, NULL);
+
+	// Initialize POLY(x)
+	mpz_set_ui(x_x, 1);
+	for (n_ = 2500000001; n_ < 250000000 + 200; n_+=4) {
+		// n
+		mpz_set_ui(n, n_);
+
+		for (uint64_t c_ = 1; c_ < 100; c_++) {
+			if (jacobi(n_ - c_, n_) != 1)
+				continue;
+			mpz_set_ui(c, c_);
+
+			for (uint64_t b_ = 1; b_ < 100; b_++) {
+				if (jacobi(b_*b_+4*c_, n_) != -1)
+					continue;
+				mpz_set_ui(b, b_);
+
+				mpz_mul(bb4c, b, b);
+				mpz_addmul_ui(bb4c, c, 4);
+
+				mpz_urandomm(foo_x, r_state, n);
+				mpz_urandomm(foo_1, r_state, n);
+
+				invert(POLY(bar), POLY(foo), MODULUS);
+				invert(POLY(baz), POLY(bar), MODULUS);
+
+				CU_ASSERT(mpz_cmp(foo_x, baz_x) == 0);
+				CU_ASSERT(mpz_cmp(foo_1, baz_1) == 0);
+
+				mult_mod(POLY(baz), POLY(foo), POLY(bar), MODULUS);
+
+				CU_ASSERT(mpz_sgn(baz_x) == 0);
+				CU_ASSERT(mpz_cmp_ui(baz_1, 1) == 0);
+			}
+		}
+	}
+
+	mpz_clears(VARIABLES, NULL);
+#undef VARIABLES
 }
 
 void frob_fast_algorithm1(void)

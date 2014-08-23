@@ -51,6 +51,7 @@ int main()
 //	CU_ADD_TEST(suite, frob_sigma_power);
 	CU_ADD_TEST(suite, frob_power_basics);
 //	CU_ADD_TEST(suite, frob_power_x_lucas);
+	CU_ADD_TEST(suite, frob_inverse);
 	CU_ADD_TEST(suite, frob_fast_algorithm1);
 	CU_ADD_TEST(suite, frob_fast_algorithm2);
 	CU_ADD_TEST(suite, frob_composites);
