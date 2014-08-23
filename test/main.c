@@ -45,13 +45,14 @@ int main()
 //	CU_ADD_TEST(suite, frob_larger_primes_int);
 
 	suite = CU_add_suite("Frobenius (GMP)", init, cleanup);
-	CU_ADD_TEST(suite, frob_mult_x);
-	CU_ADD_TEST(suite, frob_sigma_basics);
-	CU_ADD_TEST(suite, frob_sigma_short_integer);
-	CU_ADD_TEST(suite, frob_sigma_power);
+//	CU_ADD_TEST(suite, frob_mult_x);
+//	CU_ADD_TEST(suite, frob_sigma_basics);
+//	CU_ADD_TEST(suite, frob_sigma_short_integer);
+//	CU_ADD_TEST(suite, frob_sigma_power);
 	CU_ADD_TEST(suite, frob_power_basics);
-	CU_ADD_TEST(suite, frob_power_x_lucas);
-	CU_ADD_TEST(suite, frob_fast_algorithm);
+//	CU_ADD_TEST(suite, frob_power_x_lucas);
+	CU_ADD_TEST(suite, frob_fast_algorithm1);
+	CU_ADD_TEST(suite, frob_fast_algorithm2);
 	CU_ADD_TEST(suite, frob_composites);
 	CU_ADD_TEST(suite, frob_split);
 	CU_ADD_TEST(suite, frob_mult_mod);
@@ -60,7 +61,7 @@ int main()
 	CU_ADD_TEST(suite, frob_trial_division);
 	CU_ADD_TEST(suite, frob_rqft_small_primes);
 	CU_ADD_TEST(suite, frob_larger_primes);
-	CU_ADD_TEST(suite, frob_primelist);
+//	CU_ADD_TEST(suite, frob_primelist);
 
 	CU_basic_set_mode(CU_BRM_VERBOSE);
 	CU_basic_run_tests();
