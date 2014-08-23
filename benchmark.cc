@@ -256,14 +256,11 @@ int main(int argc, char *argv[])
 
 	load_numbers(bits_primes, primes, "primes.txt", NUM_PRIMES)
 	    || die("failed to load primes\n");
-	load_numbers(bits_composites, composites, "composites.txt",
-		     NUM_COMPOSITES)
+	load_numbers(bits_composites, composites, "composites.txt", NUM_COMPOSITES)
 	    || die("failed to load composites\n");
-	load_numbers(bits_mersenne_numbers, mersenne_numbers,
-		     "mersenne_numbers.txt", NUM_MERSENNE_NUMBERS)
+	load_numbers(bits_mersenne_numbers, mersenne_numbers, "mersenne_numbers.txt", NUM_MERSENNE_NUMBERS)
 	    || die("failed to load Mersenne numbers\n");
-	load_numbers(bits_mersenne_primes, mersenne_primes,
-		     "mersenne_primes.txt", NUM_MERSENNE_PRIMES)
+	load_numbers(bits_mersenne_primes, mersenne_primes, "mersenne_primes.txt", NUM_MERSENNE_PRIMES)
 	    || die("failed to load Mersenne primes\n");
 
 	// Which tests to run
