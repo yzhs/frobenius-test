@@ -420,11 +420,11 @@ static Primality steps_3_4_5(MODULUS_ARGS)
 		// At this point, foo_x * x + foo_1 = x^(n-1)/2.  We need to
 		// calculate x^((n+1)/2), so we multiply the result by x again.
 		mult_x_mod(POLY(foo), POLY(foo), MODULUS);
-
-		// Store a copy for later use.
-		mpz_set(x_n_1_2_x, foo_x);
-		mpz_set(x_n_1_2_1, foo_1);
 	}
+
+	// Store a copy for later use.
+	mpz_set(x_n_1_2_x, foo_x);
+	mpz_set(x_n_1_2_1, foo_1);
 
 	// Check whether x^((n+1)/2) has degree 1
 	if (mpz_sgn(foo_x) != 0)
@@ -454,9 +454,14 @@ static Primality steps_3_4_5(MODULUS_ARGS)
 		mult_mod(POLY(foo), POLY(foo), POLY(x_t), MODULUS);
 		mult_mod(POLY(foo), POLY(foo), POLY(x_n_1_2), MODULUS);
 	} else {
-		sigma(POLY(foo), POLY(x_t), MODULUS);
-		mult_mod(POLY(foo), POLY(foo), POLY(x_t), MODULUS);
-		//power_of_x(POLY(foo), s, MODULUS);
+		// x^s = x^(nt) x^((n+1)/2) x^(-t-1)
+		sigma(POLY(foo), POLY(x_t), MODULUS); // x^(nt)
+		mult_mod(POLY(foo), POLY(foo), POLY(x_n_1_2), MODULUS); // * x^((n+1)/2)
+
+		mult_x_mod(POLY(x_t), POLY(x_t), MODULUS); // x^(t+1)
+		invert(POLY(x_t), POLY(x_t), MODULUS); // ^(-1)
+
+		mult_mod(POLY(foo), POLY(foo), POLY(x_t), MODULUS); // * x^(-t-1)
 	}
 
 	mpz_sub_ui(tmp0, n, 1);
