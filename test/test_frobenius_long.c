@@ -12,8 +12,9 @@ static int num_iterations = 10000;
 void frob_mult_x(void)
 {
 	uint64_t n_;
-	mpz_t MODULUS, POLY(f), POLY(foo), POLY(bar), POLY(x), baz;
-	mpz_inits(MODULUS, POLY(f), POLY(foo), POLY(bar), POLY(x), baz, NULL);
+#define VARIABLES MODULUS, POLY(f), POLY(foo), POLY(bar), POLY(x), baz
+	mpz_t VARIABLES;
+	mpz_inits(VARIABLES, NULL);
 
 	// Initialize POLY(x)
 	mpz_set_ui(x_x, 1);
@@ -58,14 +59,16 @@ void frob_mult_x(void)
 		}
 	}
 
-	mpz_clears(MODULUS, POLY(f), POLY(foo), POLY(bar), POLY(x), baz, NULL);
+	mpz_clears(VARIABLES, NULL);
+#undef VARIABLES
 }
 
 void frob_sigma_basics(void)
 {
 	uint64_t n_;
-	mpz_t MODULUS, POLY(f), POLY(foo), POLY(bar), POLY(x), baz;
-	mpz_inits(MODULUS, POLY(f), POLY(foo), POLY(bar), POLY(x), baz, NULL);
+#define VARIABLES MODULUS, POLY(f), POLY(foo), POLY(bar), POLY(x), baz
+	mpz_t VARIABLES;
+	mpz_inits(VARIABLES, NULL);
 
 	// Initialize POLY(x)
 	mpz_set_ui(x_x, 1);
@@ -111,14 +114,16 @@ void frob_sigma_basics(void)
 		}
 	}
 
-	mpz_clears(MODULUS, POLY(f), POLY(foo), POLY(bar), POLY(x), baz, NULL);
+	mpz_clears(VARIABLES, NULL);
+#undef VARIABLES
 }
 
 void frob_sigma_short_integer(void)
 {
 	uint64_t n_, b_, c_, p;
-	mpz_t MODULUS, POLY(f), POLY(foo), POLY(bar), POLY(x);
-	mpz_inits(MODULUS, POLY(foo), POLY(f), POLY(bar), POLY(x), NULL);
+#define VARIABLES MODULUS, POLY(f), POLY(foo), POLY(bar), POLY(x)
+	mpz_t VARIABLES;
+	mpz_inits(VARIABLES, NULL);
 
 	// Initialize POLY(x)
 	mpz_set_ui(x_x, 1);
@@ -157,14 +162,16 @@ void frob_sigma_short_integer(void)
 		}
 	}
 
-	mpz_clears(MODULUS, POLY(f), POLY(foo), POLY(bar), POLY(x), NULL);
+	mpz_clears(VARIABLES, NULL);
+#undef VARIABLES
 }
 
 void frob_sigma_power(void)
 {
 	uint64_t n_;
-	mpz_t MODULUS, POLY(f), POLY(foo), POLY(bar), POLY(x), baz;
-	mpz_inits(MODULUS, POLY(foo), POLY(f), POLY(bar), POLY(x), baz, NULL);
+#define VARIABLES MODULUS, POLY(f), POLY(foo), POLY(bar), POLY(x), baz
+	mpz_t VARIABLES;
+	mpz_inits(VARIABLES, NULL);
 
 	// Initialize POLY(x)
 	mpz_set_ui(x_x, 1);
@@ -205,14 +212,16 @@ void frob_sigma_power(void)
 		}
 	}
 
-	mpz_clears(MODULUS, POLY(f), POLY(foo), POLY(bar), POLY(x), baz, NULL);
+	mpz_clears(VARIABLES, NULL);
+#undef VARIABLES
 }
 
 void frob_power_x_lucas(void)
 {
 	uint64_t n_;
-	mpz_t MODULUS, POLY(f), POLY(foo), POLY(bar), POLY(x), baz;
-	mpz_inits(MODULUS, POLY(foo), POLY(f), POLY(bar), POLY(x), baz, NULL);
+#define VARIABLES MODULUS, POLY(f), POLY(foo), POLY(bar), POLY(x), baz
+	mpz_t VARIABLES;
+	mpz_inits(VARIABLES, NULL);
 
 	// Initialize POLY(x)
 	n_ = 0x7ffffffff;
@@ -279,14 +288,15 @@ void frob_power_x_lucas(void)
 		}
 	}
 
-	mpz_clears(MODULUS, POLY(f), POLY(foo), POLY(bar), POLY(x), baz, NULL);
+	mpz_clears(VARIABLES, NULL);
 }
 
 void frob_power_basics(void)
 {
 	uint64_t n_;
-	mpz_t MODULUS, POLY(f), POLY(foo), POLY(bar), POLY(x), baz;
-	mpz_inits(MODULUS, POLY(foo), POLY(f), POLY(bar), POLY(x), baz, NULL);
+#define VARIABLES MODULUS, POLY(f), POLY(foo), POLY(bar), POLY(x), baz
+	mpz_t VARIABLES;
+	mpz_inits(VARIABLES, NULL);
 
 	// Initialize POLY(x)
 	n_ = 0x7fffffff;
@@ -335,7 +345,8 @@ void frob_power_basics(void)
 		}
 	}
 
-	mpz_clears(MODULUS, POLY(f), POLY(foo), POLY(bar), POLY(x), baz, NULL);
+	mpz_clears(VARIABLES, NULL);
+#undef VARIABLES
 }
 
 void frob_inverse(void)
@@ -388,8 +399,9 @@ void frob_inverse(void)
 void frob_fast_algorithm1(void)
 {
 	uint64_t r, n_;
-	mpz_t MODULUS, s, t, POLY(foo), POLY(bar), POLY(baz), POLY(x), tmp1, tmp2;
-	mpz_inits(MODULUS, s, t, POLY(foo), POLY(bar), POLY(baz), POLY(x), tmp1, tmp2, NULL);
+#define VARIABLES MODULUS, s, t, POLY(foo), POLY(bar), POLY(baz), POLY(x), tmp1, tmp2
+	mpz_t VARIABLES;
+	mpz_inits(VARIABLES, NULL);
 
 	// Initialize POLY(x)
 	mpz_set_ui(x_x, 1);
@@ -456,7 +468,8 @@ void frob_fast_algorithm1(void)
 		}
 	}
 
-	mpz_clears(MODULUS, s, t, POLY(foo), POLY(bar), POLY(baz), POLY(x), tmp1, tmp2, NULL);
+	mpz_clears(VARIABLES, NULL);
+#undef VARIABLES
 }
 
 void frob_fast_algorithm2(void)
@@ -531,6 +544,7 @@ void frob_fast_algorithm2(void)
 	}
 
 	mpz_clears(VARIABLES, NULL);
+#undef VARIABLES
 }
 
 void frob_split(void)
@@ -540,8 +554,9 @@ void frob_split(void)
 	uint64_t n, s, d;
 
 	uint64_t s_gmp;
-	mpz_t n_gmp, d_gmp;
-	mpz_inits(n_gmp, d_gmp, NULL);
+#define VARIABLES n_gmp, d_gmp
+	mpz_t VARIABLES;
+	mpz_inits(VARIABLES, NULL);
 
 	for (int i = 0; i < num_iterations; i++) {
 		n = 2 * ((uint64_t)rand() % max) + 1;
@@ -553,6 +568,8 @@ void frob_split(void)
 		CU_ASSERT_EQUAL(s_gmp, s);
 		CU_ASSERT_TRUE(mpz_cmp_ui(d_gmp, d) == 0);
 	}
+	mpz_clears(VARIABLES, NULL);
+#undef VARIABLES
 }
 
 void frob_mult_mod(void)
@@ -561,10 +578,9 @@ void frob_mult_mod(void)
 	uint64_t d, e, f, g;
 	uint64_t res0, res1;
 
-	mpz_t b_, c_, n_;
-	mpz_t d_, e_, f_, g_;
-	mpz_t res0_, res1_;
-	mpz_inits(b_, c_, n_, d_, e_, f_, g_, res0_, res1_, NULL);
+#define VARIABLES b_, c_, n_, d_, e_, f_, g_, res0_, res1_
+	mpz_t VARIABLES;
+	mpz_inits(VARIABLES, NULL);
 
 	n = 131071;
 
@@ -600,6 +616,8 @@ void frob_mult_mod(void)
 		CU_ASSERT_FATAL(mpz_cmp_ui(res0_, res0) == 0);
 		CU_ASSERT_FATAL(mpz_cmp_ui(res1_, res1) == 0);
 	}
+	mpz_clears(VARIABLES, NULL);
+#undef VARIABLES
 }
 
 
@@ -609,10 +627,9 @@ void frob_powm_mod(void)
 	uint64_t d, e, k;
 	uint64_t res0, res1;
 
-	mpz_t b_, c_, n_;
-	mpz_t d_, e_, k_;
-	mpz_t res0_, res1_;
-	mpz_inits(b_, c_, n_, d_, e_, k_, res0_, res1_, NULL);
+#define VARIABLES b_, c_, n_, d_, e_, k_, res0_, res1_
+	mpz_t VARIABLES;
+	mpz_inits(VARIABLES, NULL);
 
 	n = 131071;
 
@@ -641,6 +658,9 @@ void frob_powm_mod(void)
 		CU_ASSERT(mpz_cmp_ui(res0_, res0) == 0);
 		CU_ASSERT(mpz_cmp_ui(res1_, res1) == 0);
 	}
+
+	mpz_clears(VARIABLES, NULL);
+#undef VARIABLES
 }
 
 
@@ -666,6 +686,7 @@ void frob_trial_division(void)
 		mpz_init_set_ui(n_, n);
 
 		CU_ASSERT_EQUAL_FATAL(steps_1_2(n_), steps_1_2_int(n));
+		mpz_clear(n_);
 	}
 }
 
@@ -678,6 +699,7 @@ void frob_rqft_small_primes(void)
 		mpz_init_set_ui(n_, n);
 
 		CU_ASSERT_EQUAL_FATAL(RQFT(n_, 1), RQFT_int(n, 1));
+		mpz_clear(n_);
 	}
 }
 
@@ -710,6 +732,7 @@ void frob_primelist(void)
 			printf("%u\n", large_primes[i]);
 		CU_ASSERT_NOT_EQUAL_FATAL(foo, composite);
 	}
+	mpz_clear(n);
 }
 
 
@@ -730,6 +753,8 @@ void frob_larger_primes(void)
 
 //	mpz_set_ui(n, 2500000057);
 //	CU_ASSERT_EQUAL(RQFT(n, 1), probably_prime);
+
+	mpz_clear(n);
 }
 
 
