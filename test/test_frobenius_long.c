@@ -156,7 +156,7 @@ void frob_sigma_short_integer(void)
 		for (p = 0; p < 20; p++) {
 			mpz_set_ui(f_x, 0);
 			mpz_set_ui(f_1, p);
-			powm(POLY(foo), POLY(f), n, MODULUS);
+			poly_powm(foo, f, n);
 			CU_ASSERT(mpz_cmp_ui(foo_x, 0) == 0);
 			CU_ASSERT(mpz_cmp_ui(foo_1, p%n_) == 0);
 		}
@@ -205,8 +205,8 @@ void frob_sigma_power(void)
 			mpz_urandomm(f_1, r_state, n);
 
 			// Check whether x^n is the same as σ(x)
-			sigma(POLY(foo), POLY(x), MODULUS);
-			powm(POLY(bar), POLY(x), n, MODULUS);
+			poly_sigma(foo, x);
+			poly_powm(bar, x, n);
 			CU_ASSERT(mpz_cmp(foo_x, bar_x) == 0);
 			CU_ASSERT(mpz_cmp(foo_1, bar_1) == 0);
 		}
@@ -255,33 +255,21 @@ void frob_power_x_lucas(void)
 				// Compare x*x^k and x^(k+1), both computed
 				// using power_of_x.
 				mpz_set_ui(baz, k);
-				power_of_x(POLY(foo), baz, MODULUS);
-				mult_x_mod(POLY(foo), POLY(foo), MODULUS);
+				poly_pow_x(foo, baz);
+				poly_mul_x(foo, foo);
 
 				mpz_set_ui(baz, k+1);
-				power_of_x(POLY(bar), baz, MODULUS);
-				if (mpz_cmp(foo_x, bar_x) != 0 || mpz_cmp(foo_1, bar_1) != 0) {
-					gmp_printf("\nError: x*x^%lu = %Zd x + %Zd\n"
-					           "       x^%lu = %Zd x + %Zd\n",\
-						   k, foo_x, foo_1, k+1, bar_x, bar_1);
-					gmp_printf("n = %Zd = %d mod 4, b = %Zd, c = %Zd\n", n, mpz_fdiv_ui(n, 4), b, c);
-				}
-				CU_ASSERT_FATAL(mpz_cmp(foo_x, bar_x) == 0);
-				CU_ASSERT_FATAL(mpz_cmp(foo_1, bar_1) == 0);
+				poly_pow_x(bar, baz);
+
+				CU_ASSERT(poly_eq(foo, bar));
 			}
 
 			for (uint64_t k = 1; k < 1000; k++) {
 				mpz_set_ui(baz, k);
-				power_of_x(POLY(bar), baz, MODULUS);
-				powm(POLY(foo), POLY(x), baz, MODULUS);
-				if (mpz_cmp(foo_x, bar_x) != 0 || mpz_cmp(foo_1, bar_1) != 0) {
-					gmp_printf("\nError: f^%lu = %Zd x + %Zd according to powm, but\n"
-							"        f^%lu = %Zd x + %Zd according to power_of_x\n",\
-							k, foo_x, foo_1, k, bar_x, bar_1);
-					gmp_printf("n = %Zd = %d mod 4, b = %Zd, c = %Zd\n", n, mpz_fdiv_ui(n, 4), b, c);
-				}
-				CU_ASSERT_FATAL(mpz_cmp(foo_x, bar_x) == 0);
-				CU_ASSERT_FATAL(mpz_cmp(foo_1, bar_1) == 0);
+				poly_pow_x(bar, baz);
+				poly_powm(foo, x, baz);
+
+				CU_ASSERT(poly_eq(foo, bar));
 			}
 
 
@@ -339,7 +327,7 @@ void frob_power_basics(void)
 
 			// Make sure that x^n = b - x
 			mpz_sub_ui(baz, n, 1);
-			powm(POLY(foo), POLY(x), n, MODULUS);
+			poly_powm(foo, x, n);
 			CU_ASSERT(mpz_cmp(foo_x, baz) == 0);
 			CU_ASSERT(mpz_cmp(foo_1, b) == 0);
 		}
@@ -378,13 +366,14 @@ void frob_inverse(void)
 				mpz_urandomm(foo_x, r_state, n);
 				mpz_urandomm(foo_1, r_state, n);
 
-				invert(POLY(bar), POLY(foo), MODULUS);
-				invert(POLY(baz), POLY(bar), MODULUS);
+				if (!poly_invert(bar, foo))
+					continue;
+				if (!poly_invert(baz, bar))
+					continue;
 
-				CU_ASSERT(mpz_cmp(foo_x, baz_x) == 0);
-				CU_ASSERT(mpz_cmp(foo_1, baz_1) == 0);
+				CU_ASSERT(poly_eq(foo, baz));
 
-				mult_mod(POLY(baz), POLY(foo), POLY(bar), MODULUS);
+				poly_mul(baz, foo, bar);
 
 				CU_ASSERT(mpz_sgn(baz_x) == 0);
 				CU_ASSERT(mpz_cmp_ui(baz_1, 1) == 0);
@@ -427,39 +416,35 @@ void frob_fast_algorithm1(void)
 				split(&r, s, tmp1);
 
 				// Directly compute POLY(foo) = x^s'
-				powm(POLY(foo), POLY(x), s, MODULUS);
+				poly_powm(foo, x, s);
 
 				// And compute it via x^t
 				mpz_fdiv_q_2exp(t, s, 1);
-				powm(POLY(bar), POLY(x), t, MODULUS);
-				power_of_x(POLY(baz), t, MODULUS);
-				CU_ASSERT_FATAL(mpz_cmp(bar_x, baz_x) == 0);
-				CU_ASSERT_FATAL(mpz_cmp(bar_1, baz_1) == 0);
+				poly_powm(bar, x, t);
+				poly_pow_x(baz, t);
+				CU_ASSERT(poly_eq(bar, baz));
 
-				square_mod(POLY(bar), POLY(bar), MODULUS);
-				mult_x_mod(POLY(bar), POLY(bar), MODULUS);
+				poly_sqr(bar, bar);
+				poly_mul_x(bar, bar);
 
 				// Make sure that the two methods agree...
-				CU_ASSERT(mpz_cmp(foo_x, bar_x) == 0);
-				CU_ASSERT(mpz_cmp(foo_1, bar_1) == 0);
+				CU_ASSERT(poly_eq(foo, bar));
 
 				// Calculate x^(n+1) directly
 				mpz_add_ui(tmp1, n, 1);
-				powm(POLY(foo), POLY(x), tmp1, MODULUS);
-				power_of_x(POLY(baz), tmp1, MODULUS);
-				CU_ASSERT_FATAL(mpz_cmp(foo_x, baz_x) == 0);
-				CU_ASSERT_FATAL(mpz_cmp(foo_1, baz_1) == 0);
+				poly_powm(foo, x, tmp1);
+				poly_pow_x(baz, tmp1);
+				CU_ASSERT(poly_eq(foo, baz));
 
 				// Given x^s, comput x^((n-1)/2) = (x^s')^(2^r'-1)
 				for (uint64_t i = 0; i < r-1; i++)
-					square_mod(POLY(bar), POLY(bar), MODULUS);
+					poly_sqr(bar, bar);
 				// Now x^((n+1)/2) = x^((n-1)/2) * x
-				mult_x_mod(POLY(bar), POLY(bar), MODULUS);
+				poly_mul_x(bar, bar);
 				// and x^(n+1) = (x^((n+1)/2))^2
-				square_mod(POLY(bar), POLY(bar), MODULUS);
+				poly_sqr(bar, bar);
 
-				CU_ASSERT(mpz_cmp(foo_x, bar_x) == 0);
-				CU_ASSERT(mpz_cmp(foo_1, bar_1) == 0);
+				CU_ASSERT(poly_eq(foo, bar));
 
 				CU_ASSERT(mpz_sgn(foo_x) == 0);
 				mpz_sub(tmp1, n, c);
@@ -481,7 +466,7 @@ void frob_fast_algorithm2(void)
 
 	// Initialize POLY(x)
 	mpz_set_ui(x_x, 1);
-	for (n_ = 11; n_ < 20000; n_+=4) {
+	for (n_ = 7; n_ < 20000; n_+=4) {
 		// n
 		mpz_set_ui(n, n_);
 		if (!mpz_probab_prime_p(n, 100))
@@ -504,19 +489,34 @@ void frob_fast_algorithm2(void)
 		CU_ASSERT_EQUAL_FATAL(r, r_prime+1);
 		CU_ASSERT_FATAL(mpz_cmp(tmp1, s) == 0);
 	}
+	mpz_clears(VARIABLES, NULL);
+}
 
-	for (n_ = 11; n_ < 200; n_+=4) {
+void frob_fast_algorithm3(void)
+{
+	int counter = 0;
+	uint64_t r, n_;
+	mpz_t VARIABLES;
+	mpz_inits(VARIABLES, NULL);
+	mpz_set_ui(x_x, 1);
+
+	for (n_ = 7; n_ < 200; n_+=4) {
 		// n
 		mpz_set_ui(n, n_);
 		if (!mpz_probab_prime_p(n, 100))
 			continue;
 
-		for (uint64_t c_ = 1; c_ < 100; c_++) {
+		mpz_mul(tmp2, n, n);
+		mpz_sub_ui(tmp2, tmp2, 1); // n^2-1
+		split(&r, s, tmp2);
+		// TODO Fix this test
+
+		for (uint64_t c_ = 1; c_ < 100 && c_ < n_; c_++) {
 			if (jacobi(n_ - c_, n_) != 1)
 				continue;
 			mpz_set_ui(c, c_);
 
-			for (uint64_t b_ = 1; b_ < 100; b_++) {
+			for (uint64_t b_ = 1; b_ < 100 && b_ < n_; b_++) {
 				if (jacobi(b_*b_+4*c_, n_) != -1)
 					continue;
 				mpz_set_ui(b, b_);
@@ -524,25 +524,36 @@ void frob_fast_algorithm2(void)
 				mpz_mul(bb4c, b, b);
 				mpz_addmul_ui(bb4c, c, 4);
 
-				power_of_x(POLY(foo), s, MODULUS);
+				poly_pow_x(foo, s); // foo = x^s
 
-				power_of_x(POLY(bar), n, MODULUS);
-				powm(POLY(bar), POLY(bar), t, MODULUS);
+				poly_pow_x(bar, t); // bar = x^t
+				poly_powm(bar, bar, n); // bar = x^(nt)
 				mpz_cdiv_q_2exp(tmp1, n, 1);
-				power_of_x(POLY(baz), tmp1, MODULUS);
-				mult_mod(POLY(bar), POLY(bar), POLY(baz), MODULUS);
+				poly_pow_x(baz, tmp1); // baz = x^((n+1)/2)
+				poly_mul(bar, bar, baz); // bar = x^(nt + (n+1)/2)
 
-				power_of_x(POLY(baz), t, MODULUS);
-				mult_x_mod(POLY(baz), POLY(baz), MODULUS);
-				invert(POLY(baz), POLY(baz), MODULUS);
-				mult_mod(POLY(bar), POLY(bar), POLY(baz), MODULUS);
+				poly_pow_x(baz, t); // baz = x^t
+				poly_mul_x(baz, baz); // baz = x^(t+1)
+				poly_invert(baz, baz); // baz = x^(-(t+1))
 
-				CU_ASSERT_FATAL(mpz_cmp(foo_x, bar_x) == 0);
-				CU_ASSERT_FATAL(mpz_cmp(foo_1, bar_1) == 0);
+				poly_mul(bar, bar, baz); // bar = x^(nt+(n+1)/2-(t+1))
+
+				if (!poly_eq(foo, bar)) {
+					if (counter == 0)
+						puts("");
+					gmp_printf("%2Zd x + %2Zd ≠ %2Zd x + %2Zd, n = %2Zd, b = %2Zd, c = %2Zd\n",
+					           foo_x, foo_1, bar_x, bar_1, MODULUS);
+					counter++;
+				}
+				CU_ASSERT(poly_eq(foo, bar));
+
+				if (counter == 20)
+					goto exit;
 			}
 		}
 	}
 
+exit:
 	mpz_clears(VARIABLES, NULL);
 #undef VARIABLES
 }

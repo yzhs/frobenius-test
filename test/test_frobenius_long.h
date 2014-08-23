@@ -11,6 +11,7 @@ void frob_power_x_lucas(void);
 void frob_inverse(void);
 void frob_fast_algorithm1(void);
 void frob_fast_algorithm2(void);
+void frob_fast_algorithm3(void);
 void frob_split(void);
 void frob_get_random(void);
 void frob_mult_mod(void);

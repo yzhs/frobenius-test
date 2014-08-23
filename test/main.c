@@ -54,6 +54,7 @@ int main()
 	CU_ADD_TEST(suite, frob_inverse);
 	CU_ADD_TEST(suite, frob_fast_algorithm1);
 	CU_ADD_TEST(suite, frob_fast_algorithm2);
+	CU_ADD_TEST(suite, frob_fast_algorithm3);
 	CU_ADD_TEST(suite, frob_composites);
 	CU_ADD_TEST(suite, frob_split);
 	CU_ADD_TEST(suite, frob_mult_mod);
