@@ -12,6 +12,19 @@
 #define CONST_POLY_ARGS(name) const mpz_t name##_x, const mpz_t name##_1
 #define POLY_ARGS(name) mpz_t name##_x, mpz_t name##_1
 
+#define right_shift mpz_fdiv_q_2exp
+
+#define poly_mul(res, f, g) mult_mod(res##_x, res##_1, f##_x, f##_1, g##_x, g##_1, MODULUS)
+#define poly_sqr(res, f) square_mod(res##_x, res##_1, f##_x, f##_1, MODULUS)
+#define poly_powm(res, f, exponent) powm(res##_x, res##_1, f##_x, f##_1, (exponent), MODULUS)
+#define poly_invert(res, f) invert(res##_x, res##_1, f##_x, f##_1, MODULUS)
+
+#define poly_eq(f, g) (mpz_cmp(f##_x, g##_x) == 0 && mpz_cmp(f##_1, g##_1) == 0)
+
+#define poly_mul_x(res, f) mult_x_mod(res##_x, res##_1, f##_x, f##_1, MODULUS)
+#define poly_pow_x(res, exponent) power_of_x(res##_x, res##_1, (exponent), MODULUS)
+#define poly_sigma(res, f) sigma(res##_x, res##_1, f##_x, f##_1, MODULUS)
+
 // Some temporary variables.
 extern mpz_t bb4c, base_x, base_1, tmp0, tmp1, tmp2;
 
