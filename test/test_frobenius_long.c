@@ -7,6 +7,31 @@
 #include "../frobenius.c"
 #include "../frobenius_int.c"
 
+/*
+ * Compute b^exponent mod (n, x² - bx - c) where b is the polynomial b_x*x + b_1.
+ */
+static void powm(POLY_ARGS(res), CONST_POLY_ARGS(b), const mpz_t exponent, MODULUS_ARGS)
+{
+	mpz_t POLY(base);
+	mpz_inits(POLY(base), NULL);
+
+	// Copy all input parameters that will be changed in this function.
+	mpz_set(base_x, b_x);
+	mpz_set(base_1, b_1);
+
+	// Initialize the return value.
+	mpz_set_ui(res_x, 0);
+	mpz_set_ui(res_1, 1);
+
+	for (uint64_t k = mpz_sizeinbase(exponent, 2) - 1; k < (1lu << 63); k--) {
+		square_mod(POLY(res), POLY(res), MODULUS);
+		if (mpz_tstbit(exponent, k))
+			mult_mod(POLY(res), POLY(base), POLY(res), MODULUS);
+	}
+
+	mpz_clears(POLY(base), NULL);
+}
+
 static int num_iterations = 10000;
 
 void frob_mult_x(void)

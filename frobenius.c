@@ -79,27 +79,6 @@ static void square_mod(POLY_ARGS(res), CONST_POLY_ARGS(f), MODULUS_ARGS)
 }
 
 /*
- * Compute b^exponent mod (n, x² - bx - c) where b is the polynomial b_x*x + b_1.
- */
-static void powm(POLY_ARGS(res), CONST_POLY_ARGS(b), const mpz_t exponent, MODULUS_ARGS)
-{
-
-	// Copy all input parameters that will be changed in this function.
-	mpz_set(base_x, b_x);
-	mpz_set(base_1, b_1);
-
-	// Initialize the return value.
-	mpz_set_ui(res_x, 0);
-	mpz_set_ui(res_1, 1);
-
-	for (uint64_t k = mpz_sizeinbase(exponent, 2) - 1; k < (1lu << 63); k--) {
-		square_mod(POLY(res), POLY(res), MODULUS);
-		if (mpz_tstbit(exponent, k))
-			mult_mod(POLY(res), POLY(base), POLY(res), MODULUS);
-	}
-}
-
-/*
  * Compute x^exponent mod (n, x² - bx + c) using Lucas sequences.
  */
 static void power_of_x(POLY_ARGS(res), const mpz_t exponent, MODULUS_ARGS)
