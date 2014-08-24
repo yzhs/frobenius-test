@@ -344,16 +344,12 @@ static Primality steps_3_4_5(MODULUS_ARGS)
 	// If 2^r*s = n ± 1, t = (s-1)/2.
 	mpz_t t;
 
-	mpz_t POLY(x);       // The polynomial x
 	mpz_t POLY(x_t);     // The polynomial x^t reduced modulo (n, x² - bx - c)
 	mpz_t POLY(x_n_1_2); // x^((n+1)/2) reduced mod (n, x² - bx -c)
 	mpz_t POLY(foo);     // Temporary polynomial.  Used to store x^(n+1), x^s, ...
 
 	// Allocate memory for long integers
-	mpz_inits(POLY(x), POLY(x_t), POLY(x_n_1_2), POLY(foo), s, t, NULL);
-
-	// x_1 is initialized as 0 by mpz_inits
-	mpz_set_ui(x_x, 1);
+	mpz_inits(POLY(x_t), POLY(x_n_1_2), POLY(foo), s, t, NULL);
 
 	/**********************************************************************\
 	* Step (3). Check whether -c is a square mod (n, x² - bx - c).         *
@@ -458,7 +454,7 @@ static Primality steps_3_4_5(MODULUS_ARGS)
 
 exit:
 	// Deallocate the local variables.
-	mpz_clears(POLY(x), POLY(x_t), POLY(x_n_1_2), POLY(foo), s, t, NULL);
+	mpz_clears(POLY(x_t), POLY(x_n_1_2), POLY(foo), s, t, NULL);
 	return result;
 }
 
