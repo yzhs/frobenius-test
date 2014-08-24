@@ -710,6 +710,7 @@ void frob_squares(void)
 
 		CU_ASSERT_FALSE(steps_1_2(n_));
 		CU_ASSERT_FALSE(RQFT(n_, 1));
+		mpz_clear(n_);
 	}
 }
 
