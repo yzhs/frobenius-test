@@ -26,25 +26,14 @@ extern "C" {
 #define log(...) fprintf(stderr, __VA_ARGS__)
 
 #define TIME_IT(alg, set) \
-	if (measure_full && measure_##set##s && measure_##alg) \
-		time_it<alg>(bits_##set##s, set##s, first_##set, last_##set, set##s_name)
+	if (measure_full && measure_##set && measure_##alg) \
+		time_it<alg,set>()
 
 #define TIME_IT_PRECOMP(alg, set) \
-	if (measure_prep && measure_##set##s && measure_##alg) \
-		time_it<alg##_precomputation>(bits_##set##s, set##s, first_##set, last_##set, set##s_name)
+	if (measure_prep && measure_##set && measure_##alg) \
+		time_it<alg##_precomputation,set>()
 
 extern uint64_t multiplications;
-
-// Test inputs
-static unsigned bits_primes[NUM_PRIMES];
-static unsigned bits_composites[NUM_COMPOSITES];
-static unsigned bits_mersenne_numbers[NUM_MERSENNE_NUMBERS];
-static unsigned bits_mersenne_primes[NUM_MERSENNE_PRIMES];
-
-static mpz_t primes[NUM_PRIMES];
-static mpz_t composites[NUM_COMPOSITES];
-static mpz_t mersenne_numbers[NUM_MERSENNE_NUMBERS];
-static mpz_t mersenne_primes[NUM_MERSENNE_PRIMES];
 
 // Where to write the measurements
 static FILE *output;
@@ -55,6 +44,57 @@ static FILE *output;
  */
 static int phantom;
 
+struct Primes {
+	static const int first;
+	static const int last;
+	static const char name[];
+	static unsigned bits[NUM_PRIMES];
+	static mpz_t numbers[NUM_PRIMES];
+};
+const char Primes::name[] = "primes";
+const int Primes::first = 0;
+const int Primes::last = NUM_PRIMES-1;
+unsigned Primes::bits[NUM_PRIMES];
+mpz_t Primes::numbers[NUM_PRIMES];
+
+struct Composites {
+	static const int first;
+	static const int last;
+	static const char name[];
+	static unsigned bits[NUM_COMPOSITES];
+	static mpz_t numbers[NUM_COMPOSITES];
+};
+const char Composites::name[] = "composites";
+const int Composites::first = 0;
+const int Composites::last = 44;
+unsigned Composites::bits[NUM_COMPOSITES];
+mpz_t Composites::numbers[NUM_COMPOSITES];
+
+struct MersenneNumbers {
+	static const int first;
+	static const int last;
+	static const char name[];
+	static unsigned bits[NUM_MERSENNE_NUMBERS];
+	static mpz_t numbers[NUM_MERSENNE_NUMBERS];
+};
+const char MersenneNumbers::name[] = "Mersenne numbers";
+const int MersenneNumbers::first = 0;
+const int MersenneNumbers::last = NUM_MERSENNE_NUMBERS-1;
+unsigned MersenneNumbers::bits[NUM_MERSENNE_NUMBERS];
+mpz_t MersenneNumbers::numbers[NUM_MERSENNE_NUMBERS];
+
+struct MersennePrimes {
+	static const int first;
+	static const int last;
+	static const char name[];
+	static unsigned bits[NUM_MERSENNE_PRIMES];
+	static mpz_t numbers[NUM_MERSENNE_PRIMES];
+};
+const char MersennePrimes::name[] = "Mersenne primes";
+const int MersennePrimes::first = 0;
+const int MersennePrimes::last = 20;
+unsigned MersennePrimes::bits[NUM_MERSENNE_PRIMES];
+mpz_t MersennePrimes::numbers[NUM_MERSENNE_PRIMES];
 /*
  * Read a set of numbers for testing
  */
@@ -191,18 +231,16 @@ static unsigned get_number_of_iterations(const mpz_t num)
  * iterations took on average.  Each measurement is repeated NUM_MEASUREMENTS
  * times.  The results are written to output.
  */
-template<class T>
-static void time_it(const unsigned *bits, const mpz_t * numbers,
-                    const uint64_t first, const uint64_t last,
-                    const char *num_name)
+template<class T, class U>
+static void time_it()
 {
 	unsigned its = 10000;
 	int64_t epsilon;
 	double duration;
 	struct timespec start, stop;
 
-	for (unsigned i = first; i <= last; i++) {
-		its = get_number_of_iterations<T>(numbers[i]);
+	for (unsigned i = U::first; i <= U::last; i++) {
+		its = get_number_of_iterations<T>(U::numbers[i]);
 		log("will perform %d iterations to reach a runtime of about 1 second\n", its);
 
 		for (unsigned k = 0; k < NUM_MEASUREMENTS; k++) {
@@ -210,19 +248,19 @@ static void time_it(const unsigned *bits, const mpz_t * numbers,
 			multiplications = 0;
 			clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
 			for (unsigned j = 0; j < its; j++) {
-				l += (T::check(numbers[i]) != composite);
+				l += (T::check(U::numbers[i]) != composite);
 			}
 			clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &stop);
 			duration = get_duration(start, stop, its);
 
-			mpz_ui_pow_ui(tmp0, 2, bits[i]);
-			mpz_sub(tmp0, numbers[i], tmp0);
+			mpz_ui_pow_ui(tmp0, 2, U::bits[i]);
+			mpz_sub(tmp0, U::numbers[i], tmp0);
 			epsilon = mpz_get_si(tmp0);
 
 			fprintf(output, "%d,%li,%lu,%lu,%E,%s,%s,%s,%u,%u,%lu\n",
-				bits[i], epsilon, mpz_popcount(numbers[i]),
-				multiplications, duration, T::name, num_name,
-				T::mode, its, l, mpz_fdiv_ui(numbers[i], 4));
+				U::bits[i], epsilon, mpz_popcount(U::numbers[i]),
+				multiplications, duration, T::name, U::name,
+				T::mode, its, l, mpz_fdiv_ui(U::numbers[i], 4));
 			fflush(output);
 		}
 	}
@@ -230,17 +268,8 @@ static void time_it(const unsigned *bits, const mpz_t * numbers,
 
 int main(int argc, char *argv[])
 {
-	uint64_t first_prime, last_prime, first_composite, last_composite,
-	    first_mersenne_number, last_mersenne_number, first_mersenne_prime,
-	    last_mersenne_prime;
-
-	static const char *primes_name = "primes";
-	static const char *composites_name = "composites";
-	static const char *mersenne_numbers_name = "Mersenne numbers";
-	static const char *mersenne_primes_name = "Mersenne primes";
-
 	init();
-	init_int();
+	//init_int();
 
 	if (argc < 2)
 		output = stdout;
@@ -254,92 +283,80 @@ int main(int argc, char *argv[])
 	if (NULL == output)
 		die("failed to open output file");
 
-	load_numbers(bits_primes, primes, "primes.txt", NUM_PRIMES)
+	load_numbers(Primes::bits, Primes::numbers, "primes.txt", NUM_PRIMES)
 	    || die("failed to load primes\n");
-	load_numbers(bits_composites, composites, "composites.txt", NUM_COMPOSITES)
+	load_numbers(Composites::bits, Composites::numbers, "composites.txt", NUM_COMPOSITES)
 	    || die("failed to load composites\n");
-	load_numbers(bits_mersenne_numbers, mersenne_numbers, "mersenne_numbers.txt", NUM_MERSENNE_NUMBERS)
+	load_numbers(MersenneNumbers::bits, MersenneNumbers::numbers, "mersenne_numbers.txt", NUM_MERSENNE_NUMBERS)
 	    || die("failed to load Mersenne numbers\n");
-	load_numbers(bits_mersenne_primes, mersenne_primes, "mersenne_primes.txt", NUM_MERSENNE_PRIMES)
+	load_numbers(MersennePrimes::bits, MersennePrimes::numbers, "mersenne_primes.txt", NUM_MERSENNE_PRIMES)
 	    || die("failed to load Mersenne primes\n");
 
 	// Which tests to run
 	static bool measure_full, measure_prep;
-	static bool measure_primes, measure_composites,
-	    measure_mersenne_numbers, measure_mersenne_primes;
+	static bool measure_Primes, measure_Composites, measure_MersenneNumbers, measure_MersennePrimes;
 	static bool measure_GMP, measure_MillerRabin, measure_Frobenius;
 
 	measure_full = true;
-	measure_prep = false;
+	measure_prep = true;
 
-	measure_primes = true;
-	measure_composites = true;
-	measure_mersenne_numbers = true;
-	measure_mersenne_primes = true;
+	measure_Primes = true;
+	measure_Composites = true;
+	measure_MersenneNumbers = true;
+	measure_MersennePrimes = true;
 
-	measure_GMP = false;
-	measure_MillerRabin = false;
+	measure_GMP = true;
+	measure_MillerRabin = true;
 	measure_Frobenius = true;
-
-	first_prime = 0;
-	last_prime = NUM_PRIMES - 1;
-
-	first_composite = 0;
-	last_composite = 44;
-
-	first_mersenne_number = 0;
-	last_mersenne_number = NUM_MERSENNE_NUMBERS - 1;
-
-	first_mersenne_prime = 0;
-	last_mersenne_prime = 20;
 
 	/*
 	 * Precomputation
 	 */
 
 	// Apply the different tests to primes
-	TIME_IT_PRECOMP(GMP, prime);
-	TIME_IT_PRECOMP(MillerRabin, prime);
-	TIME_IT_PRECOMP(Frobenius, prime);
+	TIME_IT_PRECOMP(GMP, Primes);
+	TIME_IT_PRECOMP(MillerRabin, Primes);
+	TIME_IT_PRECOMP(Frobenius, Primes);
 
 	// composites
-	TIME_IT_PRECOMP(GMP, composite);
-	TIME_IT_PRECOMP(MillerRabin, composite);
-	TIME_IT_PRECOMP(Frobenius, composite);
+	TIME_IT_PRECOMP(GMP, Composites);
+	TIME_IT_PRECOMP(MillerRabin, Composites);
+	TIME_IT_PRECOMP(Frobenius, Composites);
 
 	// some Mersenne numbers
-	TIME_IT_PRECOMP(GMP, mersenne_number);
-	TIME_IT_PRECOMP(MillerRabin, mersenne_number);
-	TIME_IT_PRECOMP(Frobenius, mersenne_number);
+	TIME_IT_PRECOMP(GMP, MersenneNumbers);
+	// Finished 2^317-1
+	TIME_IT_PRECOMP(MillerRabin, MersenneNumbers);
+	TIME_IT_PRECOMP(Frobenius, MersenneNumbers);
 
 	// and 25 Mersenne primes
-	TIME_IT_PRECOMP(GMP, mersenne_prime);
-	TIME_IT_PRECOMP(MillerRabin, mersenne_prime);
-	TIME_IT_PRECOMP(Frobenius, mersenne_prime);
+	TIME_IT_PRECOMP(GMP, MersennePrimes);
+	TIME_IT_PRECOMP(MillerRabin, MersennePrimes);
+	TIME_IT_PRECOMP(Frobenius, MersennePrimes);
 
 	/*
 	 * Full test
 	 */
 
 	// Apply the different tests to primes
-	TIME_IT(GMP, prime);
-	TIME_IT(MillerRabin, prime);
-	TIME_IT(Frobenius, prime);
+	TIME_IT(GMP, Primes);
+	TIME_IT(MillerRabin, Primes);
+	TIME_IT(Frobenius, Primes);
 
 	// composites
-	TIME_IT(GMP, composite);
-	TIME_IT(MillerRabin, composite);
-	TIME_IT(Frobenius, composite);
+	TIME_IT(GMP, Composites);
+	TIME_IT(MillerRabin, Composites);
+	TIME_IT(Frobenius, Composites);
 
 	// some Mersenne numbers
-	TIME_IT(GMP, mersenne_number);
-	TIME_IT(MillerRabin, mersenne_number);
-	TIME_IT(Frobenius, mersenne_number);
+	TIME_IT(GMP, MersenneNumbers);
+	TIME_IT(MillerRabin, MersenneNumbers);
+	TIME_IT(Frobenius, MersenneNumbers);
 
 	// and 25 Mersenne primes
-	TIME_IT(GMP, mersenne_prime);
-	TIME_IT(MillerRabin, mersenne_prime);
-	TIME_IT(Frobenius, mersenne_prime);
+	TIME_IT(GMP, MersennePrimes);
+	TIME_IT(MillerRabin, MersennePrimes);
+	TIME_IT(Frobenius, MersennePrimes);
 
 	cleanup();
 	// Make sure phantom is not removed by the optimizer.  This might yield
