@@ -22,7 +22,6 @@ extern "C" {
 #define NUM_MERSENNE_NUMBERS 292
 #define NUM_MERSENNE_PRIMES 25
 
-#define max(x,y) (((x) < (y)) ? (y) : (x))
 #define log(...) fprintf(stderr, __VA_ARGS__)
 
 #define TIME_IT(alg, set) \
@@ -95,45 +94,6 @@ const int MersennePrimes::first = 0;
 const int MersennePrimes::last = 20;
 unsigned MersennePrimes::bits[NUM_MERSENNE_PRIMES];
 mpz_t MersennePrimes::numbers[NUM_MERSENNE_PRIMES];
-/*
- * Read a set of numbers for testing
- */
-static unsigned load_numbers(unsigned num_bits[], mpz_t nums[], const char file[], size_t length)
-{
-	unsigned p, i = 0;
-	FILE *fp = fopen(file, "r");
-	mpz_t tmp;
-
-	if (NULL == fp)
-		return 0;
-
-	mpz_init(tmp);
-
-	while (EOF != gmp_fscanf(fp, "%u\t%Zd\n", &p, tmp)) {
-		mpz_init(nums[i]);
-		mpz_set(nums[i], tmp);
-		if (NULL != num_bits)
-			num_bits[i] = p;
-		i++;
-		if (i >= length)
-			break;
-	}
-
-	fclose(fp);
-	mpz_clear(tmp);
-
-	return i;
-}
-
-/*
- * Calculate how many seconds a single iteration takes, if it takes from
- * [start] to [stop] to perform [its] iterations.
- */
-static double get_duration(struct timespec start, struct timespec stop, unsigned its)
-{
-	return (stop.tv_sec - start.tv_sec +
-		(stop.tv_nsec - start.tv_nsec) * 1e-9) / its;
-}
 
 /*
  * The part that is different for the different tests.
@@ -197,6 +157,46 @@ struct Frobenius_precomputation {
 };
 const char Frobenius_precomputation::name[] = "Frobenius";
 const char Frobenius_precomputation::mode[] = "prep";
+
+/*
+ * Read a set of numbers for testing
+ */
+static unsigned load_numbers(unsigned num_bits[], mpz_t nums[], const char file[], size_t length)
+{
+	unsigned p, i = 0;
+	FILE *fp = fopen(file, "r");
+	mpz_t tmp;
+
+	if (NULL == fp)
+		return 0;
+
+	mpz_init(tmp);
+
+	while (EOF != gmp_fscanf(fp, "%u\t%Zd\n", &p, tmp)) {
+		mpz_init(nums[i]);
+		mpz_set(nums[i], tmp);
+		if (NULL != num_bits)
+			num_bits[i] = p;
+		i++;
+		if (i >= length)
+			break;
+	}
+
+	fclose(fp);
+	mpz_clear(tmp);
+
+	return i;
+}
+
+/*
+ * Calculate how many seconds a single iteration takes, if it takes from
+ * [start] to [stop] to perform [its] iterations.
+ */
+static double get_duration(struct timespec start, struct timespec stop, unsigned its)
+{
+	return (stop.tv_sec - start.tv_sec +
+		(stop.tv_nsec - start.tv_nsec) * 1e-9) / its;
+}
 
 /*
  * Figure out how often to repeat each test so that the overall runtime for
