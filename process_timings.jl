@@ -46,7 +46,8 @@ function process_raw_data(df)
     mults_per_iter = sum(df[:Multiplications]) / sum(df[:Iterations])
     number_of_pprimes = sum(df[:IsPrime])
     return DataFrame(MeanTime = μ, Min = μ - factor*σ, Max = μ + factor*σ,
-                     Iterations = iters, Multiplications = mults_per_iter,
+                     StdDev = σ, Iterations = iters,
+                     Multiplications = mults_per_iter,
                      NumPrimes = number_of_pprimes)
 end
 
@@ -221,6 +222,14 @@ if plot_data
              Guide.ColorKey("Eingabemenge"),
              Scale.x_log2, Scale.y_log2);
     save_plot(p, "time_vs_multiplications");
+end
+
+if plot_data
+    p = plot(timings_full, x=:Bits, y=:StdDev, color=:Set,
+             Guide.XLabel("Eingabelänge in Bits"), Guide.YLabel("Standardabweichung"),
+             Guide.ColorKey("Eingabemenge"),
+             Scale.x_log2);
+    save_plot(p, "stddev");
 end
 
 info("Done");
