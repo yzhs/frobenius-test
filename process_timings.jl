@@ -1,6 +1,6 @@
 using DataFrames
 
-plot_data = false
+plot_data = true
 
 factor = 5
 
