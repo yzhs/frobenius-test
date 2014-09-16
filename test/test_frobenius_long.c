@@ -4,6 +4,7 @@
 
 #include "test_frobenius_long.h"
 
+#define TEST
 #include "../frobenius.c"
 #include "../frobenius_int.c"
 

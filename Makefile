@@ -11,7 +11,8 @@ CFLAGS = -std=gnu11 $(DEBUG) $(OPT) $(PROFILE)
 CXXFLAGS = -std=gnu++11 $(DEBUG) -Wno-c++98-compat-pedantic $(OPT) $(PROFILE)
 
 
-all: benchmark plots
+all: check_all_params check_all_params_long
+	#benchmark plots
 
 test: run_tests
 	./run_tests
@@ -58,6 +59,12 @@ miller_rabin: run_miller_rabin.o miller_rabin.o helpers.o common.o
 miller_rabin_int: run_miller_rabin_int.o miller_rabin_int.o helpers_int.o common.o
 	$(CC) $(CFLAGS) -o $@ $^ -lm -pthread
 
+check_all_params_long: check_all_params_long.o frobenius.o helpers.o small_primes.o common.o
+	$(CC) $(CFLAGS) -o $@ $^ -lm -lgmp
+
+check_all_params: check_all_params.o frobenius_int.o helpers_int.o small_primes.o common.o
+	$(CC) $(CFLAGS) -o $@ $^ -lm
+
 
 run_tests: helpers.o helpers_int.o small_primes.o common.o test/main.o \
 	test/test_miller_rabin_long.o test/test_miller_rabin_int.o test/test_frobenius_long.o
@@ -92,5 +99,6 @@ clean:
 	-rm *.o test/*.o
 	-rm miller_rabin frobenius miller_rabin_int frobenius_int
 	-rm run_tests benchmark nextprime find_non_smooth_numbers
+	-rm check_all_params check_all_params_long
 
 .PHONY: all clean test test_python

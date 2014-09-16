@@ -327,7 +327,7 @@ static bool invert(POLY_ARGS(res), CONST_POLY_ARGS(f), MODULUS_ARGS)
 /*
  * Perform the non-deterministic steps of the Quadratic Frobenius Test.
  */
-static Primality steps_3_4_5(MODULUS_ARGS)
+Primality steps_3_4_5(MODULUS_ARGS)
 {
 	Primality result = composite;
 

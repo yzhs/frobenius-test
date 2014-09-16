@@ -10,7 +10,7 @@
 
 static uint64_t bb4c_int, multiplications_int;
 
-
+#ifdef TEST
 /*
  * Return f(x)*g(x) mod (n, x^2 - b*x - c) where f(x) = f_x*x + f_1 and g(x) = g_x*x + g_1 in the return arguments res_x and
  * res_1, representing the polynomial res_x*x + res_1.
@@ -36,6 +36,7 @@ static void mult_mod_int(POLY_ARGS_int(res), CONST_POLY_ARGS_int(f), CONST_POLY_
 
 	multiplications_int += 4;
 }
+#endif
 
 /*
  * Calculate (dx + e)^2 mod (n, x^2-bx-c) returning the result as (*res_x) * x + (*res_1).
@@ -63,6 +64,7 @@ static void square_mod_int(POLY_ARGS_int(res), CONST_POLY_ARGS_int(f), MODULUS_A
 	multiplications_int += 4;
 }
 
+#ifdef TEST
 /*
  * Calculate (base_x * x + base_1)^exp mod (n, x^2-bx-c) returning the result as
  * (*res_x) * x + (*res_1).  The computation is done using exponentiation by
@@ -84,6 +86,7 @@ static void powm_int(POLY_ARGS_int(res), CONST_POLY_ARGS_int(b), uint64_t exp, M
 		exp /= 2;
 	}
 }
+#endif
 
 static int64_t invert_int(int64_t a, int64_t n)
 {
@@ -212,7 +215,7 @@ static Primality steps_1_2_int(const uint64_t n)
 /*
  * Execute steps (3) through (5) of the Quadratic Frobenius Test.
  */
-static Primality steps_3_4_5_int(MODULUS_ARGS_int)
+Primality steps_3_4_5_int(MODULUS_ARGS_int)
 {
 	uint64_t POLY_int(foo), s, tmp;
 	uint64_t r, i;
