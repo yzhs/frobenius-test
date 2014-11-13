@@ -4,6 +4,20 @@
 #include <sys/time.h>
 
 /*
+ * Multiply x and y, reducing the result modulo n.
+ */
+uint64_t mul_mod_n(uint64_t x, uint64_t y, uint64_t n)
+{
+#if 0
+	uint64_t q, r, p1, p2;
+	umul_ppmm(p1, p2, x, y);
+	udiv_qrnnd(q, r, p1, p2, n);
+	return r;
+#endif
+	return (x * y) % n;
+}
+
+/*
  * Given an integer 0 ≤ n < 2³², find the largest integer r such that r² ≤ n.
  */
 uint64_t int_sqrt(const uint64_t n)

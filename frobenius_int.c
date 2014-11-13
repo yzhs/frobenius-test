@@ -17,7 +17,7 @@ static uint64_t bb4c_int, multiplications_int;
  */
 static void mult_mod_int(POLY_ARGS_int(res), CONST_POLY_ARGS_int(f), CONST_POLY_ARGS_int(g), MODULUS_ARGS_int)
 {
-	uint64_t fxgx, f1gx = (f_1 * g_x) % n, f1g1 = (f_1 * g_1) % n;
+	uint64_t fxgx, f1gx = mul(f_1, g_x), f1g1 = mul(f_1, g_1);
 	multiplications_int += 2;
 
 	// If deg f = 1, the whole thing amounts to multiplying the
@@ -28,11 +28,12 @@ static void mult_mod_int(POLY_ARGS_int(res), CONST_POLY_ARGS_int(f), CONST_POLY_
 
 		return;
 	}
-	fxgx = (f_x * g_x) % n;
+	fxgx = mul(f_x, g_x);
 
-	// All these modulo operations are pretty expensive...
-	*res_x = (((fxgx * b) % n + (f_x * g_1) % n) % n + f1gx) % n;
-	*res_1 = ((fxgx * c) % n + f1g1) % n;
+	*res_x = (mul(fxgx, b) + mul(f_x, g_1) + f1gx) % n;
+	*res_1 = mul(fxgx, c) + f1g1;
+	if (*res_1 > n)
+		*res_1 -= n;
 
 	multiplications_int += 4;
 }
@@ -43,7 +44,7 @@ static void mult_mod_int(POLY_ARGS_int(res), CONST_POLY_ARGS_int(f), CONST_POLY_
  */
 static void square_mod_int(POLY_ARGS_int(res), CONST_POLY_ARGS_int(f), MODULUS_ARGS_int)
 {
-	uint64_t f1f1 = (f_1 * f_1) % n;
+	uint64_t f1f1 = mul(f_1, f_1);
 	uint64_t fxfx;
 
 	multiplications_int++;
@@ -53,13 +54,13 @@ static void square_mod_int(POLY_ARGS_int(res), CONST_POLY_ARGS_int(f), MODULUS_A
 		*res_1 = f1f1;
 		return;
 	}
-	fxfx = (f_x * f_x) % n;
+	fxfx = mul(f_x, f_x);
 
 	// compute res_x = f_x^2*b+2*f_x*f_1
-	*res_x = ((fxfx * b) % n + (2 * (f_x * f_1) % n) % n) % n;
+	*res_x = (mul(fxfx, b) + 2 * mul(f_x, f_1)) % n;
 
 	// and res_1 = f_x^2*c+f_1^2
-	*res_1 = ((fxfx * c) % n + f1f1) % n;
+	*res_1 = (mul(fxfx, c) + f1f1) % n;
 
 	multiplications_int += 4;
 }
@@ -88,27 +89,6 @@ static void powm_int(POLY_ARGS_int(res), CONST_POLY_ARGS_int(b), uint64_t exp, M
 }
 #endif
 
-static int64_t invert_int(int64_t a, int64_t n)
-{
-	int64_t t = 0, new_t = 1, r = n, new_r = a, q, tmp;
-
-	while (new_r != 0) {
-		q = r / new_r;
-		tmp = new_t;
-		new_t = t - q * new_t;
-		t = tmp;
-		tmp = new_r;
-		new_r = r - q * new_r;
-		r = new_r;
-	}
-	if (r > 1)
-		die("%lu is not invertible\n", a);
-	if (t < 0)
-		t += n;
-
-	return t;
-}
-
 /*
  * Compute x^exponent mod (n, x² - bx + c) using Lucas sequences.
  */
@@ -116,10 +96,6 @@ static void power_of_x_int(POLY_ARGS_int(res), const uint64_t exponent, MODULUS_
 {
 	int j_even = false; // We only need j to compute (-1)^j, so all we care about is whether j is odd or even.
 	uint64_t A_j = b, B_j = 1, C_j = c, tmp0;
-
-	// Compute the inverse of two.
-	// NOTE This can't be precomputed, because it depends on n.
-	uint64_t inverse_of_2 = invert_int(2, n);
 
 	// The following thre values are needed for the chain addition steps.
 	// Values that are already stored in variables available locally, are
@@ -135,14 +111,17 @@ static void power_of_x_int(POLY_ARGS_int(res), const uint64_t exponent, MODULUS_
 		 * Doubling
 		 */
 
-		B_j = (A_j * B_j) % n;
+		B_j = mul(A_j, B_j);
 
-		tmp0 = (2 * C_j) % n;
+		tmp0 = mul(2, C_j);
+
+		A_j = mul(A_j, A_j);
+		C_j = mul(C_j, C_j);
+
 		if (j_even) // TODO A conditional branch in a tight inner loop is a bad idea. Rewrite this!
 			tmp0 = -tmp0;
-		A_j = ((A_j * A_j) % n + tmp0) % n;
 
-		C_j = (C_j * C_j) % n;
+		A_j = (A_j + tmp0) % n;
 
 		j_even = true;
 		multiplications_int += 3;
@@ -153,18 +132,24 @@ static void power_of_x_int(POLY_ARGS_int(res), const uint64_t exponent, MODULUS_
 			 */
 
 			// Compute A_{j+1}
-			tmp0 = (((bb4c_int * B_1) % n) * B_j) % n + (A_1 * A_j) % n;
-			tmp0 = (tmp0 * inverse_of_2) % n;
+			tmp0 = mul(mul(bb4c_int, B_1), B_j) + mul(A_1, A_j);
+			// Divide by 2
+			if (tmp0 % 2 == 1)
+				tmp0 += n;
+			tmp0 >>= 1; // At this point tmp0 is certainly below n.
 
 			// Compute B_{j+1}
-			B_j = ((A_1 * B_j) % n + (A_j * B_1) % n) % n;
-			B_j = (B_j * inverse_of_2) % n;
+			B_j = (mul(A_1, B_j) + mul(A_j, B_1)) % n;
+			// Divide by 2
+			if (B_j % 2 == 1)
+				B_j += n;
+			B_j >>= 1;  // Now B_j < n.
 
 			// Set the new A_j
 			A_j = tmp0;
 
 			// Compute C_{j+1}
-			C_j = (C_j * C_1) % n;
+			C_j = mul(C_j, C_1);
 
 			j_even = false;
 			multiplications_int += 8;
@@ -174,12 +159,15 @@ static void power_of_x_int(POLY_ARGS_int(res), const uint64_t exponent, MODULUS_
 	// Compute the polynomial x^j = res_x * x + res_1 from A_j and B_j.
 	*res_x = B_j;
 
-	*res_1 = (b * B_j) % n;
+	*res_1 = mul(b, B_j);
 	if (*res_1 < A_j)
 		*res_1 = A_j - *res_1;
 	else
 		*res_1 = n + A_j - *res_1;
-	*res_1 = (*res_1 * inverse_of_2) % n;
+	// Divide *res_1 by 2
+	if (*res_1 % 2 == 1)
+		*res_1 += n;
+	*res_1 >>= 1;
 #undef B_1
 }
 
@@ -235,7 +223,7 @@ Primality steps_3_4_5_int(MODULUS_ARGS_int)
 	/*
 	 * Step (4) Check, whether x^(n+1) = -c mod (n, x^2-bx-c).
 	 */
-	foo_1 = (foo_1 * foo_1) % n;
+	foo_1 = mul(foo_1, foo_1);
 	tmp = n - c;
 	if (foo_1 != tmp)
 		return composite;
@@ -319,7 +307,7 @@ Primality RQFT_int(const unsigned n_, const unsigned k)
 			b = get_random_int(2, n - 2);
 			c = get_random_int(2, n - 2);
 
-			bb4c_int = ((b * b) % n + c * 4) % n;
+			bb4c_int = (mul(b, b) + c * 4) % n;
 
 			j_bb4c = jacobi(bb4c_int, n);
 			j_c = jacobi(n - c, n); // NOTE: n-c is not congruent to -c, since -c is interpreted as 2⁶⁴-c !!!
