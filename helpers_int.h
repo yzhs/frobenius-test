@@ -13,7 +13,7 @@
 
 
 /* Initialises the random number generator using a (static) seed. */
-void init_int(void);
+int init_int(void);
 
 // Replace some GMP functions.
 #define even(n) ((n) % 2lu == 0)

@@ -115,7 +115,7 @@ int jacobi(uint64_t x, uint64_t y)
 /*
  * Initialises the random number generator using a (static) seed.
  */
-void init_int(void)
+int init_int(void)
 {
 	unsigned seed;
 
@@ -126,4 +126,6 @@ void init_int(void)
 	seed = 123456;
 
 	srand(seed);
+
+	return 0;
 }
