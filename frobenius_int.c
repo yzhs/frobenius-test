@@ -105,8 +105,12 @@ static void power_of_x_int(POLY_ARGS_int(res), const uint64_t exponent, MODULUS_
 	uint64_t B_1 = 1;
 #define C_1 c
 
-	// Skip the leading 1 bit and convert convert to 0 based indexing
-	for (int k = 8*sizeof(uint64_t) - 1; k >= 0; k--) {
+	int k;
+
+	// Skip the leading 1 bit and convert to 0 based indexing
+	for (k = 8*sizeof(uint64_t) - 1; k >= 0 && ((1lu << k) & exponent) == 0; k--);
+
+	for (; k >= 0; k--) {
 		/*
 		 * Doubling
 		 */
