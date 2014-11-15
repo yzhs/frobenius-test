@@ -137,13 +137,12 @@ int jacobi(uint64_t x, uint64_t y)
  */
 int init_int(void)
 {
-	unsigned seed;
+	unsigned seed = 123456;
 
+	/* Uncomment the following lines to use a dynamic seed. */
 	//struct timeval tv;
-
 	//gettimeofday(&tv, NULL);
 	//seed = tv.tv_usec;
-	seed = 123456;
 
 	srand(seed);
 

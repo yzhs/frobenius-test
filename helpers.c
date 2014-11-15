@@ -32,12 +32,12 @@ mpz_t bb4c, base_x, base_1, tmp0, tmp1, tmp2;
  */
 int init(void)
 {
-	long int seed;
-	struct timeval tv;
+	long int seed = 123457;
 
-	//seed = 123457;
-	gettimeofday(&tv, NULL);
-	seed = tv.tv_usec;
+	/* Uncomment the following lines to use a dynamic seed. */
+	//struct timeval tv;
+	//gettimeofday(&tv, NULL);
+	//seed = tv.tv_usec;
 
 	gmp_randinit_default(r_state);
 	gmp_randseed_ui(r_state, seed);
