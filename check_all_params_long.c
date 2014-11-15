@@ -21,10 +21,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <gmp.h>
-
-#include "frobenius.h"
-#include "helpers.h"
+#include "frobenius_int.h"
+#include "helpers_int.h"
 
 /*
  * Run the randomized quadratic frobenius test to check whether [n] is a a
@@ -34,42 +32,56 @@
 int main()
 {
 	Primality result;
-
-	uint64_t i, j, N = 251*257;
-	mpz_t n, b, c, bb4c, tmp;
-	mpz_init_set_ui(n, N); // The largest two prime factors such that their product is at most 2¹⁶.
-	mpz_inits(b, c, bb4c, tmp, NULL);
-
+	uint64_t n, b = 0, c = 0, bb4c_int;
 	uint64_t valid_pairs = 0, false_positives = 0;
 
-	for (i = N-1; i < N; i++) {
-		mpz_set_ui(c, i);
-		mpz_sub(tmp, n, c);
-		if (mpz_jacobi(tmp, n) != 1)
+//	n = 251*257; // The largest two prime factors such that their product is at most 2^16. (0, -1)
+//	n = 241*257; // Both primes congruent to 1 mod 4.  No false positives.
+//	n = 239*251; // Both primes congruent to 3 mod 4.  No false positives.
+//	n = 3*3 * 7253; // Smallest number of prime factors such that a small square divides n.  No false positives.
+//	n = 3*5*4363; // Product of two small primes and a large prime. No false positives.
+//	n = 3*5*7; // Smallest non-trivial product of an odd number of distinct odd primes.  No false positives.
+//	n = 3*5*7*11*13; // Smallest product of 5 odd primes, largest primorial/2 below 2^16.  (0, -1)
+//	n = 31*37*41; // Product of the three largest consecutive primes such that their product is below 2^16. (0, -1)
+//	n = 3*5*7*11; // (0, -1)
+//	n = 3*5*7*13; // No false positives.
+//	n = 3*3*3*3*3 * 3*3*3*3*3; // No false positives.
+//	n = 3*3*3*3*3 * 3*3*3*3; // (0, -1)
+
+	for (n = 3; n < 10000; n+=2) {
+		// Trial division is enough, so it does not matter, whether we call RQFT_int(n, 0) or RQFT_int(n, 10000).
+		if (RQFT_int(n, 0) == prime)
 			continue;
-		for (j = 0; j < N; j++) {
-			mpz_set_ui(b, j);
-			mpz_set_ui(bb4c, (j*j+4*i)%N);
-			if (mpz_jacobi(bb4c, n) != -1)
+		valid_pairs = false_positives = 0;
+
+		for (c = 1; c < n; c++) {
+			if (jacobi(n - c, n) != 1)
 				continue;
-			valid_pairs++;
+			for (b = 0; b < n; b++) {
+				bb4c_int = ((b * b) % n + c * 4) % n;
+				if (jacobi(bb4c_int, n) != -1)
+					continue;
+				valid_pairs++;
 
-			result = steps_3_4_5(n, b, c);
-			if (result != composite) {
-				false_positives++;
-				printf("#");
-				fflush(stdout);
-				gmp_fprintf(stderr, "(GMP) Found a false positive: n = %Zd, b = %Zd, c = %Zd\n", n, b, c);
+				result = steps_3_4_5_int(n, b, c);
+				if (result != composite) {
+					false_positives++;
+					//printf("#");
+					fflush(stdout);
+					fprintf(stdout, "n=%5lu Found a false positive: n = %5lu, b = %5lu, c = %5lu\n",
+					        n, n, b, c);
+				}
 			}
+			//if (c % 100 == 1) {
+			//	printf(".");
+			//	fflush(stdout);
+			//}
 		}
-		if (i % 100 == 1) {
-			printf(".");
-			fflush(stdout);
-		}
-	}
 
-	printf("Checked a total of %lu parameter pairs.  %lu of these were valid parameters.\n", N*N, valid_pairs);
-	printf("A total number of %lu false positives were found\n", false_positives);
+		printf("n=%5lu Checked a total of %lu parameter pairs modulo %lu.  %lu of these were valid parameters.\n",
+		       n, n*n, n, valid_pairs);
+		printf("n=%5lu A total number of %lu false positives were found\n", n, false_positives);
+	}
 
 	return 0;
 }

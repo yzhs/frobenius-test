@@ -78,11 +78,17 @@ miller_rabin: run_miller_rabin.o miller_rabin.o helpers.o common.o
 miller_rabin_int: run_miller_rabin_int.o miller_rabin_int.o helpers_int.o common.o
 	$(CC) $(CFLAGS) -o $@ $^ -lm -pthread
 
+check_all_params: check_all_params.o frobenius_int.o helpers_int.o small_primes.o common.o
+	$(CC) $(CFLAGS) -o $@ $^ -lm
+
 check_all_params_long: check_all_params_long.o frobenius.o helpers.o small_primes.o common.o
 	$(CC) $(CFLAGS) -o $@ $^ -lm -lgmp
 
-check_all_params: check_all_params.o frobenius_int.o helpers_int.o small_primes.o common.o
+check_all_small_numbers: check_all_small_numbers.o frobenius_int.o miller_rabin_int.o helpers_int.o small_primes.o common.o
 	$(CC) $(CFLAGS) -o $@ $^ -lm
+
+check_all_small_numbers_long: check_all_small_numbers_long.o frobenius.o helpers.o helpers_int.o small_primes.o common.o
+	$(CC) $(CFLAGS) -o $@ $^ -lm -lgmp
 
 
 run_tests: helpers.o helpers_int.o small_primes.o common.o test/main.o \
@@ -125,5 +131,6 @@ clean:
 	-rm miller_rabin frobenius miller_rabin_int frobenius_int
 	-rm run_tests benchmark nextprime find_non_smooth_numbers
 	-rm check_all_params check_all_params_long
+	-rm check_all_small_numbers check_all_small_numbers_long
 
 .PHONY: all clean test test_python
