@@ -130,7 +130,7 @@ static void power_of_x_int(POLY_ARGS_int(res), const uint64_t exponent, MODULUS_
 	// #defined, the remaining values is stored in a global temporary
 	// variable.
 #define A_1 b
-	uint64_t B_1 = 1;
+	//uint64_t B_1 = 1;  // not used
 #define C_1 c
 
 	int k;
@@ -145,7 +145,7 @@ static void power_of_x_int(POLY_ARGS_int(res), const uint64_t exponent, MODULUS_
 
 		B_j = mul(A_j, B_j);
 
-		tmp0 = mul(2, C_j);
+		tmp0 = (C_j+C_j) % n;
 
 		A_j = mul(A_j, A_j);
 		C_j = mul(C_j, C_j);
@@ -163,15 +163,15 @@ static void power_of_x_int(POLY_ARGS_int(res), const uint64_t exponent, MODULUS_
 			 * Chain addition
 			 */
 
-			// Compute A_{j+1}
-			tmp0 = mul(mul(bb4c_int, B_1), B_j) + mul(A_1, A_j);
+			// Compute A_{j+1} (B_1 = 1)
+			tmp0 = (mul(bb4c_int, B_j) + mul(A_1, A_j)) % n;
 			// Divide by 2
 			if (tmp0 % 2 == 1)
 				tmp0 += n;
 			tmp0 >>= 1; // At this point tmp0 is certainly below n.
 
-			// Compute B_{j+1}
-			B_j = (mul(A_1, B_j) + mul(A_j, B_1)) % n;
+			// Compute B_{j+1} (B_1 = 1)
+			B_j = (mul(A_1, B_j) + A_j) % n;
 			// Divide by 2
 			if (B_j % 2 == 1)
 				B_j += n;
