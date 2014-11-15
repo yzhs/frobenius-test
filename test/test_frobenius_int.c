@@ -282,15 +282,15 @@ void frob_primelist_int(void)
 	if (NULL == fp)
 		die(TEST_DATA_PATH "primelist.txt: %s\n", strerror(errno));
 
-	while (EOF != fscanf(fp, "%u\n", &p))
+	while (EOF != fscanf(fp, "%u\n", &p) && i < len(large_primes))
 		large_primes[i++] = p;
 
 	fclose(fp);
 
 	for (i = 0; i < len(large_primes); i++) {
 		Primality foo = RQFT_int(large_primes[i], 1);
-		if (foo == composite && large_primes[i] % 16 != 15)
-			printf("%x\n", large_primes[i]);
+		if (foo == composite)
+			printf("%u\n", large_primes[i]);
 		CU_ASSERT_NOT_EQUAL(foo, composite);
 	}
 }
