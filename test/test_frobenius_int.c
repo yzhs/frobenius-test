@@ -17,10 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with frobenius-test.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 #include <CUnit/CUnit.h>
 
-#include "frob_int.h"
-
+#define TEST
 #include "../frobenius_int.c"
 
 /*
