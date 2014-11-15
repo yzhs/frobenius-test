@@ -28,8 +28,6 @@
 
 extern int enable_logging;
 
-//#define die(...) do { fprintf(stderr, __VA_ARGS__); exit(1); } while (0)
-
 // Print an error message and terminate the programm.
 int die(const char *format, ...);
 
