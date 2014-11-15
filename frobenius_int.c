@@ -184,7 +184,7 @@ static void power_of_x_int(POLY_ARGS_int(res), const uint64_t exponent, MODULUS_
 			C_j = mul(C_j, C_1);
 
 			j_even = false;
-			multiplications_int += 8;
+			multiplications_int += 4;
 		}
 	}
 
@@ -200,6 +200,8 @@ static void power_of_x_int(POLY_ARGS_int(res), const uint64_t exponent, MODULUS_
 	if (*res_1 % 2 == 1)
 		*res_1 += n;
 	*res_1 >>= 1;
+
+	multiplications_int += 1;
 #undef B_1
 }
 
