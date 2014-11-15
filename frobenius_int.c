@@ -28,12 +28,17 @@
 #include "small_primes.h"
 #include "frobenius_int.h"
 
-static uint64_t bb4c_int, multiplications_int;
+// Compute b^2+4c once for every n.
+static uint64_t bb4c_int;
+
+// Count the number of multiplications mod n performed.
+static uint64_t multiplications_int;
 
 #ifdef TEST
 /*
- * Return f(x)*g(x) mod (n, x^2 - b*x - c) where f(x) = f_x*x + f_1 and g(x) = g_x*x + g_1 in the return arguments res_x and
- * res_1, representing the polynomial res_x*x + res_1.
+ * Return f(x)*g(x) mod (n, x^2 - b*x - c) where f(x) = f_x*x + f_1 and
+ * g(x) = * g_x*x + g_1 in the return arguments res_x and res_1, representing
+ * the polynomial res_x*x + res_1.
  */
 static void mult_mod_int(POLY_ARGS_int(res), CONST_POLY_ARGS_int(f), CONST_POLY_ARGS_int(g), MODULUS_ARGS_int)
 {
@@ -90,6 +95,8 @@ static void square_mod_int(POLY_ARGS_int(res), CONST_POLY_ARGS_int(f), MODULUS_A
  * Calculate (base_x * x + base_1)^exp mod (n, x^2-bx-c) returning the result as
  * (*res_x) * x + (*res_1).  The computation is done using exponentiation by
  * squaring.
+ *
+ * This function is only used to insure that power_of_x_int does the right thing.
  */
 static void powm_int(POLY_ARGS_int(res), CONST_POLY_ARGS_int(b), uint64_t exp, MODULUS_ARGS_int)
 {
@@ -110,7 +117,8 @@ static void powm_int(POLY_ARGS_int(res), CONST_POLY_ARGS_int(b), uint64_t exp, M
 #endif
 
 /*
- * Compute x^exponent mod (n, x² - bx + c) using Lucas sequences.
+ * Compute x^exponent mod (n, x² - bx + c) (basically using Lucas sequences) as
+ * described in section 3.4 of the paper.
  */
 static void power_of_x_int(POLY_ARGS_int(res), const uint64_t exponent, MODULUS_ARGS_int)
 {
@@ -212,15 +220,15 @@ static Primality steps_1_2_int(const uint64_t n)
 		return composite;
 
 	/*
-	 * Step (1)
+	 * Step (1) Trial division.
 	 */
-	// Start from prime_list[1] == 3 stead of prime_list[0] == 2.
+	// Start from prime_list[1] = 3 stead of prime_list[0] = 2.
 	for (uint64_t i = 1; i < len(prime_list) && prime_list[i] <= sqrt; i++)
 		if (n % prime_list[i] == 0)
 			return composite;
 
 	// If the given number is small enough, there cannot be a non-trivial
-	// divisor of n, whence n is prime.
+	// divisor of n, whence n is certainly prime.
 	return (sqrt < B) ? prime : probably_prime;
 }
 
@@ -241,7 +249,7 @@ Primality steps_3_4_5_int(MODULUS_ARGS_int)
 	tmp = n + 1;
 	tmp = tmp / 2;
 	power_of_x_int(&foo_x, &foo_1, tmp, MODULUS_int);
-	if (foo_x != 0)  // Check, whether x^((n+1)/2) has degree 1.
+	if (foo_x != 0)  // Check whether x^((n+1)/2) has degree 1.
 		return composite;
 
 	/*
@@ -256,7 +264,7 @@ Primality steps_3_4_5_int(MODULUS_ARGS_int)
 	 * Step (5)
 	 */
 	split_int(&r, &s, n * n); // Calculate r,s such that 2^r*s + 1 == n^2
-	power_of_x_int(&foo_x, &foo_1, s, MODULUS_int);
+	power_of_x_int(&foo_x, &foo_1, s, MODULUS_int); // TODO make this more efficient using σ : x ↦ b-x.
 
 	if (foo_x == 0 && foo_1 == 1)
 		return probably_prime;
@@ -281,6 +289,8 @@ Primality steps_3_4_5_int(MODULUS_ARGS_int)
 Primality QFT_int(const unsigned n_, const unsigned b_, const unsigned c_)
 {
 	const uint64_t n = n_, b = b_, c = c_;
+	// Running step (2) is not really necessary, as (b,c) is a valid
+	// parameter pair, so n cannot possibly be a perfect square.
 	Primality result = steps_1_2_int(n);
 
 	if (result != probably_prime)
@@ -334,7 +344,7 @@ Primality RQFT_int(const unsigned n_, const unsigned k)
 			bb4c_int = (mul(b, b) + c * 4) % n;
 
 			j_bb4c = jacobi(bb4c_int, n);
-			j_c = jacobi(n - c, n); // NOTE: n-c is not congruent to -c, since -c is interpreted as 2⁶⁴-c !!!
+			j_c = jacobi(n - c, n); // NOTE: n-c is not congruent to -c, since -c is understood as 2⁶⁴-c !!!
 
 			if (j_bb4c == -1 && j_c == 1) {
 				check_non_trivial_divisor(bb4c_int);

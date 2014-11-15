@@ -25,6 +25,11 @@
 
 #include "common.h"
 
+
+/*
+ * A few macros for passing commonly used arguments and declaring the
+ * corresponding parameters.
+ */
 #define POLY_int(f) f##_x, f##_1
 #define POLY_ARGS_int(f) uint64_t *f##_x, uint64_t *f##_1
 #define CONST_POLY_ARGS_int(f) const uint64_t f##_x, const uint64_t f##_1
@@ -35,7 +40,7 @@
 /* Initialises the random number generator using a (static) seed. */
 int init_int(void);
 
-// Replace some GMP functions.
+/* Replacements for some GMP functions. */
 #define even(n) ((n) % 2lu == 0)
 #define odd(n) ((n) % 2lu == 1)
 

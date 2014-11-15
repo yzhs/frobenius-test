@@ -49,7 +49,7 @@ int init(void)
 }
 
 /*
- * Whatever is to be done before program shutdown.
+ * Whatever is to be done before programme shutdown.
  */
 int cleanup(void)
 {
@@ -60,7 +60,7 @@ int cleanup(void)
 
 
 /*
- * Calculate [s], [d] such that [n-1=2^s*d] where [d] is odd.
+ * Calculate s, d such that n-1=2^s*d where d is odd.
  */
 void split(uint64_t *s, mpz_t d, const mpz_t n)
 {
@@ -89,10 +89,10 @@ void get_random(mpz_t result, const mpz_t n)
 }
 
 /*
- * Generate a random integer between [low] and [high]+1, both included.
+ * Generate a random integer between low and high, both included.
  */
 unsigned randint(const unsigned low, const unsigned high)
 {
-	// TODO make sure the distribution is uniform
+	// TODO make the distribution is uniform
 	return low + (unsigned)rand() % (high - low + 1);
 }

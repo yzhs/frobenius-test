@@ -70,8 +70,7 @@ uint64_t gcd(uint64_t a, uint64_t b)
 }
 
 /*
- * Use the integer square root function to figure out whether a number is a
- * perfect square.
+ * Test whether a given integer is a perfect square.
  */
 bool is_square(const uint64_t n)
 {
@@ -81,7 +80,7 @@ bool is_square(const uint64_t n)
 }
 
 /*
- * Calculate [s], [d] such that [n-1=2^s*d] where [d] is odd.
+ * Calculate s, d such that n-1=2^s*d where d is odd.
  */
 void split_int(uint64_t *s, uint64_t *d, const uint64_t n)
 {
@@ -95,8 +94,9 @@ void split_int(uint64_t *s, uint64_t *d, const uint64_t n)
 }
 
 /*
- * This function generates a random integer between 2 and n-2.  This function
- * will fail if n is equal to 3 and produce weird results for smaller ns.
+ * This function generates a random integer between in the interval
+ * [low, high].  As we divide by (high - low + 1) in the process, we need
+ * low < high.
  */
 uint64_t get_random_int(const uint64_t low, const uint64_t high)
 {
