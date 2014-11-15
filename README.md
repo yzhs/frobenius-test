@@ -25,9 +25,9 @@ Installation
 ------------
 
 To build this project, you will need a C99 compatible C and a C++98 compatible
-C++ compiler.  I have had success building it with both [GCC
-4.9.2](https://gcc.gnu.org/) and [clang 3.5.0](http://clang.llvm.org/).  You
-will also need a (not too old version of) GMP (I'm using GMP 6.0.0).
+C++ compiler.  I have had success building it with both
+[GCC 4.9.2](https://gcc.gnu.org/) and [clang 3.5.0](http://clang.llvm.org/).
+You will also need a (not too old version of) GMP (I'm using GMP 6.0.0).
 
 If you want to regenerate the plots, you will need a recent version of the Julia
 language, as well as [gnuplot](http://www.gnuplot.info/).  The exact gnuplot

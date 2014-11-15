@@ -24,11 +24,12 @@ else
 DEBUG = -DDEBUG -g -Wall -Wextra -Wno-pointer-arith -Wno-format-nonliteral
 endif
 OPT = -O3 -mtune=native -march=native
-CFLAGS = -std=gnu11 $(DEBUG) $(OPT) $(PROFILE)
-CXXFLAGS = -std=gnu++11 $(DEBUG) -Wno-c++98-compat-pedantic $(OPT) $(PROFILE)
+CFLAGS = -std=gnu99 $(DEBUG) $(OPT) $(PROFILE)
+CXXFLAGS = -std=gnu++98 $(DEBUG) $(OPT) $(PROFILE)
 
+UTILS = check_all_params check_all_small_numbers check_all_small_numbers_long
 
-all: check_all_params check_all_small_numbers check_all_small_numbers_long plots
+all: benchmark plots $(UTILS)
 
 test: run_tests
 	./run_tests
