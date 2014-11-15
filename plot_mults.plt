@@ -42,17 +42,17 @@ set key top left
 C(x) = c*x
 D(x) = d*x
 
-fit C(x) 'data/multiplications_primes.csv' using 1:2 via c
-fit D(x) 'data/multiplications_mersenne_primes.csv' using 1:2 via d
+fit C(x) 'processed/multiplications_primes.csv' using 1:2 via c
+fit D(x) 'processed/multiplications_mersenne_primes.csv' using 1:2 via d
 
 label_C = sprintf("$%d\\log n$", c+0.5)
 label_D = sprintf("$%d\\log n$", d+0.5)
 
-set output 'pic/multiplications.tex'
-plot 'data/multiplications_primes.csv'           using 1:2 title 'Primzahlen', \
-     'data/multiplications_composites.csv'       using 1:2 title 'Zusammengesetzt', \
-     'data/multiplications_mersenne_numbers.csv' using 1:2 title 'Mersenne-Zahlen', \
-     'data/multiplications_mersenne_primes.csv'  using 1:2 title 'Mersenne-Primzahlen', \
+set output 'plots/multiplications.tex'
+plot 'processed/multiplications_primes.csv'           using 1:2 ls 3 title 'Primzahlen', \
+     'processed/multiplications_composites.csv'       using 1:2 ls 4 title 'Zusammengesetzt', \
+     'processed/multiplications_mersenne_numbers.csv' using 1:2 ls 5 title 'Mersenne-Zahlen', \
+     'processed/multiplications_mersenne_primes.csv'  using 1:2 ls 6 title 'Mersenne-Primzahlen', \
      C(x) title label_C ls 1, \
      D(x) title label_D ls 2
 
@@ -65,13 +65,15 @@ G(x) = g * x ** (log(3)/log(2))
 # 3-way Toom-Cook multiplication takes time Θ(x 2^(2√(2log x)) log(x))
 H(x) = h * x * 2**(2*sqrt(2*log(x))) * log(x)
 
-fit G(x) 'data/time_vs_multiplications_primes.csv'          using 3:($2/$1) via g
-fit H(x) 'data/time_vs_multiplications_mersenne_primes.csv' using 3:($2/$1) via h
+fit G(x) 'processed/time_vs_multiplications_primes.csv'          using 3:($2/$1) via g
+fit H(x) 'processed/time_vs_multiplications_mersenne_primes.csv' using 3:($2/$1) via h
 
-set output 'pic/time_vs_multiplications.tex'
-plot 'data/time_vs_multiplications_primes.csv'           using 3:($2/$1) title 'Primzahlen', \
-     'data/time_vs_multiplications_composites.csv'       using 3:($2/$1) title 'Zusammengesetzt', \
-     'data/time_vs_multiplications_mersenne_primes.csv'  using 3:($2/$1) title 'Mersenne-Primzahlen' ls 4, \
-     G(x) ls 2 title "Karatsuba", \
-     H(x) ls 3 title "Toom-Cook"
-     #'data/time_vs_multiplications_mersenne_numbers.csv' using 3:($2/$1) title 'Mersenne-Zahlen', \
+set output 'plots/time_vs_multiplications.tex'
+plot 'processed/time_vs_multiplications_primes.csv'           using 3:($2/$1) ls 3 title 'Primzahlen', \
+     'processed/time_vs_multiplications_composites.csv'       using 3:($2/$1) ls 4 title 'Zusammengesetzt', \
+     'processed/time_vs_multiplications_mersenne_primes.csv'  using 3:($2/$1) ls 5 title 'Mersenne-Primzahlen', \
+     G(x) ls 1 title "Karatsuba", \
+     H(x) ls 2 title "Toom-Cook"
+     #'processed/time_vs_multiplications_mersenne_numbers.csv' using 3:($2/$1) title 'Mersenne-Zahlen', \
+
+# vim: set ft=gnuplot :

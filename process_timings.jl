@@ -23,7 +23,7 @@ plot_data = true
 
 factor = 5
 
-tex_output = "pic/"
+tex_output = "plots/"
 pic_output = "pictures/"
 
 if plot_data
@@ -40,7 +40,7 @@ end
 # Write the specified columns of a DataFrame to a csv file at the given
 # location.
 function save_data(data, columns::Array{Symbol,1}, filename::String)
-    writetable("data/$filename.csv", data[columns]);
+    writetable("processed/$filename.csv", data[columns]);
 end
 
 function save_data_by_algo(data::DataFrame, indices::Array{Symbol,1}, filename::String)

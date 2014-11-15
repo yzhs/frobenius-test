@@ -41,40 +41,42 @@ set key top left
 set ytics 1e-6,1e2,1e8
 
 # Full test
-set output 'pic/gmp.tex'
-plot 'data/primes_gmp.csv' using 1:2 title 'Primzahlen', \
-     'data/composites_gmp.csv' using 1:2 title 'Zusammengesetzte Zahlen', \
-     'data/mersenne_numbers_gmp.csv' using 1:2 title 'Mersenne-Zahlen', \
-     'data/mersenne_primes_gmp.csv' using 1:2 title 'Mersenne-Primzahlen'
+set output 'plots/gmp.tex'
+plot 'processed/primes_gmp.csv'            using 1:2 ls 1 title 'Primzahlen', \
+     'processed/composites_gmp.csv'        using 1:2 ls 2 title 'Zusammengesetzte Zahlen', \
+     'processed/mersenne_numbers_gmp.csv'  using 1:2 ls 3 title 'Mersenne-Zahlen', \
+     'processed/mersenne_primes_gmp.csv'   using 1:2 ls 4 title 'Mersenne-Primzahlen'
 
-set output 'pic/mr.tex'
-plot 'data/primes_mr.csv' using 1:2 title 'Primzahlen', \
-     'data/composites_mr.csv' using 1:2 title 'Zusammengesetzte Zahlen', \
-     'data/mersenne_numbers_mr.csv' using 1:2 title 'Mersenne-Zahlen', \
-     'data/mersenne_primes_mr.csv' using 1:2 title 'Mersenne-Primzahlen'
+set output 'plots/mr.tex'
+plot 'processed/primes_mr.csv'             using 1:2 ls 1 title 'Primzahlen', \
+     'processed/composites_mr.csv'         using 1:2 ls 2 title 'Zusammengesetzte Zahlen', \
+     'processed/mersenne_numbers_mr.csv'   using 1:2 ls 3 title 'Mersenne-Zahlen', \
+     'processed/mersenne_primes_mr.csv'    using 1:2 ls 4 title 'Mersenne-Primzahlen'
 
-set output 'pic/frob.tex'
-plot 'data/primes_frob.csv' using 1:2 title 'Primzahlen', \
-     'data/composites_frob.csv' using 1:2 title 'Zusammengesetzte Zahlen', \
-     'data/mersenne_numbers_frob.csv' using 1:2 title 'Mersenne-Zahlen', \
-     'data/mersenne_primes_frob.csv' using 1:2 title 'Mersenne-Primzahlen'
+set output 'plots/frob.tex'
+plot 'processed/primes_frob.csv'           using 1:2 ls 1 title 'Primzahlen', \
+     'processed/composites_frob.csv'       using 1:2 ls 2 title 'Zusammengesetzte Zahlen', \
+     'processed/mersenne_numbers_frob.csv' using 1:2 ls 3 title 'Mersenne-Zahlen', \
+     'processed/mersenne_primes_frob.csv'  using 1:2 ls 4 title 'Mersenne-Primzahlen'
 
 
 # Just the precomputation
-set output 'pic/prep_gmp.tex'
-plot 'data/prep_primes_gmp.csv' using 1:2 title 'Primzahlen', \
-     'data/prep_composites_gmp.csv' using 1:2 title 'Zusammengesetzte Zahlen', \
-     'data/prep_mersenne_numbers_gmp.csv' using 1:2 title 'Mersenne-Zahlen', \
-     'data/prep_mersenne_primes_gmp.csv' using 1:2 title 'Mersenne-Primzahlen'
+set output 'plots/prep_gmp.tex'
+plot 'processed/prep_primes_gmp.csv'            using 1:2 ls 1 title 'Primzahlen', \
+     'processed/prep_composites_gmp.csv'        using 1:2 ls 2 title 'Zusammengesetzte Zahlen', \
+     'processed/prep_mersenne_numbers_gmp.csv'  using 1:2 ls 3 title 'Mersenne-Zahlen', \
+     'processed/prep_mersenne_primes_gmp.csv'   using 1:2 ls 4 title 'Mersenne-Primzahlen'
 
-set output 'pic/prep_mr.tex'
-plot 'data/prep_primes_mr.csv' using 1:2 title 'Primzahlen', \
-     'data/prep_composites_mr.csv' using 1:2 title 'Zusammengesetzte Zahlen', \
-     'data/prep_mersenne_numbers_mr.csv' using 1:2 title 'Mersenne-Zahlen', \
-     'data/prep_mersenne_primes_mr.csv' using 1:2 title 'Mersenne-Primzahlen'
+set output 'plots/prep_mr.tex'
+plot 'processed/prep_primes_mr.csv'             using 1:2 ls 1 title 'Primzahlen', \
+     'processed/prep_composites_mr.csv'         using 1:2 ls 2 title 'Zusammengesetzte Zahlen', \
+     'processed/prep_mersenne_numbers_mr.csv'   using 1:2 ls 3 title 'Mersenne-Zahlen', \
+     'processed/prep_mersenne_primes_mr.csv'    using 1:2 ls 4 title 'Mersenne-Primzahlen'
 
-set output 'pic/prep_frob.tex'
-plot 'data/prep_primes_frob.csv' using 1:2 title 'Primzahlen', \
-     'data/prep_composites_frob.csv' using 1:2 title 'Zusammengesetzte Zahlen', \
-     'data/prep_mersenne_numbers_frob.csv' using 1:2 title 'Mersenne-Zahlen', \
-     'data/prep_mersenne_primes_frob.csv' using 1:2 title 'Mersenne-Primzahlen'
+set output 'plots/prep_frob.tex'
+plot 'processed/prep_primes_frob.csv'           using 1:2 ls 1 title 'Primzahlen', \
+     'processed/prep_composites_frob.csv'       using 1:2 ls 2 title 'Zusammengesetzte Zahlen', \
+     'processed/prep_mersenne_numbers_frob.csv' using 1:2 ls 3 title 'Mersenne-Zahlen', \
+     'processed/prep_mersenne_primes_frob.csv'  using 1:2 ls 4 title 'Mersenne-Primzahlen'
+
+# vim: set ft=gnuplot :

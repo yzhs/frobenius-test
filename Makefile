@@ -28,8 +28,7 @@ CFLAGS = -std=gnu11 $(DEBUG) $(OPT) $(PROFILE)
 CXXFLAGS = -std=gnu++11 $(DEBUG) -Wno-c++98-compat-pedantic $(OPT) $(PROFILE)
 
 
-all: check_all_params check_all_params_long
-	#benchmark plots
+all: check_all_params check_all_small_numbers check_all_small_numbers_long plots
 
 test: run_tests
 	./run_tests
@@ -44,24 +43,27 @@ benchmark.o: benchmark.cc
 	$(CXX) $(CXXFLAGS) -c -o $@ $^
 
 
-SET_TEX = pic/primes.tex pic/composites.tex pic/mersenne_numbers.tex pic/mersenne_primes.tex \
-	pic/prep_primes.tex pic/prep_composites.tex pic/prep_mersenne_numbers.tex pic/prep_mersenne_primes.tex
-ALG_TEX = pic/gmp.tex pic/mr.tex pic/frob.tex pic/prep_gmp.tex pic/prep_mr.tex pic/prep_frob.tex
-MULT_TEX = pic/multiplications.tex
-MISC_TEX = pic/all.tex pic/false_positives.tex
+SET_TEX = plots/primes.tex plots/composites.tex plots/mersenne_numbers.tex plots/mersenne_primes.tex \
+	plots/prep_primes.tex plots/prep_composites.tex plots/prep_mersenne_numbers.tex plots/prep_mersenne_primes.tex
+ALG_TEX = plots/gmp.tex plots/mr.tex plots/frob.tex plots/prep_gmp.tex plots/prep_mr.tex plots/prep_frob.tex
+MULT_TEX = plots/multiplications.tex
+MISC_TEX = plots/false_positives.tex plots/small_composites.tex
 
-plots: $(SET_TEX) $(ALG_TEX) $(MULT_TEX)
+plots: $(SET_TEX) $(ALG_TEX) $(MULT_TEX) $(MISC_TEX)
 
-data/primes_gmp.csv pic/false_positives.tex: process_timings.jl timings_20140708.csv
+processed/primes_gmp.csv plots/false_positives.tex: process_timings.jl timings_20140708.csv
 	julia $^
 
-$(SET_TEX): plot_sets.plt data/primes_gmp.csv
+plots/small_composites.tex: all_params.log small_composites.template
+	sh small_composites.sh
+
+$(SET_TEX): plot_sets.plt processed/primes_gmp.csv
 	gnuplot plot_sets.plt
 
-$(ALG_TEX): plot_algorithms.plt data/primes_gmp.csv
+$(ALG_TEX): plot_algorithms.plt processed/primes_gmp.csv
 	gnuplot plot_algorithms.plt
 
-$(MULT_TEX): plot_mults.plt data/primes_gmp.csv
+$(MULT_TEX): plot_mults.plt processed/primes_gmp.csv
 	gnuplot plot_mults.plt
 
 frobenius: run_frobenius.o frobenius.o helpers.o small_primes.o common.o
