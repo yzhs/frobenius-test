@@ -67,8 +67,14 @@ check_all_params: check_all_params.o frobenius_int.o helpers_int.o small_primes.
 
 
 run_tests: helpers.o helpers_int.o small_primes.o common.o test/main.o \
-	test/test_miller_rabin_long.o test/test_miller_rabin_int.o test/test_frobenius_long.o
+	test/test_miller_rabin_long.o test/test_miller_rabin_int.o test/test_frobenius_int.o \
+	test/data/primelist.txt
 	$(CC) $(CFLAGS) -o $@ $^ -lm -lcunit -lgmp
+#	test/test_miller_rabin_long.o test/test_miller_rabin_int.o test/test_frobenius_long.o
+
+# Generate a large list of primes for testing using djb's primegen (http://cr.yp.to/primegen.html)
+test/data/primelist.txt:
+	primes 2500000000 3000000000 > test/data/primelist.txt
 
 find_non_smooth_numbers: find_non_smooth_numbers.o small_primes.o
 	$(CC) $(CFLAGS) -o $@ $^ -lgmp

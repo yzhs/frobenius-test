@@ -9,5 +9,4 @@ add_epsilon_mod_4
 run_tests
 pic/
 pictures/
-data/
-test/data/
+test/data/primelist.txt
