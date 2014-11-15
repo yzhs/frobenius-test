@@ -26,6 +26,10 @@
 #include "common.h"
 
 
+/* Multiply two numbers modulo n. */
+#define mul(x, y) mul_mod_n(x, y, n)
+uint64_t mul_mod_n(uint64_t x, uint64_t y, uint64_t n);
+
 /*
  * A few macros for passing commonly used arguments and declaring the
  * corresponding parameters.
