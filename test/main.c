@@ -35,19 +35,29 @@ int main()
 
 	if (CUE_NOMEMORY == CU_initialize_registry())
 		die("could not initialize CUnit registry: out of memory\n");
+/*
+ * The Miller-Rabin test works properly, disable tests while working on the
+ * QFT.
+ */
+#if 0
+	suite = CU_add_suite("Miller-Rabin (int)", init_int, NULL);
+	CU_ADD_TEST(suite, test_mr_powm_int);
+	CU_ADD_TEST(suite, test_mr_primes_int);
 
-//	suite = CU_add_suite("Miller-Rabin (int)", init_int, NULL);
-//	CU_ADD_TEST(suite, test_mr_powm_int);
-//	CU_ADD_TEST(suite, test_mr_primes_int);
+	suite = CU_add_suite("Miller-Rabin (GMP)", init, cleanup);
+	CU_ADD_TEST(suite, test_mr_some_numbers);
+	CU_ADD_TEST(suite, test_mr_primes);
+	CU_ADD_TEST(suite, test_mr_composites);
+	CU_ADD_TEST(suite, test_mr_composites2);
+	CU_ADD_TEST(suite, test_mr_both);
+#endif
 
-//	suite = CU_add_suite("Miller-Rabin (GMP)", init, cleanup);
-//	CU_ADD_TEST(suite, test_mr_some_numbers);
-//	CU_ADD_TEST(suite, test_mr_primes);
-//	CU_ADD_TEST(suite, test_mr_composites);
-//	CU_ADD_TEST(suite, test_mr_composites2);
-//	CU_ADD_TEST(suite, test_mr_both);
-
-//	suite = CU_add_suite("Frobenius (int)", init_int, NULL);
+/*
+ * Due to name collisions, we can test either the long long or the GMP
+ * implementation of the QFT.
+ */
+#if 1
+	suite = CU_add_suite("Frobenius (int)", init_int, NULL);
 //	CU_ADD_TEST(suite, frob_int_int_sqrt);
 //	CU_ADD_TEST(suite, frob_int_gcd);
 //	CU_ADD_TEST(suite, frob_int_is_square);
@@ -60,10 +70,10 @@ int main()
 //	CU_ADD_TEST(suite, frob_trial_division_int);
 //	CU_ADD_TEST(suite, frob_int_rqft_small_primes);
 //	CU_ADD_TEST(suite, frob_int_rqft_small_composites);
-//	CU_ADD_TEST(suite, frob_primelist_int);
 //	CU_ADD_TEST(suite, frob_problematic_primes_int);
-//	CU_ADD_TEST(suite, frob_larger_primes_int);
-
+	CU_ADD_TEST(suite, frob_larger_primes_int);
+	CU_ADD_TEST(suite, frob_primelist_int);
+#else
 	suite = CU_add_suite("Frobenius (GMP)", init, cleanup);
 //	CU_ADD_TEST(suite, frob_mult_x);
 //	CU_ADD_TEST(suite, frob_sigma_basics);
@@ -84,6 +94,8 @@ int main()
 	CU_ADD_TEST(suite, frob_rqft_small_primes);
 	CU_ADD_TEST(suite, frob_larger_primes);
 //	CU_ADD_TEST(suite, frob_primelist);
+#endif
+
 
 	CU_basic_set_mode(CU_BRM_VERBOSE);
 	CU_basic_run_tests();
