@@ -27,6 +27,10 @@
 #include "helpers.h"
 #include "helpers_int.h"
 
+/*
+ * Uncomment the following to always select the smallest possible parameter c
+ * instead of using c = n-4.
+ */
 //#define SMALL_C
 
 /*

@@ -27,10 +27,13 @@
 
 #include "common.h"
 
+
+// How many number of each type to read from disk.
 #define NUM_PRIMES 40
 #define NUM_COMPOSITES 58
 #define NUM_MERSENNE_NUMBERS 292
 #define NUM_MERSENNE_PRIMES 25
+
 
 // Test inputs
 static unsigned bits_primes[NUM_PRIMES];
@@ -42,6 +45,7 @@ static mpz_t primes[NUM_PRIMES];
 static mpz_t composites[NUM_COMPOSITES];
 static mpz_t mersenne_numbers[NUM_MERSENNE_NUMBERS];
 static mpz_t mersenne_primes[NUM_MERSENNE_PRIMES];
+
 
 /*
  * Read a set of numbers for testing
@@ -73,6 +77,10 @@ static unsigned load_numbers(unsigned num_bits[], mpz_t nums[], const char file[
 	return i;
 }
 
+
+/*
+ * Count the number of commas in a given string.
+ */
 static int count_commas(char *s)
 {
 	int counter = 0;
@@ -83,6 +91,7 @@ static int count_commas(char *s)
 
 	return counter;
 }
+
 
 /*
  * Find the number used in a test given which set the number belongs two and
@@ -96,11 +105,13 @@ static void get_num(mpz_t num, mpz_t numbers[], unsigned bits_numbers[], uint64_
 	mpz_set(num, numbers[i]);
 }
 
+
 int main()
 {
 	FILE *input, *output;
 	mpz_t n, tmp;
 
+	// Read all the benchmarking inputs.
 	load_numbers(bits_primes, primes, "primes.txt", NUM_PRIMES)
 	    || die("failed to load primes\n");
 	load_numbers(bits_composites, composites, "composites.txt", NUM_COMPOSITES)
@@ -110,10 +121,12 @@ int main()
 	load_numbers(bits_mersenne_primes, mersenne_primes, "mersenne_primes.txt", NUM_MERSENNE_PRIMES)
 	    || die("failed to load Mersenne primes\n");
 
+	// Open the old timings file
 	input = fopen("timings_20140708.csv", "r");
 	if (NULL == input)
 		die("failed to open input file");
 
+	// and the new file
 	output = fopen("timings_new.csv", "w");
 	if (NULL == output)
 		die("failed to open output file");
@@ -129,13 +142,14 @@ int main()
 	char *line = NULL;
 	size_t len;
 	while ((read = getline(&line, &len, input)) != -1) {
+		uint64_t bits;
 		// Get rid of the final newline character.
 		line[strlen(line)-1] = '\0';
-		uint64_t bits;
 		if (count_commas(line) == 10) {
 			fprintf(output, "%s\n", line);
 			continue;
 		}
+
 		sscanf(line, "%lu,", &bits);
 		mpz_ui_pow_ui(tmp, 2, bits);
 		if (NULL != strstr(line, ",primes,"))
@@ -146,6 +160,7 @@ int main()
 			get_num(n, mersenne_numbers, bits_mersenne_numbers, bits);
 		else if (NULL != strstr(line, ",composites,"))
 			get_num(n, mersenne_primes, bits_mersenne_primes, bits);
+
 		// We do not have to do anything otherwise, because it is the
 		// line containing the column headers.
 		mpz_sub(tmp, n, tmp);

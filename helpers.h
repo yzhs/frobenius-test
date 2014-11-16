@@ -25,6 +25,10 @@
 
 #include "common.h"
 
+/*
+ * A few macros for passing commonly used arguments and declaring the
+ * corresponding parameters.
+ */
 #define MODULUS n, b, c
 #define MODULUS_ARGS const mpz_t n, const mpz_t b, const mpz_t c
 
@@ -32,6 +36,7 @@
 #define CONST_POLY_ARGS(name) const mpz_t name##_x, const mpz_t name##_1
 #define POLY_ARGS(name) mpz_t name##_x, mpz_t name##_1
 
+// Some macros to simplify handling polyonmial arithmetic.
 #define right_shift mpz_fdiv_q_2exp
 
 #define poly_mul(res, f, g) mult_mod(res##_x, res##_1, f##_x, f##_1, g##_x, g##_1, MODULUS)

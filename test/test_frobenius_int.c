@@ -296,7 +296,6 @@ void frob_primelist_int(void)
 }
 
 // Test the first few primes larger than B^2.
-// These are the smallest primes that
 void frob_larger_primes_int(void)
 {
 	CU_ASSERT_EQUAL(RQFT_int(2500000001, 1), probably_prime);

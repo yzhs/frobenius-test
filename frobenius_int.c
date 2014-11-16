@@ -250,6 +250,7 @@ Primality steps_3_4_5_int(MODULUS_ARGS_int)
 	split_int(&r, &s, n+1);
 	tmp = n + 1;
 	tmp = tmp / 2;
+	// Compute x^((n+1)/2)
 	power_of_x_int(&foo_x, &foo_1, tmp, MODULUS_int);
 	if (foo_x != 0)  // Check whether x^((n+1)/2) has degree 1.
 		return composite;

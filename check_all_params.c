@@ -35,21 +35,9 @@ int main()
 	uint64_t n, b = 0, c = 0, bb4c_int;
 	uint64_t valid_pairs = 0, false_positives = 0;
 
-//	n = 251*257; // The largest two prime factors such that their product is at most 2^16. (0, -1)
-//	n = 241*257; // Both primes congruent to 1 mod 4.  No false positives.
-//	n = 239*251; // Both primes congruent to 3 mod 4.  No false positives.
-//	n = 3*3 * 7253; // Smallest number of prime factors such that a small square divides n.  No false positives.
-//	n = 3*5*4363; // Product of two small primes and a large prime. No false positives.
-//	n = 3*5*7; // Smallest non-trivial product of an odd number of distinct odd primes.  No false positives.
-//	n = 3*5*7*11*13; // Smallest product of 5 odd primes, largest primorial/2 below 2^16.  (0, -1)
-//	n = 31*37*41; // Product of the three largest consecutive primes such that their product is below 2^16. (0, -1)
-//	n = 3*5*7*11; // (0, -1)
-//	n = 3*5*7*13; // No false positives.
-//	n = 3*3*3*3*3 * 3*3*3*3*3; // No false positives.
-//	n = 3*3*3*3*3 * 3*3*3*3; // (0, -1)
-
 	for (n = 3; n < 10000; n+=2) {
-		// Trial division is enough, so it does not matter, whether we call RQFT_int(n, 0) or RQFT_int(n, 10000).
+		// Trial division is enough, so it does not matter, whether we
+		// call RQFT_int(n, 0) or RQFT_int(n, 10000).
 		if (RQFT_int(n, 0) == prime)
 			continue;
 		valid_pairs = false_positives = 0;
@@ -66,16 +54,11 @@ int main()
 				result = steps_3_4_5_int(n, b, c);
 				if (result != composite) {
 					false_positives++;
-					//printf("#");
 					fflush(stdout);
 					fprintf(stdout, "n=%5lu Found a false positive: n = %5lu, b = %5lu, c = %5lu\n",
 					        n, n, b, c);
 				}
 			}
-			//if (c % 100 == 1) {
-			//	printf(".");
-			//	fflush(stdout);
-			//}
 		}
 
 		printf("n=%5lu Checked a total of %lu parameter pairs modulo %lu.  %lu of these were valid parameters.\n",
