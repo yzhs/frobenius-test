@@ -27,6 +27,7 @@
 #include "helpers_int.h"
 #include "small_primes.h"
 #include "frobenius_int.h"
+#define TEST
 
 // Compute b^2+4c once for every n.
 static uint64_t bb4c_int;
@@ -241,6 +242,8 @@ Primality steps_3_4_5_int(MODULUS_ARGS_int)
 {
 	uint64_t POLY_int(foo), s, tmp;
 	uint64_t r, i;
+	uint64_t POLY_int(x);
+	x_x = 1; x_1 = 0;
 
 	s = tmp = foo_x = foo_1 = 0;
 
@@ -251,7 +254,8 @@ Primality steps_3_4_5_int(MODULUS_ARGS_int)
 	tmp = n + 1;
 	tmp = tmp / 2;
 	// Compute x^((n+1)/2)
-	power_of_x_int(&foo_x, &foo_1, tmp, MODULUS_int);
+	powm_int(&foo_x, &foo_1, x_x, x_1, tmp, MODULUS_int);
+	//power_of_x_int(&foo_x, &foo_1, tmp, MODULUS_int);
 	if (foo_x != 0)  // Check whether x^((n+1)/2) has degree 1.
 		return composite;
 
@@ -262,12 +266,14 @@ Primality steps_3_4_5_int(MODULUS_ARGS_int)
 	tmp = n - c;
 	if (foo_1 != tmp)
 		return composite;
+	x_x = 1; x_1 = 0;
 
 	/*
 	 * Step (5)
 	 */
 	split_int(&r, &s, n * n); // Calculate r,s such that 2^r*s + 1 == n^2
-	power_of_x_int(&foo_x, &foo_1, s, MODULUS_int); // TODO make this more efficient using σ : x ↦ b-x.
+	powm_int(&foo_x, &foo_1, x_x, x_1, s, MODULUS_int);// TODO make this more efficient using σ : x ↦ b-x.
+	//power_of_x_int(&foo_x, &foo_1, s, MODULUS_int); // TODO make this more efficient using σ : x ↦ b-x.
 
 	if (foo_x == 0 && foo_1 == 1)
 		return probably_prime;
