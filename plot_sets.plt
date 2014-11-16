@@ -23,8 +23,8 @@ set terminal epslatex color size 17cm,10cm
 
 set style line 1 lt rgb "red" lw 2
 set style line 2 lt rgb "orange" lw 2
-set style line 3 lt rgb "#00B000" lw 2
-set style line 4 lt rgb "black" lw 2
+set style line 3 lt rgb "#00B000" lw 2 pt 4
+set style line 4 lt rgb "black" lw 2 pt 3
 set style line 5 lt rgb "cyan" lw 2
 set style line 6 lt rgb "blue" lw 2
 set style line 7 lt rgb "violet" lw 2
@@ -66,46 +66,46 @@ plot 'processed/primes_gmp.csv'           using 1:2:3:4 with errorbars ls 1 titl
 
 set output 'plots/composites.tex'
 plot 'processed/composites_gmp.csv'  using 1:2 ls 1 title 'GMP', \
-     'processed/composites_mr.csv'   using 1:2 ls 2 title 'Miller-Rabin', \
-     'processed/composites_frob.csv' using 1:2 ls 3 title 'Frobenius'
+     'processed/composites_mr.csv'   using 1:2 ls 3 title 'Miller-Rabin', \
+     'processed/composites_frob.csv' using 1:2 ls 4 title 'Frobenius'
 
 
 set output 'plots/mersenne_primes.tex'
 plot 'processed/mersenne_primes_gmp.csv'  using 1:2 ls 1 title 'GMP', \
-     'processed/mersenne_primes_mr.csv'   using 1:2 ls 2 title 'Miller-Rabin', \
-     'processed/mersenne_primes_frob.csv' using 1:2 ls 3 title 'Frobenius'
+     'processed/mersenne_primes_mr.csv'   using 1:2 ls 3 title 'Miller-Rabin', \
+     'processed/mersenne_primes_frob.csv' using 1:2 ls 4 title 'Frobenius'
 
 set xrange [32:2048]
 set output 'plots/mersenne_numbers.tex'
 plot 'processed/mersenne_numbers_gmp.csv'  using 1:2 ls 1 title 'GMP', \
-     'processed/mersenne_numbers_mr.csv'   using 1:2 ls 2 title 'Miller-Rabin', \
-     'processed/mersenne_numbers_frob.csv' using 1:2 ls 3 title 'Frobenius'
+     'processed/mersenne_numbers_mr.csv'   using 1:2 ls 3 title 'Miller-Rabin', \
+     'processed/mersenne_numbers_frob.csv' using 1:2 ls 4 title 'Frobenius'
 set xrange [32:131072]
 
 
 # Precomputation
 set output 'plots/prep_primes.tex'
 plot 'processed/prep_primes_gmp.csv'  using 1:2 ls 1 title 'GMP', \
-     'processed/prep_primes_mr.csv'   using 1:2 ls 2 title 'Miller-Rabin', \
-     'processed/prep_primes_frob.csv' using 1:2 ls 3 title 'Frobenius'
+     'processed/prep_primes_mr.csv'   using 1:2 ls 3 title 'Miller-Rabin', \
+     'processed/prep_primes_frob.csv' using 1:2 ls 4 title 'Frobenius'
 
 
 set output 'plots/prep_composites.tex'
 plot 'processed/prep_composites_gmp.csv'  using 1:2 ls 1 title 'GMP', \
-     'processed/prep_composites_mr.csv'   using 1:2 ls 2 title 'Miller-Rabin', \
-     'processed/prep_composites_frob.csv' using 1:2 ls 3 title 'Frobenius'
+     'processed/prep_composites_mr.csv'   using 1:2 ls 3 title 'Miller-Rabin', \
+     'processed/prep_composites_frob.csv' using 1:2 ls 4 title 'Frobenius'
 
 
 set output 'plots/prep_mersenne_primes.tex'
 plot 'processed/prep_mersenne_primes_gmp.csv'  using 1:2 ls 1 title 'GMP', \
-     'processed/prep_mersenne_primes_mr.csv'   using 1:2 ls 2 title 'Miller-Rabin', \
-     'processed/prep_mersenne_primes_frob.csv' using 1:2 ls 3 title 'Frobenius'
+     'processed/prep_mersenne_primes_mr.csv'   using 1:2 ls 3 title 'Miller-Rabin', \
+     'processed/prep_mersenne_primes_frob.csv' using 1:2 ls 4 title 'Frobenius'
 
 set xrange [32:2048]
 set output 'plots/prep_mersenne_numbers.tex'
 plot 'processed/prep_mersenne_numbers_gmp.csv'  using 1:2 ls 1 title 'GMP', \
-     'processed/prep_mersenne_numbers_mr.csv'   using 1:2 ls 2 title 'Miller-Rabin', \
-     'processed/prep_mersenne_numbers_frob.csv' using 1:2 ls 3 title 'Frobenius'
+     'processed/prep_mersenne_numbers_mr.csv'   using 1:2 ls 3 title 'Miller-Rabin', \
+     'processed/prep_mersenne_numbers_frob.csv' using 1:2 ls 4 title 'Frobenius'
 set xrange [32:131072]
 
 
