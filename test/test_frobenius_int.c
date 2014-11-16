@@ -276,7 +276,7 @@ void frob_primelist_int(void)
 {
 	FILE *fp = fopen(TEST_DATA_PATH "primelist.txt", "r");
 	unsigned p;
-	uint64_t i = 0;
+	uint64_t i = 0, j;
 	static unsigned large_primes[3069262];
 
 	if (NULL == fp)
@@ -292,6 +292,13 @@ void frob_primelist_int(void)
 		if (foo == composite)
 			printf("%u\n", large_primes[i]);
 		CU_ASSERT_NOT_EQUAL(foo, composite);
+		if (i < len(large_primes)-1)
+			for (j = large_primes[i] + 2; j < large_primes[i+1]; j+=2) {
+				Primality foo = RQFT_int(j, 10);
+				if (foo != composite)
+					printf("false positive: %u\n", large_primes[i]);
+				CU_ASSERT_EQUAL_FATAL(foo, composite);
+			}
 	}
 }
 
