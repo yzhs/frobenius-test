@@ -206,7 +206,10 @@ void frob_powm_mod_int(void)
 	}
 }
 
-
+void frob_power_of_x_int(void)
+{
+	// TODO adapt the test from test_frobenius_long
+}
 
 void frob_squares_int(void)
 {
