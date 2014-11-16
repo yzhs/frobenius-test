@@ -2,8 +2,8 @@ The Quadratic Frobenius Test
 ============================
 
 This is an implementation of the probabilistic primality test described by Jon
-Grantham in "A Probable Prime Test with High Confidence", published in the
-"Journal of Number Theory" 72, pages 32--47 (1998).  The algorithm is
+Grantham in *A Probable Prime Test with High Confidence*, published in the
+*Journal of Number Theory* 72, pages 32--47 (1998).  The algorithm is
 implemented in C using the GNU Multiple Precision Arithmetic Library (GMP).
 
 In addition to the Quadratic Frobenius test from the above paper, there is
@@ -26,20 +26,22 @@ Installation
 
 To build this project, you will need a C99 compatible C and a C++98 compatible
 C++ compiler.  I have had success building it with both
-[GCC 4.9.2](https://gcc.gnu.org/) and [clang 3.5.0](http://clang.llvm.org/).
-You will also need a (not too old version of) GMP (I'm using GMP 6.0.0).
+[GCC](https://gcc.gnu.org/) 4.9.2 and [clang](http://clang.llvm.org/) 3.5.0.
+You will also need a (not too old version of) [GMP](http://gmplib.org/)
+(I'm using GMP 6.0.0).
 
-If you want to regenerate the plots, you will need a recent version of the Julia
-language, as well as [gnuplot](http://www.gnuplot.info/).  The exact gnuplot
-version probably won't matter because my code does not, as far as I know, use
-any particularly new features.  It certainly works with version 4.6 patchlevel
-6.
+If you want to regenerate the plots, you will need a recent version of the
+[Julia language](http://www.julialang.org/), as well as
+[gnuplot](http://www.gnuplot.info/).  The exact gnuplot version probably won't
+matter because my code does not, as far as I know, use any particularly new
+features.  It certainly works with version 4.6 patchlevel 6.
 
 In case you want to run the included tests, you will also need `primes` from
 djb's [primegen](http://cr.yp.to/primegen.html) project to generate a large
 list of primes used during the test.  Alternatively you could just provide your
 own file of prime numbers (one line per prime, no empty lines) for
-`test/data/primelist.txt`.
+`test/data/primelist.txt`.  The test code depends on
+[CUnit](http://cunit.sourceforge.net/).
 
 To build the code all you have to do is type
 ```
