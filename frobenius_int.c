@@ -250,7 +250,10 @@ Primality steps_3_4_5_int(MODULUS_ARGS_int)
 	/*
 	 * Step (3) Check, whether -c is a square modulo n.
 	 */
-	split_int(&r, &s, n+1);
+	if (n % 4 == 1)
+		split_int(&r, &s, n+1);
+	else
+		split_int(&r, &s, n-1);
 	tmp = n + 1;
 	tmp = tmp / 2;
 	// Compute x^((n+1)/2)
