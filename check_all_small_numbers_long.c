@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
 
 	for (n_ = lower_bound | 1; n_ <= upper_bound; n_+=2) {
 		mpz_set_ui(n, n_);
-		if (mpz_perfect_square_p(n))
+		if (mpz_perfect_square_p(n) || mpz_probab_prime_p(n, 100))
 			continue;
 #ifdef SMALL_C
 		for (c_ = 2; c_ < n_; c_++) {
