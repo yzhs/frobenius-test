@@ -40,6 +40,17 @@ uint64_t mul_mod_n(uint64_t x, uint64_t y, uint64_t n);
 #define MODULUS_int n, b, c
 #define MODULUS_ARGS_int const uint64_t n, const uint64_t b, const uint64_t c
 
+// Some macros to simplify handling polyonmial arithmetic.
+#define poly_mul_int(res, f, g) mult_mod_int(res##_x, res##_1, f##_x, f##_1, g##_x, g##_1, MODULUS)
+#define poly_sqr_int(res, f) square_mod_int(res##_x, res##_1, f##_x, f##_1, MODULUS)
+#define poly_powm_int(res, f, exponent) powm_int(res##_x, res##_1, f##_x, f##_1, (exponent), MODULUS)
+#define poly_invert_int(res, f) invert_int(res##_x, res##_1, f##_x, f##_1, MODULUS)
+
+#define poly_eq_int(f, g) (f##_x == g##_x && f##_1 == g##_1)
+
+#define poly_mul_x_int(res, f) mult_x_mod_int(res##_x, res##_1, f##_x, f##_1, MODULUS)
+#define poly_pow_x_int(res, exponent) power_of_x_int(res##_x, res##_1, (exponent), MODULUS)
+#define poly_sigma_int(res, f) sigma_int(res##_x, res##_1, f##_x, f##_1, MODULUS)
 
 /* Initialises the random number generator using a (static) seed. */
 int init_int(void);
