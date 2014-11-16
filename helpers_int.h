@@ -25,6 +25,17 @@
 
 #include "common.h"
 
+/*
+ * The following lines are needed to use GMP's longlong.h which provides a
+ * macro for multiplying two 64-bit numbers to produce a 128-bit result which
+ * is stored across two registers.
+ */
+//#define W_TYPE_SIZE 64
+//typedef uint64_t UWtype;
+//typedef uint64_t UDItype;
+//// Including the following file from GMP in the distribution forces this
+//// programme to be licenced under the terms of the GPL.
+//#include "longlong.h"
 
 /* Multiply two numbers modulo n. */
 #define mul(x, y) mul_mod_n(x, y, n)
