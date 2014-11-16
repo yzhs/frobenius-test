@@ -58,19 +58,19 @@ int main()
  */
 #if 1
 	suite = CU_add_suite("Frobenius (int)", init_int, NULL);
-//	CU_ADD_TEST(suite, frob_int_int_sqrt);
-//	CU_ADD_TEST(suite, frob_int_gcd);
-//	CU_ADD_TEST(suite, frob_int_is_square);
-//	CU_ADD_TEST(suite, frob_int_jacobi);
-//	CU_ADD_TEST(suite, frob_int_split);
-//	CU_ADD_TEST(suite, frob_mult_mod_int);
+	CU_ADD_TEST(suite, frob_int_int_sqrt);
+	CU_ADD_TEST(suite, frob_int_gcd);
+	CU_ADD_TEST(suite, frob_int_is_square);
+	CU_ADD_TEST(suite, frob_int_jacobi);
+	CU_ADD_TEST(suite, frob_int_split);
+	CU_ADD_TEST(suite, frob_mult_mod_int);
 //	CU_ADD_TEST(suite, frob_powm_mod_int);
-//	CU_ADD_TEST(suite, frob_int_get_random_int);
-//	CU_ADD_TEST(suite, frob_squares_int);
-//	CU_ADD_TEST(suite, frob_trial_division_int);
-//	CU_ADD_TEST(suite, frob_int_rqft_small_primes);
-//	CU_ADD_TEST(suite, frob_int_rqft_small_composites);
-//	CU_ADD_TEST(suite, frob_problematic_primes_int);
+	CU_ADD_TEST(suite, frob_int_get_random_int);
+	CU_ADD_TEST(suite, frob_squares_int);
+	CU_ADD_TEST(suite, frob_trial_division_int);
+	CU_ADD_TEST(suite, frob_int_rqft_small_primes);
+	CU_ADD_TEST(suite, frob_int_rqft_small_composites);
+	CU_ADD_TEST(suite, frob_problematic_primes_int);
 	CU_ADD_TEST(suite, frob_larger_primes_int);
 	CU_ADD_TEST(suite, frob_primelist_int);
 #else
