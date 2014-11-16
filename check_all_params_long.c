@@ -21,8 +21,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "frobenius_int.h"
-#include "helpers_int.h"
+#include <gmp.h>
+
+#include "frobenius.h"
+#include "helpers.h"
 
 /*
  * Run the randomized quadratic frobenius test to check whether [n] is a a
@@ -32,43 +34,51 @@
 int main()
 {
 	Primality result;
-	uint64_t n, b = 0, c = 0, bb4c_int;
+	uint64_t n_, b_ = 0, c_ = 0, bb4c_int;
 	uint64_t valid_pairs = 0, false_positives = 0;
+	mpz_t n, b, c, bb4c, tmp;
+	mpz_inits(n, b, c, bb4c, tmp, NULL);
 
-	for (n = 3; n < 10000; n+=2) {
+	for (n_ = 3; n_ < 10000; n_+=2) {
 		// Trial division is enough, so it does not matter, whether we call RQFT_int(n, 0) or RQFT_int(n, 10000).
-		if (RQFT_int(n, 0) == prime)
+		mpz_set_ui(n, n_);
+		if (RQFT(n, 0) == prime || mpz_perfect_square_p(n))
 			continue;
 		valid_pairs = false_positives = 0;
 
-		for (c = 1; c < n; c++) {
-			if (jacobi(n - c, n) != 1)
+		for (c_ = 1; c_ < n_; c_++) {
+			mpz_set_ui(c, c_);
+			mpz_sub(tmp, n, c);
+			if (mpz_jacobi(tmp, n) != 1)
 				continue;
-			for (b = 0; b < n; b++) {
-				bb4c_int = ((b * b) % n + c * 4) % n;
-				if (jacobi(bb4c_int, n) != -1)
+			for (b_ = 0; b_ < n_; b_++) {
+				mpz_set_ui(b, b_);
+				bb4c_int = ((b_ * b_) % n_ + c_ * 4) % n_;
+				mpz_set_ui(bb4c, bb4c_int);
+				if (mpz_jacobi(bb4c, n) != -1)
 					continue;
 				valid_pairs++;
 
-				result = steps_3_4_5_int(n, b, c);
+				result = steps_3_4_5(n, b, c);
 				if (result != composite) {
 					false_positives++;
 					//printf("#");
 					fflush(stdout);
 					fprintf(stdout, "n=%5lu Found a false positive: n = %5lu, b = %5lu, c = %5lu\n",
-					        n, n, b, c);
+					        n_, n_, b_, c_);
 				}
 			}
-			//if (c % 100 == 1) {
+			//if (c_ % 100 == 1) {
 			//	printf(".");
 			//	fflush(stdout);
 			//}
 		}
 
 		printf("n=%5lu Checked a total of %lu parameter pairs modulo %lu.  %lu of these were valid parameters.\n",
-		       n, n*n, n, valid_pairs);
-		printf("n=%5lu A total number of %lu false positives were found\n", n, false_positives);
+		       n_, n_*n_, n_, valid_pairs);
+		printf("n=%5lu A total number of %lu false positives were found\n", n_, false_positives);
 	}
 
+	mpz_clears(n, b, c, bb4c, tmp, NULL);
 	return 0;
 }
