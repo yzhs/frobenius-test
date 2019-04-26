@@ -17,8 +17,8 @@ faster for the numbers it can handle.  Therefore, it can be used to test a
 large number of integers for compositeness, or checking a large number of the
 possible parameters for a given integer.
 
-The code in this repository was created as part of my bachelor's thesis in
-mathematics.
+The code in this repository was created as part of my [bachelor's thesis in
+mathematics](https://github.com/yzhs/frobenius-test/raw/master/thesis.pdf).
 
 
 Installation
